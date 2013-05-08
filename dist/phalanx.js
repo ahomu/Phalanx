@@ -213,22 +213,22 @@ _.extend(View.prototype, PROTO_VIEW, {
    * @param {Object} [events]
    */
   delegateEvents: function(events) {
-    PROTO_VIEW.delegateEvents.apply(this, arguments);
+    var componentEvents = {},
+        componentName, protoComponent,
+        eventKeys, eventClosures;
 
     if (events == null) {
-      var componentEvents = {},
-          componentName, protoComponent,
-          eventKeys, eventClosures;
-
       for (componentName in this.components) {
         protoComponent = this.components[componentName].prototype;
         eventKeys      = _.keys(protoComponent.events),
         eventClosures  = _.map(protoComponent.events, this._getComponentEventClosure);
         _.extend(componentEvents, _.object(eventKeys, eventClosures));
       }
-
-      PROTO_VIEW.delegateEvents.apply(this, [componentEvents]);
+      PROTO_VIEW.delegateEvents.apply(this, [_.extend(componentEvents, this.events)]);
+    } else {
+      PROTO_VIEW.delegateEvents.apply(this, arguments);
     }
+
   },
 
   /**
@@ -274,12 +274,14 @@ _.extend(View.prototype, PROTO_VIEW, {
    * From the selector defined by this.ui, caching to explore the elements.
    */
   lookupUi: function() {
-    var name, selector;
+    var name, selector, thisUi = {};
 
     for (name in this.ui) {
       selector = this.ui[name];
-      this.ui[name] = this.$el.find(selector);
+      thisUi[name] = this.$el.find(selector);
     }
+
+    this.ui = thisUi;
   },
 
   /**
@@ -612,8 +614,7 @@ var Component = defineClass({
 
     for (name in this.ui) {
       selector = this.ui[name];
-      thisUi[name] = '$' in window ? this.$el.find(selector)
-        : this.el.querySelectorAll(selector);
+      thisUi[name] = this.$el.find(selector);
     }
 
     this.ui = thisUi;

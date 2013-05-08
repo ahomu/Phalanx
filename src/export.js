@@ -8,8 +8,9 @@ var Phalanx = {
   defineClass: defineClass,
 
   Model      : Model,
-  View       : View,
   Collection : Collection,
+
+  View       : View,
   Layout     : Layout,
   Component  : Component
 };

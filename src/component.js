@@ -77,8 +77,7 @@ var Component = defineClass({
 
     for (name in this.ui) {
       selector = this.ui[name];
-      thisUi[name] = '$' in window ? this.$el.find(selector)
-        : this.el.querySelectorAll(selector);
+      thisUi[name] = this.$el.find(selector);
     }
 
     this.ui = thisUi;
