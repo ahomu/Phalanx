@@ -1,8 +1,26 @@
+'use strict';
+
 /**
  * @abstract
  * @class
  */
 var Layout = defineClass({
+  /**
+   * @property {Object}
+   */
+  regions: {},
+
+  /**
+   * Correspondence table of the region name and assigned View.
+   *
+   *     laput.assign(regionName, Phalanx.View);
+   *     // layout._assignedMap => { regionName: Phalanx.View }
+   *
+   * @private
+   * @property {Object}
+   */
+  _assignedMap: {},
+
   /**
    * @constructor
    * @param {Object} options
@@ -10,11 +28,104 @@ var Layout = defineClass({
   constructor: function(options) {
     options || (options = {});
 
+    if (options.regions) {
+      _.extend(this.regions, options.regions)
+    }
+
+    this.onCreate.apply(this, arguments);
+
     this.initialize.apply(this, arguments);
   },
 
   /**
+   * Assign new View to element in layout.
+   * And destroy old View automatically.
+   *
+   * @param {String} regionName
+   * @param {View} newView
+   */
+  assign: function(regionName, newView) {
+    var selector, oldView;
+
+    selector = this.regions[regionName];
+    oldView  = this.getRegionView(regionName);
+
+    if (!selector) {
+      throw new Error('Could not get a selector from the region ' + regionName);
+    }
+
+    // change
+    this.onChange(regionName, newView, oldView);
+
+    // old
+    oldView && oldView.destroy();
+
+    // new
+    newView.setElement($(selector)[0]);
+
+    this._assignedMap[regionName] = newView;
+  },
+
+  /**
+   * @param {String} regionName
+   * @returns {View}
+   */
+  getRegionView: function(regionName) {
+    if (!regionName in this.regions) {
+      throw new Error('Undefined region `' + regionName + '` is specified');
+    }
+    return this._assignedMap[regionName] || null;
+  },
+
+  /**
+   * @param {String} regionName
+   * @return {View}
+   */
+  withdraw: function(regionName) {
+    var view;
+
+    view = this.getRegionView(regionName);
+    view.destroy();
+    this._assignedMap[regionName] = null;
+
+    return view;
+  },
+
+  /**
+   * When the layout is destroyed, View which encloses also destroy all.
+   */
+  destroy: function() {
+    this.onDestroy();
+
+    var i = 0, regions = Object.keys(this.regions),
+        iz = this.regions.length, regionName;
+
+    for (; i<iz; i++) {
+      regionName = regions[i]
+      this.withdraw(regionName);
+    }
+  },
+
+  /**
+   * @abstract
+   * @param {String} regionName
+   * @param {View} newView
+   * @param {View} oldView
+   */
+  onChange: function(regionName, newView, oldView) {},
+
+  /**
    * @abstract
    */
-  initialize: function() {}
+  initialize: function() {},
+
+  /**
+   * @abstract
+   */
+  onCreate: function() {},
+
+  /**
+   * @abstract
+   */
+  onDestroy: function() {}
 });

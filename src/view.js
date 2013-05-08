@@ -1,7 +1,8 @@
+'use strict';
+
 /**
  * @abstract
  * @class
- * @extends Backbone.View
  */
 var View = defineClass({
   /**
@@ -11,13 +12,21 @@ var View = defineClass({
   constructor: function(options) {
     options || (options = {});
 
-    this._baseInitialize();
+    this.onCreate.apply(this, arguments);
 
     Backbone.View.apply(this, arguments);
   }
 });
 
-_.extend(View.prototype, Backbone.View.prototype, {
+var PROTO_VIEW = Backbone.View.prototype,
+
+    ATTR_COMPONENT     = 'data-component',
+    ATTR_COMPONENT_UID = 'data-component-uid',
+
+    INCREMENT_COMPONENT_UID = 0;
+
+_.extend(View.prototype, PROTO_VIEW, {
+
   /**
    * @property {String}
    */
@@ -55,21 +64,87 @@ _.extend(View.prototype, Backbone.View.prototype, {
 
   /**
    * @private
-   * @method _baseInitialize
+   * @property {Object}
    */
-  _baseInitialize: function() {
+  _createdComponents: {},
 
+  /**
+   * @see Backbone.View.setElement
+   * @param element
+   * @param delegate
+   */
+  setElement: function(element, delegate) {
+    this.onSetElement(element);
+    PROTO_VIEW.setElement.apply(this, arguments);
+    this.lookupUi();
   },
 
   /**
-   * @abstract
+   * @see Backbone.View.delegateEvents
+   * @param {Object} [events]
    */
-  initialize: function() {},
+  delegateEvents: function(events) {
+    PROTO_VIEW.delegateEvents.apply(this, arguments);
+
+    if (events == null) {
+      var componentEvents = {},
+          componentName, protoComponent,
+          eventKeys, eventClosures;
+
+      for (componentName in this.components) {
+        protoComponent = this.components[componentName].prototype;
+        eventKeys      = _.keys(protoComponent.events),
+        eventClosures  = _.map(protoComponent.events, this._getComponentEventClosure);
+        _.extend(componentEvents, _.object(eventKeys, eventClosures));
+      }
+
+      PROTO_VIEW.delegateEvents.apply(this, [componentEvents]);
+    }
+  },
+
+  /**
+   * @private
+   * @param {String} methodName
+   * @returns {Function}
+   */
+  _getComponentEventClosure: function(methodName) {
+    return function(evt) {
+      var component = this.getComponent(evt.target);
+      component[methodName].apply(component, arguments);
+    }
+  },
+
+  /**
+   * like singleton...
+   *
+   * @param {HTMLElement} el
+   * @returns {*}
+   */
+  getComponent: function(el) {
+    var componentName, uid;
+
+    do {
+      componentName = el.getAttribute(ATTR_COMPONENT);
+    } while(!componentName && (el = el.parentNode));
+
+    if (!componentName) {
+      throw new Error('Component name is not detected from ' + ATTR_COMPONENT)
+    }
+
+    uid  = el.getAttribute(ATTR_COMPONENT_UID) || INCREMENT_COMPONENT_UID++;
+
+    if (this._createdComponents[uid]) {
+      return this._createdComponents[uid];
+    } else {
+      el.setAttribute(ATTR_COMPONENT_UID, uid);
+      return this._createdComponents[uid] = new this.components[componentName](el, uid);
+    }
+  },
 
   /**
    * From the selector defined by this.ui, caching to explore the elements.
    */
-  setupUi: function() {
+  lookupUi: function() {
     var name, selector;
 
     for (name in this.ui) {
@@ -81,24 +156,46 @@ _.extend(View.prototype, Backbone.View.prototype, {
   /**
    * Release ui elements reference.
    */
-  teardownUi: function() {
+  releaseUi: function() {
     var name;
 
     for (name in this.ui) {
-      this.ui[key] = null;
-      delete this.ui[key];
+      this.ui[name] = null;
+      delete this.ui[name];
     }
   },
 
   /**
-   *
+   * Destroy all created componentns.
+   */
+  destroyComponents: function() {
+    var uid, component;
+    for (uid in this._createdComponents) {
+      component = this._createdComponents[uid];
+      component.destroy();
+      this._createdComponents[uid] = null;
+      delete this._createdComponents[uid];
+    }
+  },
+
+  /**
+   * Destory and teadown View.
    */
   destroy: function() {
 
-    // TODO destroy unused components
+    this.undelegateEvents();
+
+    this.destroyComponents();
+
+    this.releaseUi();
 
     this.onDestroy();
   },
+
+  /**
+   * @abstract
+   */
+  initialize: function() {},
 
   /**
    * @abstract
@@ -106,17 +203,21 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * @param {String} html
    * @return {*}
    */
-  render: function(html) { this.el.innerHTML = html; return this; },
+  render: function(html) { this.$el.html(html); return this; },
+
+  /**
+   * @abstract
+   */
+  onCreate: function() {},
 
   /**
    * @abstract
    * @param {HTMLElement} el
    */
-  onAttach: function(el) {},
+  onSetElement: function(el) {},
 
   /**
    * @abstract
-   * @param {HTMLElement} el
    */
-  onDetach: function(el) {}
+  onDestroy: function() {}
 });
