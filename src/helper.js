@@ -76,7 +76,7 @@ function defineClass(constructor_or_members, members) {
    *     var classDefinition = {
    *       // ...
    *     };
-   *     var ExtendedWithTrait = SomeClass.extends(classDefinition)
+   *     var ExtendedWithTrait = SomeClass.extend(classDefinition)
    *                                      .with(AsyncCallbackTrait)
    *                                      .with(ObservableTrait, {
    *                                        method: 'aliasedMethod'
