@@ -2,7 +2,13 @@
   "framework": "jasmine",
   "before_tests": "coffee -c spec/*.coffee",
   "on_exit": "rm spec/*.js",
-  "src_files": ["dist/elastic.debug.js", "spec/*.coffee"],
-  "serve_files": ["spec/lib/sinon.js", "dist/elastic.debug.js", "spec/*.js"],
+  "src_files": ["dist/phalanx.debug.js", "spec/*.coffee"],
+  "serve_files": [
+    "spec/lib/jquery.js",
+    "spec/lib/lodash.js",
+    "spec/lib/backbone.js",
+    "dist/phalanx.debug.js",
+    "spec/*.js"
+  ],
   "launch_in_dev": ["PhantomJS"]
 }
