@@ -145,9 +145,11 @@ _.extend(View.prototype, PROTO_VIEW, {
    * From the selector defined by this.ui, caching to explore the elements.
    */
   lookupUi: function() {
-    var name, selector, thisUi = {};
+    var name, selector, thisUi = {},
+        i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
-    for (name in this.ui) {
+    for (; i<iz; i++) {
+      name = keys[i];
       selector = this.ui[name];
       thisUi[name] = this.$el.find(selector);
     }
@@ -159,9 +161,11 @@ _.extend(View.prototype, PROTO_VIEW, {
    * Release ui elements reference.
    */
   releaseUi: function() {
-    var name;
+    var name,
+        i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
-    for (name in this.ui) {
+    for (; i<iz; i++) {
+      name = keys[i];
       this.ui[name] = null;
       delete this.ui[name];
     }
@@ -171,8 +175,11 @@ _.extend(View.prototype, PROTO_VIEW, {
    * Destroy all created componentns.
    */
   destroyComponents: function() {
-    var uid, component;
-    for (uid in this._createdComponents) {
+    var uid, component,
+        i = 0, keys = Object.keys(this._createdComponents), iz = keys.length;
+
+    for (; i<iz; i++) {
+      uid = keys[i];
       component = this._createdComponents[uid];
       component.destroy();
       this._createdComponents[uid] = null;

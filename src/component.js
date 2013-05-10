@@ -74,9 +74,11 @@ var Component = defineClass({
    * From the selector defined by this.ui, caching to explore the elements.
    */
   lookupUi: function() {
-    var name, selector, thisUi = {};
+    var name, selector, thisUi = {},
+        i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
-    for (name in this.ui) {
+    for (; i<iz; i++) {
+      name = keys[i];
       selector = this.ui[name];
       thisUi[name] = this.$el.find(selector);
     }
@@ -88,9 +90,11 @@ var Component = defineClass({
    * Release ui elements reference.
    */
   releaseUi: function() {
-    var name;
+    var name,
+        i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
-    for (name in this.ui) {
+    for (; i<iz; i++) {
+      name = keys[i];
       this.ui[name] = null;
       delete this.ui[name];
     }
