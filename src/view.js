@@ -68,9 +68,10 @@ _.extend(View.prototype, PROTO_VIEW, {
 
   /**
    * @see Backbone.View.setElement
-   * @param element
+   * @param {HTMLElement} element
+   * @param {Boolean} delegate
    */
-  setElement: function(element) {
+  setElement: function(element, delegate) {
     this.onSetElement(element);
     PROTO_VIEW.setElement.apply(this, arguments);
     this.lookupUi();

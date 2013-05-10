@@ -1,4 +1,4 @@
-/*! Phalanx - v0.0.0 ( 2013-05-09 ) - MIT */
+/*! Phalanx - v0.0.0 ( 2013-05-11 ) - MIT */
 (function(window) {
 
 "use strict";
@@ -150,9 +150,7 @@ var View = defineClass({
 var PROTO_VIEW = Backbone.View.prototype,
 
     ATTR_COMPONENT     = 'data-component',
-    ATTR_COMPONENT_UID = 'data-component-uid',
-
-    INCREMENT_COMPONENT_UID = 0;
+    ATTR_COMPONENT_UID = 'data-component-uid';
 
 _.extend(View.prototype, PROTO_VIEW, {
 
@@ -199,8 +197,8 @@ _.extend(View.prototype, PROTO_VIEW, {
 
   /**
    * @see Backbone.View.setElement
-   * @param element
-   * @param delegate
+   * @param {HTMLElement} element
+   * @param {Boolean} delegate
    */
   setElement: function(element, delegate) {
     this.onSetElement(element);
@@ -250,7 +248,7 @@ _.extend(View.prototype, PROTO_VIEW, {
    * @returns {*}
    */
   getComponent: function(el) {
-    var componentName, uid;
+    var componentName, component, uid;
 
     do {
       componentName = el.getAttribute(ATTR_COMPONENT);
@@ -260,13 +258,15 @@ _.extend(View.prototype, PROTO_VIEW, {
       throw new Error('Component name is not detected from ' + ATTR_COMPONENT)
     }
 
-    uid  = el.getAttribute(ATTR_COMPONENT_UID) || INCREMENT_COMPONENT_UID++;
+    uid  = el.getAttribute(ATTR_COMPONENT_UID);
 
-    if (this._createdComponents[uid]) {
+    if (uid && this._createdComponents[uid]) {
       return this._createdComponents[uid];
     } else {
+      component = new this.components[componentName](el);
+      uid = component.uid;
       el.setAttribute(ATTR_COMPONENT_UID, uid);
-      return this._createdComponents[uid] = new this.components[componentName](el, uid);
+      return this._createdComponents[uid] = component;
     }
   },
 
@@ -418,6 +418,16 @@ _.extend(Collection.prototype, Backbone.Collection.prototype, {
 });
 var Layout = defineClass({
   /**
+   * @property {HTMLElement}
+   */
+  el: null,
+
+  /**
+   * @property {jQuery|Zepto}
+   */
+  $el: null,
+
+  /**
    * @property {Object}
    */
   regions: {},
@@ -440,13 +450,31 @@ var Layout = defineClass({
   constructor: function(options) {
     options || (options = {});
 
+    if (options.el) {
+      this.el = options.el;
+    }
+
     if (options.regions) {
       _.extend(this.regions, options.regions)
+    }
+
+    if (_.isElement(this.el)) {
+      this.setElement(this.el);
+    } else {
+      this.setElement(document.body);
     }
 
     this.onCreate.apply(this, arguments);
 
     this.initialize.apply(this, arguments);
+  },
+
+  /**
+   * @param {HTMLElement} element
+   */
+  setElement: function(element) {
+    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
+    this.el = this.$el[0];
   },
 
   /**
@@ -473,7 +501,7 @@ var Layout = defineClass({
     oldView && oldView.destroy();
 
     // new
-    newView.setElement($(selector)[0]);
+    newView.setElement(this.$el.find(selector)[0]);
 
     this._assignedMap[regionName] = newView;
   },
@@ -541,6 +569,12 @@ var Layout = defineClass({
    */
   onDestroy: function() {}
 });
+var INCREMENT_COMPONENT_UID = 0;
+
+/**
+ * @abstract
+ * @class
+ */
 var Component = defineClass({
   /**
    * @property {HTMLElement}
@@ -581,12 +615,11 @@ var Component = defineClass({
   /**
    * @constructor
    * @param {HTMLElement} el
-   * @param {Number} uid
    */
-  constructor: function(el, uid) {
+  constructor: function(el) {
     this.$el = el instanceof Backbone.$ ? el : Backbone.$(el);
     this.el  = this.$el[0];
-    this.uid = uid;
+    this.uid = INCREMENT_COMPONENT_UID++;
 
     this.lookupUi();
 
@@ -653,8 +686,9 @@ var Phalanx = {
   defineClass: defineClass,
 
   Model      : Model,
-  View       : View,
   Collection : Collection,
+
+  View       : View,
   Layout     : Layout,
   Component  : Component
 };

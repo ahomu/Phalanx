@@ -6,6 +6,16 @@
  */
 var Layout = defineClass({
   /**
+   * @property {HTMLElement}
+   */
+  el: null,
+
+  /**
+   * @property {jQuery|Zepto}
+   */
+  $el: null,
+
+  /**
    * @property {Object}
    */
   regions: {},
@@ -28,13 +38,31 @@ var Layout = defineClass({
   constructor: function(options) {
     options || (options = {});
 
+    if (options.el) {
+      this.el = options.el;
+    }
+
     if (options.regions) {
       _.extend(this.regions, options.regions)
+    }
+
+    if (_.isElement(this.el)) {
+      this.setElement(this.el);
+    } else {
+      this.setElement(document.body);
     }
 
     this.onCreate.apply(this, arguments);
 
     this.initialize.apply(this, arguments);
+  },
+
+  /**
+   * @param {HTMLElement} element
+   */
+  setElement: function(element) {
+    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
+    this.el = this.$el[0];
   },
 
   /**
@@ -61,7 +89,7 @@ var Layout = defineClass({
     oldView && oldView.destroy();
 
     // new
-    newView.setElement($(selector)[0]);
+    newView.setElement(this.$el.find(selector)[0]);
 
     this._assignedMap[regionName] = newView;
   },
