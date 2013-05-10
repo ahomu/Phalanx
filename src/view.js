@@ -21,9 +21,7 @@ var View = defineClass({
 var PROTO_VIEW = Backbone.View.prototype,
 
     ATTR_COMPONENT     = 'data-component',
-    ATTR_COMPONENT_UID = 'data-component-uid',
-
-    INCREMENT_COMPONENT_UID = 0;
+    ATTR_COMPONENT_UID = 'data-component-uid';
 
 _.extend(View.prototype, PROTO_VIEW, {
 
@@ -71,9 +69,8 @@ _.extend(View.prototype, PROTO_VIEW, {
   /**
    * @see Backbone.View.setElement
    * @param element
-   * @param delegate
    */
-  setElement: function(element, delegate) {
+  setElement: function(element) {
     this.onSetElement(element);
     PROTO_VIEW.setElement.apply(this, arguments);
     this.lookupUi();
@@ -121,7 +118,7 @@ _.extend(View.prototype, PROTO_VIEW, {
    * @returns {*}
    */
   getComponent: function(el) {
-    var componentName, uid;
+    var componentName, component, uid;
 
     do {
       componentName = el.getAttribute(ATTR_COMPONENT);
@@ -131,13 +128,15 @@ _.extend(View.prototype, PROTO_VIEW, {
       throw new Error('Component name is not detected from ' + ATTR_COMPONENT)
     }
 
-    uid  = el.getAttribute(ATTR_COMPONENT_UID) || INCREMENT_COMPONENT_UID++;
+    uid  = el.getAttribute(ATTR_COMPONENT_UID);
 
-    if (this._createdComponents[uid]) {
+    if (uid && this._createdComponents[uid]) {
       return this._createdComponents[uid];
     } else {
+      component = new this.components[componentName](el);
+      uid = component.uid;
       el.setAttribute(ATTR_COMPONENT_UID, uid);
-      return this._createdComponents[uid] = new this.components[componentName](el, uid);
+      return this._createdComponents[uid] = component;
     }
   },
 

@@ -1,5 +1,7 @@
 'use strict';
 
+var INCREMENT_COMPONENT_UID = 0;
+
 /**
  * @abstract
  * @class
@@ -44,12 +46,11 @@ var Component = defineClass({
   /**
    * @constructor
    * @param {HTMLElement} el
-   * @param {Number} uid
    */
-  constructor: function(el, uid) {
+  constructor: function(el) {
     this.$el = el instanceof Backbone.$ ? el : Backbone.$(el);
     this.el  = this.$el[0];
-    this.uid = uid;
+    this.uid = INCREMENT_COMPONENT_UID++;
 
     this.lookupUi();
 
