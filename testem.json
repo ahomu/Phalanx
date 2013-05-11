@@ -7,6 +7,10 @@
     "spec/lib/jquery.js",
     "spec/lib/lodash.js",
     "spec/lib/backbone.js",
+
+    "spec/lib/sinon.js",
+    "spec/lib/jasmine-jquery.js",
+
     "dist/phalanx.debug.js",
     "spec/*.js"
   ],
