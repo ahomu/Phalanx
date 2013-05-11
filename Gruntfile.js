@@ -54,9 +54,8 @@ module.exports = function(grunt) {
         preserveComments: 'some'
       },
       dist: {
-        files: {
-          'dist/phalanx.min.js': ['dist/phalanx.js']
-        }
+        src: ['dist/phalanx.js'],
+        dest: 'dist/phalanx.min.js'
       }
     },
     watch: {
@@ -66,16 +65,39 @@ module.exports = function(grunt) {
         nospawn: false,
         interrupt: true
       }
+    },
+    jsduck: {
+      options: {
+        'builtin-classes': false,
+        // @see https://github.com/senchalabs/jsduck/blob/master/lib/jsduck/logger.rb
+        'warnings': ['-no_doc', '-dup_member', '-link_ambiguous', '-type_name'],
+        'external': ['XMLHttpRequest']
+      },
+      dist: {
+        src: ['dist/phalanx.debug.js'],
+        dest: 'docs'
+      }
+    },
+    plato: {
+      options: {
+        jshint : grunt.file.readJSON('.jshintrc')
+      },
+      dist: {
+        src: ['src/**/*.js'],
+        dest: 'reports'
+      }
     }
   });
 
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-jsduck');
+  grunt.loadNpmTasks('grunt-plato');
 
   // Default task(s).
   grunt.registerTask('default', ['build']);
-  grunt.registerTask('build',   ['concat', 'uglify']);
+  grunt.registerTask('build',   ['concat', 'uglify', 'jsduck', 'plato']);
   grunt.registerTask('devel',   ['watch']);
 
 };
