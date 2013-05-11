@@ -11,6 +11,7 @@ on development...
 ###Document generator
 
 - [senchalabs/jsduck](https://github.com/senchalabs/jsduck "senchalabs/jsduck · GitHub")
+- [jsoverson/plato · GitHub](https://github.com/jsoverson/plato "jsoverson/plato · GitHub")
 
 ###Automated spec runner
 

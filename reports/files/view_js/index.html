@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title></title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/bootstrap-3.0.0-wip.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome-ie7.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet">
+  <link href="../../assets/css/plato.css" rel="stylesheet">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="brand" href="http://github.com/jsoverson/plato">Plato on Github</a>
+    <ul class="nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>view.js</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="span6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"></i></a></h2>
+      <p class="stat">69.47</p>
+    </div>
+    <div class="span6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h2>
+      <p class="stat">230</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="span6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="span6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="span6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty"></i></a></h2>
+      <p class="stat">50.67</p>
+    </div>
+    <div class="span6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs"></i></a></h2>
+      <p class="stat">1.18</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="span6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="span6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="span12">'use strict';
+
+/**
+ * @abstract
+ * @class Phalanx.View
+ */
+var View = defineClass({
+  /**
+   * @constructor
+   * @param {Object} options
+   */
+  constructor: function(options) {
+    options || (options = {});
+
+    this.onCreate.apply(this, arguments);
+
+    Backbone.View.apply(this, arguments);
+  }
+});
+
+var PROTO_VIEW = Backbone.View.prototype,
+
+    ATTR_COMPONENT     = 'data-component',
+    ATTR_COMPONENT_UID = 'data-component-uid';
+
+_.extend(View.prototype, PROTO_VIEW, {
+
+  /**
+   *     events: {
+   *       'click .js_event_selector': 'someMethodName'
+   *     }
+   *     // $('.js_event_selector').click() => someMethod()
+   *
+   * @property {Object}
+   */
+  events: {},
+
+  /**
+   *     ui: {
+   *       partOf: '.js_ui_selector'
+   *     }
+   *     // view.ui.partOf => element.js_ui_selector
+   *
+   * @property {Object}
+   */
+  ui: {},
+
+  /**
+   *     components: {
+   *       likeBtn: LikeBtnComponent
+   *     }
+   *     // <button data-component="likeBtn"></button> => LikeBtnComponent
+   *
+   * @property {Object}
+   */
+  components: {},
+
+  /**
+   * @private
+   * @property {Object}
+   */
+  _createdComponents: {},
+
+  /**
+   * @see Backbone.View.setElement
+   * @param {HTMLElement} element
+   * @param {Boolean} delegate
+   */
+  setElement: function(element, delegate) {
+    this.onSetElement(element);
+    PROTO_VIEW.setElement.apply(this, arguments);
+    this.lookupUi();
+  },
+
+  /**
+   * @see Backbone.View.delegateEvents
+   * @param {Object} [events]
+   */
+  delegateEvents: function(events) {
+    var componentEvents = {},
+        componentName, protoComponent,
+        eventKeys, eventClosures,
+        i = 0, keys = Object.keys(this.components), iz = keys.length;
+
+    if (events == null) {
+      for (; i<iz; i++) {
+        componentName  = keys[i];
+        protoComponent = this.components[componentName].prototype;
+        eventKeys      = _.keys(protoComponent.events),
+        eventClosures  = _.map(protoComponent.events, this._getComponentEventClosure);
+        _.extend(componentEvents, _.object(eventKeys, eventClosures));
+      }
+      PROTO_VIEW.delegateEvents.apply(this, [_.extend(componentEvents, this.events)]);
+    } else {
+      PROTO_VIEW.delegateEvents.apply(this, arguments);
+    }
+
+  },
+
+  /**
+   * @private
+   * @param {String} methodName
+   * @returns {Function}
+   */
+  _getComponentEventClosure: function(methodName) {
+    return function(evt) {
+      var component = this.getComponent(evt.target);
+      component[methodName].apply(component, arguments);
+    };
+  },
+
+  /**
+   * like singleton...
+   *
+   * @param {HTMLElement} el
+   * @returns {*}
+   */
+  getComponent: function(el) {
+    var componentName, component, uid;
+
+    do {
+      componentName = el.getAttribute(ATTR_COMPONENT);
+    } while(!componentName && (el = el.parentNode));
+
+    if (!componentName) {
+      throw new Error('Component name is not detected from ' + ATTR_COMPONENT);
+    }
+
+    uid  = el.getAttribute(ATTR_COMPONENT_UID);
+
+    if (uid && this._createdComponents[uid]) {
+      return this._createdComponents[uid];
+    } else {
+      component = new this.components[componentName](el);
+      uid = component.uid;
+      el.setAttribute(ATTR_COMPONENT_UID, uid);
+      this._createdComponents[uid] = component;
+      return component;
+    }
+  },
+
+  /**
+   * From the selector defined by this.ui, caching to explore the elements.
+   */
+  lookupUi: function() {
+    var name, selector, thisUi = {},
+        i = 0, keys = Object.keys(this.ui), iz = keys.length;
+
+    for (; i<iz; i++) {
+      name = keys[i];
+      selector = this.ui[name];
+      thisUi[name] = this.$el.find(selector);
+    }
+
+    this.ui = thisUi;
+  },
+
+  /**
+   * Release ui elements reference.
+   */
+  releaseUi: function() {
+    var name,
+        i = 0, keys = Object.keys(this.ui), iz = keys.length;
+
+    for (; i<iz; i++) {
+      name = keys[i];
+      this.ui[name] = null;
+      delete this.ui[name];
+    }
+  },
+
+  /**
+   * Destroy all created componentns.
+   */
+  destroyComponents: function() {
+    var uid, component,
+        i = 0, keys = Object.keys(this._createdComponents), iz = keys.length;
+
+    for (; i<iz; i++) {
+      uid = keys[i];
+      component = this._createdComponents[uid];
+      component.destroy();
+      this._createdComponents[uid] = null;
+      delete this._createdComponents[uid];
+    }
+  },
+
+  /**
+   * Destory and teadown View.
+   */
+  destroy: function() {
+
+    this.undelegateEvents();
+
+    this.destroyComponents();
+
+    this.releaseUi();
+
+    this.onDestroy();
+  },
+
+  /**
+   * @abstract
+   */
+  initialize: function() {},
+
+  /**
+   * @abstract
+   * @chainable
+   * @param {String} html
+   * @return {*}
+   */
+  render: function(html) { this.$el.html(html); return this; },
+
+  /**
+   * @abstract
+   */
+  onCreate: function() {},
+
+  /**
+   * @abstract
+   * @param {HTMLElement} el
+   */
+  onSetElement: function(el) {},
+
+  /**
+   * @abstract
+   */
+  onDestroy: function() {}
+});</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ complexity.cyclomatic }} <br>
+    Length : {{ complexity.halstead.length }} <br>
+    Difficulty : {{ complexity.halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ complexity.halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>

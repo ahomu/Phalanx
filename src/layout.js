@@ -2,7 +2,7 @@
 
 /**
  * @abstract
- * @class
+ * @class Phalanx.Layout
  */
 var Layout = defineClass({
   /**

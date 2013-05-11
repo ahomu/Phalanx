@@ -2,7 +2,7 @@
 
 /**
  * @abstract
- * @class
+ * @class Phalanx.Model
  */
 var Model = defineClass({
   /**

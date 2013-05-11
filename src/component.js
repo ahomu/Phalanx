@@ -4,7 +4,7 @@ var INCREMENT_COMPONENT_UID = 0;
 
 /**
  * @abstract
- * @class
+ * @class Phalanx.Component
  */
 var Component = defineClass({
   /**

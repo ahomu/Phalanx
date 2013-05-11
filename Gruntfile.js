@@ -19,7 +19,7 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
     concat: {
       options: {
-        stripBanners: true,
+        stripBanners: false,
         banner: [BANNER_TEMPLATE_STRING,
                  '(function(window) {',
                  '',

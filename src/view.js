@@ -2,7 +2,7 @@
 
 /**
  * @abstract
- * @class
+ * @class Phalanx.View
  */
 var View = defineClass({
   /**

@@ -157,6 +157,10 @@ function __super(methodName, args) {
   // TODO: this.super() で連鎖的に先祖のメソッドを呼び出したい
   return this.__super__[methodName].apply(this, args);
 }
+/**
+ * @abstract
+ * @class Phalanx.View
+ */
 var View = defineClass({
   /**
    * @constructor
@@ -382,6 +386,10 @@ _.extend(View.prototype, PROTO_VIEW, {
   onDestroy: function() {}
 });
 
+/**
+ * @abstract
+ * @class Phalanx.Model
+ */
 var Model = defineClass({
   /**
    * @constructor
@@ -414,6 +422,10 @@ _.extend(Model.prototype, Backbone.Model.prototype, {
   onDestroy: function() {}
 });
 
+/**
+ * @abstract
+ * @class Phalanx.Collection
+ */
 var Collection = defineClass({
   /**
    * @constructor
@@ -445,6 +457,10 @@ _.extend(Collection.prototype, Backbone.Collection.prototype, {
    */
   onDestroy: function() {}
 });
+/**
+ * @abstract
+ * @class Phalanx.Layout
+ */
 var Layout = defineClass({
   /**
    * @property {HTMLElement}
@@ -602,7 +618,7 @@ var INCREMENT_COMPONENT_UID = 0;
 
 /**
  * @abstract
- * @class
+ * @class Phalanx.Component
  */
 var Component = defineClass({
   /**
@@ -714,6 +730,9 @@ var Component = defineClass({
   onDestroy: function() {}
 });
 
+/**
+ * @class Phalanx
+ */
 var Phalanx = {
 
   defineClass: defineClass,

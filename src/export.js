@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @class
+ * @class Phalanx
  */
 var Phalanx = {
 

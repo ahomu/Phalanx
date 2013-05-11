@@ -1,10 +1,9 @@
-/*! Phalanx - v0.0.0 ( 2013-05-09 ) - MIT */
+/*! Phalanx - v0.0.0 ( 2013-05-11 ) - MIT */
 (function(window) {
 
 "use strict";
 
 var DEFINE_NOT_WRITABLE   = {writable: false};
-var UNDEFINED_UNIQUE_NAME = '__UNDEFINED__';
 
 /**
  * `defineClass` is Helper function, to generate Object like Class with basic oop fetures
@@ -39,17 +38,15 @@ function defineClass(constructor_or_members, members) {
    * @class Klass
    * @returns {*}
    */
-  var constructor;
+  var Constructor;
 
-  if (arguments.length === 1) {
-    members = constructor_or_members;
+  if (typeof constructor_or_members === 'function') {
+    Constructor = constructor_or_members;
   } else {
-    constructor = constructor_or_members;
+    members = constructor_or_members;
+    Constructor = members.hasOwnProperty('constructor') ? members.constructor
+                                                        : function() {};
   }
-
-  var Constructor = typeof constructor === 'function' ? constructor
-                                                      : members.hasOwnProperty('constructor') ? members.constructor
-                                                                                              : function() {};
 
   delete members.constructor;
   _.extend(Constructor.prototype, members);
@@ -104,17 +101,39 @@ function defineClass(constructor_or_members, members) {
   Constructor.create = __create;
   Object.defineProperty(Constructor, 'create', DEFINE_NOT_WRITABLE);
 
+  /**
+   * Call a specific method of the parent class
+   *
+   *     var SuperClass = Klass.of({
+   *       onCreate: function() {
+   *         alert('Yup!');
+   *       }
+   *     });
+   *     var SubClass = SuperClass.extends({
+   *       onCreate: function() {
+   *         this.super('onCreate', arguments); // => alert('Yup!')
+   *       }
+   *     });
+   *
+   * @method super
+   * @param {String} methodName
+   * @param {Object|Arguments} args
+   * @type {Function}
+   */
+  Constructor.prototype.super = __super;
+
   return Constructor;
 }
 
 function __with(trait, aliases) {
+  /*jshint validthis:true */
   var i = 0, keys = Object.keys(trait), iz = keys.length,
       prop, processed_trait = {};
 
   aliases || (aliases = {});
 
   for (; i<iz; i++) {
-    prop = keys[i]
+    prop = keys[i];
     if (aliases[prop]) {
       processed_trait[aliases[prop]] = trait[prop];
     } else {
@@ -127,12 +146,21 @@ function __with(trait, aliases) {
 }
 
 function __create() {
+  /*jshint validthis:true */
   var instance = Object.create(this.prototype);
   this.apply(instance, arguments);
   return instance;
 }
 
-
+function __super(methodName, args) {
+  /*jshint validthis:true */
+  // TODO: this.super() で連鎖的に先祖のメソッドを呼び出したい
+  return this.__super__[methodName].apply(this, args);
+}
+/**
+ * @abstract
+ * @class Phalanx.View
+ */
 var View = defineClass({
   /**
    * @constructor
@@ -150,16 +178,9 @@ var View = defineClass({
 var PROTO_VIEW = Backbone.View.prototype,
 
     ATTR_COMPONENT     = 'data-component',
-    ATTR_COMPONENT_UID = 'data-component-uid',
-
-    INCREMENT_COMPONENT_UID = 0;
+    ATTR_COMPONENT_UID = 'data-component-uid';
 
 _.extend(View.prototype, PROTO_VIEW, {
-
-  /**
-   * @property {String}
-   */
-  name: UNDEFINED_UNIQUE_NAME,
 
   /**
    *     events: {
@@ -199,8 +220,8 @@ _.extend(View.prototype, PROTO_VIEW, {
 
   /**
    * @see Backbone.View.setElement
-   * @param element
-   * @param delegate
+   * @param {HTMLElement} element
+   * @param {Boolean} delegate
    */
   setElement: function(element, delegate) {
     this.onSetElement(element);
@@ -215,10 +236,12 @@ _.extend(View.prototype, PROTO_VIEW, {
   delegateEvents: function(events) {
     var componentEvents = {},
         componentName, protoComponent,
-        eventKeys, eventClosures;
+        eventKeys, eventClosures,
+        i = 0, keys = Object.keys(this.components), iz = keys.length;
 
     if (events == null) {
-      for (componentName in this.components) {
+      for (; i<iz; i++) {
+        componentName  = keys[i];
         protoComponent = this.components[componentName].prototype;
         eventKeys      = _.keys(protoComponent.events),
         eventClosures  = _.map(protoComponent.events, this._getComponentEventClosure);
@@ -240,7 +263,7 @@ _.extend(View.prototype, PROTO_VIEW, {
     return function(evt) {
       var component = this.getComponent(evt.target);
       component[methodName].apply(component, arguments);
-    }
+    };
   },
 
   /**
@@ -250,23 +273,26 @@ _.extend(View.prototype, PROTO_VIEW, {
    * @returns {*}
    */
   getComponent: function(el) {
-    var componentName, uid;
+    var componentName, component, uid;
 
     do {
       componentName = el.getAttribute(ATTR_COMPONENT);
     } while(!componentName && (el = el.parentNode));
 
     if (!componentName) {
-      throw new Error('Component name is not detected from ' + ATTR_COMPONENT)
+      throw new Error('Component name is not detected from ' + ATTR_COMPONENT);
     }
 
-    uid  = el.getAttribute(ATTR_COMPONENT_UID) || INCREMENT_COMPONENT_UID++;
+    uid  = el.getAttribute(ATTR_COMPONENT_UID);
 
-    if (this._createdComponents[uid]) {
+    if (uid && this._createdComponents[uid]) {
       return this._createdComponents[uid];
     } else {
+      component = new this.components[componentName](el);
+      uid = component.uid;
       el.setAttribute(ATTR_COMPONENT_UID, uid);
-      return this._createdComponents[uid] = new this.components[componentName](el, uid);
+      this._createdComponents[uid] = component;
+      return component;
     }
   },
 
@@ -274,9 +300,11 @@ _.extend(View.prototype, PROTO_VIEW, {
    * From the selector defined by this.ui, caching to explore the elements.
    */
   lookupUi: function() {
-    var name, selector, thisUi = {};
+    var name, selector, thisUi = {},
+        i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
-    for (name in this.ui) {
+    for (; i<iz; i++) {
+      name = keys[i];
       selector = this.ui[name];
       thisUi[name] = this.$el.find(selector);
     }
@@ -288,9 +316,11 @@ _.extend(View.prototype, PROTO_VIEW, {
    * Release ui elements reference.
    */
   releaseUi: function() {
-    var name;
+    var name,
+        i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
-    for (name in this.ui) {
+    for (; i<iz; i++) {
+      name = keys[i];
       this.ui[name] = null;
       delete this.ui[name];
     }
@@ -300,8 +330,11 @@ _.extend(View.prototype, PROTO_VIEW, {
    * Destroy all created componentns.
    */
   destroyComponents: function() {
-    var uid, component;
-    for (uid in this._createdComponents) {
+    var uid, component,
+        i = 0, keys = Object.keys(this._createdComponents), iz = keys.length;
+
+    for (; i<iz; i++) {
+      uid = keys[i];
       component = this._createdComponents[uid];
       component.destroy();
       this._createdComponents[uid] = null;
@@ -353,6 +386,10 @@ _.extend(View.prototype, PROTO_VIEW, {
   onDestroy: function() {}
 });
 
+/**
+ * @abstract
+ * @class Phalanx.Model
+ */
 var Model = defineClass({
   /**
    * @constructor
@@ -385,6 +422,10 @@ _.extend(Model.prototype, Backbone.Model.prototype, {
   onDestroy: function() {}
 });
 
+/**
+ * @abstract
+ * @class Phalanx.Collection
+ */
 var Collection = defineClass({
   /**
    * @constructor
@@ -416,7 +457,21 @@ _.extend(Collection.prototype, Backbone.Collection.prototype, {
    */
   onDestroy: function() {}
 });
+/**
+ * @abstract
+ * @class Phalanx.Layout
+ */
 var Layout = defineClass({
+  /**
+   * @property {HTMLElement}
+   */
+  el: null,
+
+  /**
+   * @property {jQuery|Zepto}
+   */
+  $el: null,
+
   /**
    * @property {Object}
    */
@@ -440,13 +495,31 @@ var Layout = defineClass({
   constructor: function(options) {
     options || (options = {});
 
+    if (options.el) {
+      this.el = options.el;
+    }
+
     if (options.regions) {
-      _.extend(this.regions, options.regions)
+      _.extend(this.regions, options.regions);
+    }
+
+    if (_.isElement(this.el)) {
+      this.setElement(this.el);
+    } else {
+      this.setElement(document.body);
     }
 
     this.onCreate.apply(this, arguments);
 
     this.initialize.apply(this, arguments);
+  },
+
+  /**
+   * @param {HTMLElement} element
+   */
+  setElement: function(element) {
+    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
+    this.el = this.$el[0];
   },
 
   /**
@@ -473,7 +546,7 @@ var Layout = defineClass({
     oldView && oldView.destroy();
 
     // new
-    newView.setElement($(selector)[0]);
+    newView.setElement(this.$el.find(selector)[0]);
 
     this._assignedMap[regionName] = newView;
   },
@@ -483,7 +556,7 @@ var Layout = defineClass({
    * @returns {View}
    */
   getRegionView: function(regionName) {
-    if (!regionName in this.regions) {
+    if (!(regionName in this.regions)) {
       throw new Error('Undefined region `' + regionName + '` is specified');
     }
     return this._assignedMap[regionName] || null;
@@ -513,7 +586,7 @@ var Layout = defineClass({
         iz = this.regions.length, regionName;
 
     for (; i<iz; i++) {
-      regionName = regions[i]
+      regionName = regions[i];
       this.withdraw(regionName);
     }
   },
@@ -541,6 +614,12 @@ var Layout = defineClass({
    */
   onDestroy: function() {}
 });
+var INCREMENT_COMPONENT_UID = 0;
+
+/**
+ * @abstract
+ * @class Phalanx.Component
+ */
 var Component = defineClass({
   /**
    * @property {HTMLElement}
@@ -581,12 +660,11 @@ var Component = defineClass({
   /**
    * @constructor
    * @param {HTMLElement} el
-   * @param {Number} uid
    */
-  constructor: function(el, uid) {
+  constructor: function(el) {
     this.$el = el instanceof Backbone.$ ? el : Backbone.$(el);
     this.el  = this.$el[0];
-    this.uid = uid;
+    this.uid = INCREMENT_COMPONENT_UID++;
 
     this.lookupUi();
 
@@ -610,9 +688,11 @@ var Component = defineClass({
    * From the selector defined by this.ui, caching to explore the elements.
    */
   lookupUi: function() {
-    var name, selector, thisUi = {};
+    var name, selector, thisUi = {},
+        i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
-    for (name in this.ui) {
+    for (; i<iz; i++) {
+      name = keys[i];
       selector = this.ui[name];
       thisUi[name] = this.$el.find(selector);
     }
@@ -624,9 +704,11 @@ var Component = defineClass({
    * Release ui elements reference.
    */
   releaseUi: function() {
-    var name;
+    var name,
+        i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
-    for (name in this.ui) {
+    for (; i<iz; i++) {
+      name = keys[i];
       this.ui[name] = null;
       delete this.ui[name];
     }
@@ -648,27 +730,31 @@ var Component = defineClass({
   onDestroy: function() {}
 });
 
+/**
+ * @class Phalanx
+ */
 var Phalanx = {
 
   defineClass: defineClass,
 
   Model      : Model,
-  View       : View,
   Collection : Collection,
+
+  View       : View,
   Layout     : Layout,
   Component  : Component
 };
 
 // for RequireJS
-if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
   window.define(function() {
     return Phalanx;
   });
 }
 // for Node.js & browserify
-else if (typeof module == 'object' && module &&
-  typeof exports == 'object' && exports &&
-  module.exports == exports
+else if (typeof module === 'object' && module &&
+  typeof exports === 'object' && exports &&
+  module.exports === exports
   ) {
   module.exports = Phalanx;
 }

@@ -98,6 +98,27 @@ function defineClass(constructor_or_members, members) {
   Constructor.create = __create;
   Object.defineProperty(Constructor, 'create', DEFINE_NOT_WRITABLE);
 
+  /**
+   * Call a specific method of the parent class
+   *
+   *     var SuperClass = Klass.of({
+   *       onCreate: function() {
+   *         alert('Yup!');
+   *       }
+   *     });
+   *     var SubClass = SuperClass.extends({
+   *       onCreate: function() {
+   *         this.super('onCreate', arguments); // => alert('Yup!')
+   *       }
+   *     });
+   *
+   * @method super
+   * @param {String} methodName
+   * @param {Object|Arguments} args
+   * @type {Function}
+   */
+  Constructor.prototype.super = __super;
+
   return Constructor;
 }
 
@@ -128,3 +149,8 @@ function __create() {
   return instance;
 }
 
+function __super(methodName, args) {
+  /*jshint validthis:true */
+  // TODO: this.super() で連鎖的に先祖のメソッドを呼び出したい
+  return this.__super__[methodName].apply(this, args);
+}
