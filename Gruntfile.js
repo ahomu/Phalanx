@@ -5,7 +5,7 @@ module.exports = function(grunt) {
       RE_CONSOLE_METHODS      = /console.[\w]+\(.*?(\w*\(.*\))*\);/g,
       BANNER_TEMPLATE_STRING  = '/*! <%= pkg.name %> - v<%= pkg.version %> ( <%= grunt.template.today("yyyy-mm-dd") %> ) - <%= pkg.license %> */',
       BUILD_ORDERED_LIST      = [
-        'src/helper.js',
+        'src/define_class.js',
         'src/view.js',
         'src/model.js',
         'src/collection.js',
