@@ -1,4 +1,5 @@
 module.exports = function(grunt) {
+  'use strict';
 
   var RE_USE_STRICT_STATEMENT = /(^|\n)[ \t]*('use strict'|"use strict");?\s*/g,
       RE_CONSOLE_METHODS      = /console.[\w]+\(.*?(\w*\(.*\))*\);/g,

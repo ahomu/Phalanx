@@ -43,7 +43,7 @@ var Layout = defineClass({
     }
 
     if (options.regions) {
-      _.extend(this.regions, options.regions)
+      _.extend(this.regions, options.regions);
     }
 
     if (_.isElement(this.el)) {
@@ -99,7 +99,7 @@ var Layout = defineClass({
    * @returns {View}
    */
   getRegionView: function(regionName) {
-    if (!regionName in this.regions) {
+    if (!(regionName in this.regions)) {
       throw new Error('Undefined region `' + regionName + '` is specified');
     }
     return this._assignedMap[regionName] || null;
@@ -129,7 +129,7 @@ var Layout = defineClass({
         iz = this.regions.length, regionName;
 
     for (; i<iz; i++) {
-      regionName = regions[i]
+      regionName = regions[i];
       this.withdraw(regionName);
     }
   },

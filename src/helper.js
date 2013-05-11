@@ -35,17 +35,15 @@ function defineClass(constructor_or_members, members) {
    * @class Klass
    * @returns {*}
    */
-  var constructor;
+  var Constructor;
 
-  if (arguments.length === 1) {
-    members = constructor_or_members;
+  if (typeof constructor_or_members === 'function') {
+    Constructor = constructor_or_members;
   } else {
-    constructor = constructor_or_members;
+    members = constructor_or_members;
+    Constructor = members.hasOwnProperty('constructor') ? members.constructor
+                                                        : function() {};
   }
-
-  var Constructor = typeof constructor === 'function' ? constructor
-                                                      : members.hasOwnProperty('constructor') ? members.constructor
-                                                                                              : function() {};
 
   delete members.constructor;
   _.extend(Constructor.prototype, members);
@@ -104,13 +102,14 @@ function defineClass(constructor_or_members, members) {
 }
 
 function __with(trait, aliases) {
+  /*jshint validthis:true */
   var i = 0, keys = Object.keys(trait), iz = keys.length,
       prop, processed_trait = {};
 
   aliases || (aliases = {});
 
   for (; i<iz; i++) {
-    prop = keys[i]
+    prop = keys[i];
     if (aliases[prop]) {
       processed_trait[aliases[prop]] = trait[prop];
     } else {
@@ -123,6 +122,7 @@ function __with(trait, aliases) {
 }
 
 function __create() {
+  /*jshint validthis:true */
   var instance = Object.create(this.prototype);
   this.apply(instance, arguments);
   return instance;

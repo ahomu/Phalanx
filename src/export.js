@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 /**
  * @class
@@ -16,15 +16,15 @@ var Phalanx = {
 };
 
 // for RequireJS
-if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
   window.define(function() {
     return Phalanx;
   });
 }
 // for Node.js & browserify
-else if (typeof module == 'object' && module &&
-  typeof exports == 'object' && exports &&
-  module.exports == exports
+else if (typeof module === 'object' && module &&
+  typeof exports === 'object' && exports &&
+  module.exports === exports
   ) {
   module.exports = Phalanx;
 }

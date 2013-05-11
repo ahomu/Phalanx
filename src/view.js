@@ -79,10 +79,12 @@ _.extend(View.prototype, PROTO_VIEW, {
   delegateEvents: function(events) {
     var componentEvents = {},
         componentName, protoComponent,
-        eventKeys, eventClosures;
+        eventKeys, eventClosures,
+        i = 0, keys = Object.keys(this.components), iz = keys.length;
 
     if (events == null) {
-      for (componentName in this.components) {
+      for (; i<iz; i++) {
+        componentName  = keys[i];
         protoComponent = this.components[componentName].prototype;
         eventKeys      = _.keys(protoComponent.events),
         eventClosures  = _.map(protoComponent.events, this._getComponentEventClosure);
@@ -104,7 +106,7 @@ _.extend(View.prototype, PROTO_VIEW, {
     return function(evt) {
       var component = this.getComponent(evt.target);
       component[methodName].apply(component, arguments);
-    }
+    };
   },
 
   /**
@@ -121,7 +123,7 @@ _.extend(View.prototype, PROTO_VIEW, {
     } while(!componentName && (el = el.parentNode));
 
     if (!componentName) {
-      throw new Error('Component name is not detected from ' + ATTR_COMPONENT)
+      throw new Error('Component name is not detected from ' + ATTR_COMPONENT);
     }
 
     uid  = el.getAttribute(ATTR_COMPONENT_UID);
@@ -132,7 +134,8 @@ _.extend(View.prototype, PROTO_VIEW, {
       component = new this.components[componentName](el);
       uid = component.uid;
       el.setAttribute(ATTR_COMPONENT_UID, uid);
-      return this._createdComponents[uid] = component;
+      this._createdComponents[uid] = component;
+      return component;
     }
   },
 

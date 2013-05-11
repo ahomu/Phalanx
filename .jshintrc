@@ -1,0 +1,45 @@
+{
+  "globals": {
+    "defineClass": true,
+    "console": true,
+    "Backbone": true,
+    "_": true,
+    "$": true,
+    "jQuery": true,
+    "Zepto": true,
+    "Model": true,
+    "Collection": true,
+    "View": true,
+    "Layout": true,
+    "Component": true,
+    "define": true,
+    "exports": true,
+    "module": true
+  },
+
+  "maxlen": 100,
+  "quotmark": "single",
+  "maxparams": 3,
+  "maxdepth": 3,
+
+  "bitwise": true,
+  "curly": true,
+  "eqeqeq": true,
+  "forin": true,
+  "newcap": true,
+  "noarg": true,
+  "noempty": true,
+  "nonew": true,
+  "undef": true,
+  "strict": true,
+  "trailing": true,
+
+  "browser": true,
+  "devel": true,
+  "jquery": true,
+
+  "globalstrict": true,
+  "es5": true,
+  "eqnull": true,
+  "expr"  : true
+}
