@@ -35,12 +35,16 @@ describe 'Phalanx.Component is units of actionable ui', ->
     $btns = $('[data-btn]')
     $nums = $('[data-num]')
 
+    # 要素をクリックしたときにコンポーネントが生成される
     $btns.eq(1).click()
     expect($btns.eq(1).parent()).toHaveAttr('data-component-uid')
 
-    component = view.getComponent($btns.eq(1)[0])
-    expect(component.uid).not.toBeNull
-
-    expect(component.ui.num.text()).toBe '1'
+    # クリックしたコンポーネントのテキストだけ加算されている
     expect($nums.eq(0).text()).toBe '0'
+    expect($nums.eq(1).text()).toBe '1'
     expect($nums.eq(2).text()).toBe '0'
+
+    # 関係ない要素をクリックしても大丈夫
+    $nums.eq(2).click()
+    $nums.eq(2).parent().click()
+    expect($nums.eq(2).parent()).not.toHaveAttr('data-component-uid')
