@@ -48,8 +48,7 @@ var Component = defineClass({
    * @param {HTMLElement} el
    */
   constructor: function(el) {
-    this.$el = el instanceof Backbone.$ ? el : Backbone.$(el);
-    this.el  = this.$el[0];
+    this.setElement(el);
     this.uid = INCREMENT_COMPONENT_UID++;
 
     this.lookupUi();
@@ -57,6 +56,14 @@ var Component = defineClass({
     this.onCreate.apply(this, arguments);
 
     this.initialize.apply(this, arguments);
+  },
+
+  /**
+   * @param {HTMLElement} element
+   */
+  setElement: function(element) {
+    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
+    this.el = this.$el[0];
   },
 
   /**
