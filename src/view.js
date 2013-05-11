@@ -26,11 +26,6 @@ var PROTO_VIEW = Backbone.View.prototype,
 _.extend(View.prototype, PROTO_VIEW, {
 
   /**
-   * @property {String}
-   */
-  name: UNDEFINED_UNIQUE_NAME,
-
-  /**
    *     events: {
    *       'click .js_event_selector': 'someMethodName'
    *     }

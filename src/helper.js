@@ -1,7 +1,6 @@
 'use strict';
 
 var DEFINE_NOT_WRITABLE   = {writable: false};
-var UNDEFINED_UNIQUE_NAME = '__UNDEFINED__';
 
 /**
  * `defineClass` is Helper function, to generate Object like Class with basic oop fetures
