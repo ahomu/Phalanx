@@ -156,4 +156,5 @@ var Layout = defineClass({
    * @abstract
    */
   onDestroy: function() {}
-});
+
+}).with(Backbone.Events);

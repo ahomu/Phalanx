@@ -28,6 +28,5 @@ via. [Ancient Macedonian battle tactics - Wikipedia, the free encyclopedia](http
 
 ##TODO
 
-- Event interface add to Layout & Component
 - Example codes
 - Conceptual diagram

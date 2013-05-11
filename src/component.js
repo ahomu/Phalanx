@@ -121,4 +121,5 @@ var Component = defineClass({
    * @abstract
    */
   onDestroy: function() {}
-});
+
+}).with(Backbone.Events);

@@ -1,4 +1,4 @@
-/*! Phalanx - v0.0.0 ( 2013-05-11 ) - MIT */
+/*! Phalanx - v0.0.0 ( 2013-05-12 ) - MIT */
 (function(window) {
 
 "use strict";
@@ -613,7 +613,8 @@ var Layout = defineClass({
    * @abstract
    */
   onDestroy: function() {}
-});
+
+}).with(Backbone.Events);
 var INCREMENT_COMPONENT_UID = 0;
 
 /**
@@ -735,7 +736,8 @@ var Component = defineClass({
    * @abstract
    */
   onDestroy: function() {}
-});
+
+}).with(Backbone.Events);
 
 /**
  * @class Phalanx
