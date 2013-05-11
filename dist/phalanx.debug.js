@@ -155,7 +155,7 @@ function __create() {
 function __super(methodName, args) {
   /*jshint validthis:true */
   // TODO: this.super() で連鎖的に先祖のメソッドを呼び出したい
-  return this.__super__[methodName].apply(this, args);
+  return this.constructor.__super__[methodName].apply(this, args);
 }
 /**
  * @abstract
@@ -662,8 +662,7 @@ var Component = defineClass({
    * @param {HTMLElement} el
    */
   constructor: function(el) {
-    this.$el = el instanceof Backbone.$ ? el : Backbone.$(el);
-    this.el  = this.$el[0];
+    this.setElement(el);
     this.uid = INCREMENT_COMPONENT_UID++;
 
     this.lookupUi();
@@ -671,6 +670,14 @@ var Component = defineClass({
     this.onCreate.apply(this, arguments);
 
     this.initialize.apply(this, arguments);
+  },
+
+  /**
+   * @param {HTMLElement} element
+   */
+  setElement: function(element) {
+    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
+    this.el = this.$el[0];
   },
 
   /**

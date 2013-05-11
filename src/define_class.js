@@ -152,5 +152,5 @@ function __create() {
 function __super(methodName, args) {
   /*jshint validthis:true */
   // TODO: this.super() で連鎖的に先祖のメソッドを呼び出したい
-  return this.__super__[methodName].apply(this, args);
+  return this.constructor.__super__[methodName].apply(this, args);
 }
