@@ -49,11 +49,14 @@ module.exports = function(grunt) {
       }
     },
     uglify: {
-      options: {
-        report: 'min',
-        preserveComments: 'some'
-      },
       dist: {
+        options: {
+          report: 'min',
+          preserveComments: 'some',
+          sourceMap : 'dist/phalanx.map',
+          sourceMappingURL : 'phalanx.map',
+          sourceMapPrefix : 1
+        },
         src: ['dist/phalanx.js'],
         dest: 'dist/phalanx.min.js'
       }
@@ -97,7 +100,8 @@ module.exports = function(grunt) {
 
   // Default task(s).
   grunt.registerTask('default', ['build']);
-  grunt.registerTask('build',   ['concat', 'uglify', 'jsduck', 'plato']);
+  grunt.registerTask('build',   ['concat', 'uglify']);
+  grunt.registerTask('release', ['concat', 'uglify', 'jsduck', 'plato']);
   grunt.registerTask('devel',   ['watch']);
 
 };
