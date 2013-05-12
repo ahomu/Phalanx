@@ -1,18 +1,19 @@
 {
-  "framework": "jasmine",
+  "framework": "mocha",
   "before_tests": "coffee -c spec/*.coffee",
   "on_exit": "rm spec/*.js",
   "src_files": ["dist/phalanx.debug.js", "spec/*.coffee"],
   "serve_files": [
-    "spec/lib/jquery.js",
-    "spec/lib/lodash.js",
-    "spec/lib/backbone.js",
+    "spec/lib/jquery/jquery.js",
+    "spec/lib/lodash/lodash.js",
+    "spec/lib/backbone/backbone.js",
 
-    "spec/lib/sinon.js",
-    "spec/lib/jasmine-jquery.js",
+    "spec/lib/expect/expect.js",
+    "spec/lib/sinon/lib/sinon.js",
+    "spec/lib/fixtures/index.js",
 
     "dist/phalanx.debug.js",
-    "spec/*.js"
+    "spec/define_class_spec.js"
   ],
   "launch_in_dev": ["PhantomJS"]
 }

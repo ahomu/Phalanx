@@ -1,0 +1,26 @@
+{
+  "name": "Phalanx",
+  "version": "0.0.0",
+  "main": "dist/phalanx.js",
+  "ignore": [
+    "spec",
+    "src",
+
+    ".*",
+    "bower.json",
+    "Gruntfile.js",
+    "package.json",
+    "testem.json"
+  ],
+  "dependencies": {
+    "jquery": "~2.0.0",
+    "backbone": "~1.0.0",
+    "lodash": "~1.2.1"
+  },
+  "devDependencies": {
+    "mocha": "~1.9.0",
+    "expect": "~0.2.0",
+    "sinon": "~1.7.1",
+    "fixtures": "https://raw.github.com/badunk/js-fixtures/master/fixtures.js"
+  }
+}
