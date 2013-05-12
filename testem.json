@@ -2,6 +2,7 @@
   "framework": "mocha",
   "before_tests": "coffee -c spec/*.coffee",
   "on_exit": "rm spec/*.js",
+  "test_page": "spec/mocharunner.html",
   "src_files": ["dist/phalanx.debug.js", "spec/*.coffee"],
   "serve_files": [
     "spec/lib/jquery/jquery.js",
