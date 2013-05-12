@@ -1,4 +1,4 @@
-/*! Phalanx - v0.0.0 ( 2013-05-11 ) - MIT */
+/*! Phalanx - v0.0.1 ( 2013-05-12 ) - MIT */
 (function(window) {
 
 "use strict";
@@ -155,7 +155,7 @@ function __create() {
 function __super(methodName, args) {
   /*jshint validthis:true */
   // TODO: this.super() で連鎖的に先祖のメソッドを呼び出したい
-  return this.__super__[methodName].apply(this, args);
+  return this.constructor.__super__[methodName].apply(this, args);
 }
 /**
  * @abstract
@@ -267,7 +267,7 @@ _.extend(View.prototype, PROTO_VIEW, {
   },
 
   /**
-   * like singleton...
+   * TODO 要素からのcomponent取得と、componentの生成はメソッドを分割したほうが良い
    *
    * @param {HTMLElement} el
    * @returns {*}
@@ -503,7 +503,7 @@ var Layout = defineClass({
       _.extend(this.regions, options.regions);
     }
 
-    if (_.isElement(this.el)) {
+    if (this.el) {
       this.setElement(this.el);
     } else {
       this.setElement(document.body);
@@ -557,9 +557,9 @@ var Layout = defineClass({
    */
   getRegionView: function(regionName) {
     if (!(regionName in this.regions)) {
-      throw new Error('Undefined region `' + regionName + '` is specified');
+      throw new Error('Specified region `' + regionName + '` is not declared');
     }
-    return this._assignedMap[regionName] || null;
+    return this._assignedMap[regionName];
   },
 
   /**
@@ -613,7 +613,8 @@ var Layout = defineClass({
    * @abstract
    */
   onDestroy: function() {}
-});
+
+}).with(Backbone.Events);
 var INCREMENT_COMPONENT_UID = 0;
 
 /**
@@ -662,8 +663,7 @@ var Component = defineClass({
    * @param {HTMLElement} el
    */
   constructor: function(el) {
-    this.$el = el instanceof Backbone.$ ? el : Backbone.$(el);
-    this.el  = this.$el[0];
+    this.setElement(el);
     this.uid = INCREMENT_COMPONENT_UID++;
 
     this.lookupUi();
@@ -671,6 +671,14 @@ var Component = defineClass({
     this.onCreate.apply(this, arguments);
 
     this.initialize.apply(this, arguments);
+  },
+
+  /**
+   * @param {HTMLElement} element
+   */
+  setElement: function(element) {
+    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
+    this.el = this.$el[0];
   },
 
   /**
@@ -728,7 +736,8 @@ var Component = defineClass({
    * @abstract
    */
   onDestroy: function() {}
-});
+
+}).with(Backbone.Events);
 
 /**
  * @class Phalanx

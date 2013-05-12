@@ -37,7 +37,7 @@
 
 <div class="jumbotron">
   <div class="container">
-    <h1>layout.js</h1>
+    <h1>define_class.js</h1>
   </div>
 </div>
 
@@ -45,11 +45,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"></i></a></h2>
-      <p class="stat">73.52</p>
+      <p class="stat">66.23</p>
     </div>
     <div class="span6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h2>
-      <p class="stat">160</p>
+      <p class="stat">156</p>
     </div>
   </div>
   <div class="row historical">
@@ -63,11 +63,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty"></i></a></h2>
-      <p class="stat">39.65</p>
+      <p class="stat">24.40</p>
     </div>
     <div class="span6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs"></i></a></h2>
-      <p class="stat">0.64</p>
+      <p class="stat">0.42</p>
     </div>
   </div>
 </div>
@@ -92,164 +92,160 @@
   <div class="row">
     <textarea id="file-source" class="span12">'use strict';
 
+var DEFINE_NOT_WRITABLE   = {writable: false};
+
 /**
- * @abstract
- * @class Phalanx.Layout
+ * `defineClass` is Helper function, to generate Object like Class with basic oop fetures
+ *
+ *     // e.g 1
+ *     var Klass = Phalanx.defineClass{
+ *       constructor: function() {
+ *         console.log('Hello World');
+ *       },
+ *       foo: 'bar',
+ *       baz: 'qux'
+ *     });
+ *
+ *     // e.g 2
+ *     function NewClass() {
+ *       console.log('This is constructor');
+ *     }
+ *     Phalanx.defineClass(NewClass, {
+ *       hoge: 'fuga',
+ *       hige: 'piyo'
+ *     };
+ *
+ * @param {Function|Object} constructor_or_members
+ * @param {Object} [members]
  */
-var Layout = defineClass({
-  /**
-   * @property {HTMLElement}
-   */
-  el: null,
+function defineClass(constructor_or_members, members) {
 
   /**
-   * @property {jQuery|Zepto}
-   */
-  $el: null,
-
-  /**
-   * @property {Object}
-   */
-  regions: {},
-
-  /**
-   * Correspondence table of the region name and assigned View.
+   * Base Class of OOP feature
    *
-   *     laput.assign(regionName, Phalanx.View);
-   *     // layout._assignedMap => { regionName: Phalanx.View }
-   *
-   * @private
-   * @property {Object}
+   * @abstract
+   * @class Klass
+   * @returns {*}
    */
-  _assignedMap: {},
+  var Constructor;
+
+  if (typeof constructor_or_members === 'function') {
+    Constructor = constructor_or_members;
+  } else {
+    members = constructor_or_members;
+    Constructor = members.hasOwnProperty('constructor') ? members.constructor
+                                                        : function() {};
+  }
+
+  delete members.constructor;
+  _.extend(Constructor.prototype, members);
 
   /**
-   * @constructor
-   * @param {Object} options
+   * By inheriting an existing class, you create a new class
+   *
+   *     var classDefinition = {
+   *       // ...
+   *     };
+   *     var ExtendedClass = SomeClass.extend(classDefinition)
+   *
+   * @method extend
+   * @see Backbone.View.extend
+   * @param {Function|Object} constructor_or_child
+   * @param {Object} [child]
+   * @return {Klass}
    */
-  constructor: function(options) {
-    options || (options = {});
+  Constructor.extend = Backbone.View.extend;
+  Object.defineProperty(Constructor, 'extend', DEFINE_NOT_WRITABLE);
 
-    if (options.el) {
-      this.el = options.el;
-    }
+  /**
+   * Mixin the trait in the `prototype` of the class.
+   * Is a feature that is for a simple mixin, not the exact trait.
+   * Not support multiple inheritance like "Squeak Smalltalk".
+   *
+   *     var classDefinition = {
+   *       // ...
+   *     };
+   *     var ExtendedWithTrait = SomeClass.extend(classDefinition)
+   *                                      .with(AsyncCallbackTrait)
+   *                                      .with(ObservableTrait, {
+   *                                        method: 'aliasedMethod'
+   *                                      });
+   *
+   * @method with
+   * @param {Object} trait
+   * @param {Object} [aliases]
+   * @return {Klass}
+   */
+  Constructor.with = __with;
+  Object.defineProperty(Constructor, 'with', DEFINE_NOT_WRITABLE);
 
-    if (options.regions) {
-      _.extend(this.regions, options.regions);
-    }
+  /**
+   * Method which can be used instead of the `new` statement
+   *
+   *     var instance = Klass.create();
+   *
+   * @method create
+   * @return {*}
+   */
+  Constructor.create = __create;
+  Object.defineProperty(Constructor, 'create', DEFINE_NOT_WRITABLE);
 
-    if (this.el) {
-      this.setElement(this.el);
+  /**
+   * Call a specific method of the parent class
+   *
+   *     var SuperClass = Klass.of({
+   *       onCreate: function() {
+   *         alert('Yup!');
+   *       }
+   *     });
+   *     var SubClass = SuperClass.extends({
+   *       onCreate: function() {
+   *         this.super('onCreate', arguments); // => alert('Yup!')
+   *       }
+   *     });
+   *
+   * @method super
+   * @param {String} methodName
+   * @param {Object|Arguments} args
+   * @type {Function}
+   */
+  Constructor.prototype.super = __super;
+
+  return Constructor;
+}
+
+function __with(trait, aliases) {
+  /*jshint validthis:true */
+  var i = 0, keys = Object.keys(trait), iz = keys.length,
+      prop, processed_trait = {};
+
+  aliases || (aliases = {});
+
+  for (; i<iz; i++) {
+    prop = keys[i];
+    if (aliases[prop]) {
+      processed_trait[aliases[prop]] = trait[prop];
     } else {
-      this.setElement(document.body);
+      processed_trait[prop] = trait[prop];
     }
+  }
 
-    this.onCreate.apply(this, arguments);
+  _.extend(this.prototype, processed_trait);
+  return this;
+}
 
-    this.initialize.apply(this, arguments);
-  },
+function __create() {
+  /*jshint validthis:true */
+  var instance = Object.create(this.prototype);
+  this.apply(instance, arguments);
+  return instance;
+}
 
-  /**
-   * @param {HTMLElement} element
-   */
-  setElement: function(element) {
-    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
-    this.el = this.$el[0];
-  },
-
-  /**
-   * Assign new View to element in layout.
-   * And destroy old View automatically.
-   *
-   * @param {String} regionName
-   * @param {View} newView
-   */
-  assign: function(regionName, newView) {
-    var selector, oldView;
-
-    selector = this.regions[regionName];
-    oldView  = this.getRegionView(regionName);
-
-    if (!selector) {
-      throw new Error('Could not get a selector from the region ' + regionName);
-    }
-
-    // change
-    this.onChange(regionName, newView, oldView);
-
-    // old
-    oldView && oldView.destroy();
-
-    // new
-    newView.setElement(this.$el.find(selector)[0]);
-
-    this._assignedMap[regionName] = newView;
-  },
-
-  /**
-   * @param {String} regionName
-   * @returns {View}
-   */
-  getRegionView: function(regionName) {
-    if (!(regionName in this.regions)) {
-      throw new Error('Specified region `' + regionName + '` is not declared');
-    }
-    return this._assignedMap[regionName];
-  },
-
-  /**
-   * @param {String} regionName
-   * @return {View}
-   */
-  withdraw: function(regionName) {
-    var view;
-
-    view = this.getRegionView(regionName);
-    view.destroy();
-    this._assignedMap[regionName] = null;
-
-    return view;
-  },
-
-  /**
-   * When the layout is destroyed, View which encloses also destroy all.
-   */
-  destroy: function() {
-    this.onDestroy();
-
-    var i = 0, regions = Object.keys(this.regions),
-        iz = this.regions.length, regionName;
-
-    for (; i<iz; i++) {
-      regionName = regions[i];
-      this.withdraw(regionName);
-    }
-  },
-
-  /**
-   * @abstract
-   * @param {String} regionName
-   * @param {View} newView
-   * @param {View} oldView
-   */
-  onChange: function(regionName, newView, oldView) {},
-
-  /**
-   * @abstract
-   */
-  initialize: function() {},
-
-  /**
-   * @abstract
-   */
-  onCreate: function() {},
-
-  /**
-   * @abstract
-   */
-  onDestroy: function() {}
-
-}).with(Backbone.Events);</textarea>
+function __super(methodName, args) {
+  /*jshint validthis:true */
+  // TODO: this.super() で連鎖的に先祖のメソッドを呼び出したい
+  return this.constructor.__super__[methodName].apply(this, args);
+}</textarea>
   </div>
 </div>
 

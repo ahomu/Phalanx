@@ -1,6 +1,6 @@
 {
   "name": "Phalanx",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Focusing to decouple view and manage ui component simply.",
   "main": "Guntfile.js",
   "scripts": {

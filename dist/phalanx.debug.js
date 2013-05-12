@@ -1,4 +1,4 @@
-/*! Phalanx - v0.0.0 ( 2013-05-12 ) - MIT */
+/*! Phalanx - v0.0.1 ( 2013-05-12 ) - MIT */
 (function(window) {
 
 "use strict";
