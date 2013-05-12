@@ -42,37 +42,37 @@ describe '`defineClass` of basic OOP feture provider', ->
     expect(superman.say()).to.be('Super! '+superman.beam)
     expect(ultraman.say()).to.be('Ultra! '+ultraman.beam)
 
-  it 'created class can mixin trait', ->
-    BatWing =
-      fly: ->
-        'I can fly!'
-      speed: 3000
+  context 'created class', ->
 
-    Batman = Human.extend(
-      say: ->
-        'Batman!'
-      speed: 30
-    ).with(BatWing, {fly: 'batmanFly'})
+    it 'can mixin trait', ->
+      BatWing =
+        fly: ->
+          'I can fly!'
+        speed: 3000
 
-    bruce = new Batman(39, 'male')
+      Batman = Human.extend(
+        say: ->
+          'Batman!'
+        speed: 30
+      ).with(BatWing, {fly: 'batmanFly'})
 
-    expect(bruce.say()).to.be('Batman!')
-    expect(bruce.batmanFly()).to.be('I can fly!')
-    expect(bruce.speed).to.be(3000)
-    expect(Batman.speed).to.be.a('undefined')
+      bruce = new Batman(39, 'male')
 
-  it 'created sub class can call super class method', ->
-    HelloMan = Human.extend
-      say: ->
-        @super('say', arguments) + ' World'
-      god: (ohmy)->
-        ohmy + ' God'
+      expect(bruce.say()).to.be('Batman!')
+      expect(bruce.batmanFly()).to.be('I can fly!')
+      expect(bruce.speed).to.be(3000)
+      expect(Batman.speed).to.be.a('undefined')
 
-    JesusMan = HelloMan.extend
-#      say: ->
-#        @super 'say', arguments
-      god: ->
-        @super 'god', arguments
+    it 'can call super class method', ->
+      HelloMan = Human.extend
+        say: ->
+          @super('say', arguments) + ' World'
+        god: (ohmy)->
+          ohmy + ' God'
 
-    believer = new JesusMan(54, 'male')
-    expect(believer.god('Oh my')).to.be('Oh my God')
+      JesusMan = HelloMan.extend
+        god: ->
+          @super 'god', arguments
+
+      believer = new JesusMan(54, 'male')
+      expect(believer.god('Oh my')).to.be('Oh my God')

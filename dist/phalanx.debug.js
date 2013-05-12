@@ -503,7 +503,7 @@ var Layout = defineClass({
       _.extend(this.regions, options.regions);
     }
 
-    if (_.isElement(this.el)) {
+    if (this.el) {
       this.setElement(this.el);
     } else {
       this.setElement(document.body);
@@ -557,9 +557,9 @@ var Layout = defineClass({
    */
   getRegionView: function(regionName) {
     if (!(regionName in this.regions)) {
-      throw new Error('Undefined region `' + regionName + '` is specified');
+      throw new Error('Specified region `' + regionName + '` is not declared');
     }
-    return this._assignedMap[regionName] || null;
+    return this._assignedMap[regionName];
   },
 
   /**

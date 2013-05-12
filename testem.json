@@ -8,7 +8,7 @@
   ],
   "dev_dependencies": [
     "lib/expect/expect.js",
-    "lib/sinon/lib/sinon.js",
+    "lib/sinon/pkg/sinon.js",
     "lib/fixtures/index.js"
   ],
   "dependencies": [

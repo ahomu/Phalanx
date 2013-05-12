@@ -26,6 +26,12 @@ via. [Ancient Macedonian battle tactics - Wikipedia, the free encyclopedia](http
 - [airportyh/testem](https://github.com/airportyh/testem "airportyh/testem · GitHub")
 - [jashkenas/coffee-script](https://github.com/jashkenas/coffee-script "jashkenas/coffee-script · GitHub")
 
+note: Require build before using sinon.js.
+
+  % bower install
+  % gem install juicer
+  % ./lib/sinon/build
+
 ##TODO
 
 - Example codes
