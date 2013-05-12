@@ -3,8 +3,10 @@
   "on_exit": "rm spec/*.js",
   "test_page": "spec/runner.html",
   "src_files": ["dist/phalanx.debug.js", "spec/*.coffee"],
+  "framework": [
+    "spec/lib/mocha/mocha.js"
+  ],
   "dev_dependencies": [
-    "spec/lib/mocha/mocha.js",
     "spec/lib/expect/expect.js",
     "spec/lib/sinon/lib/sinon.js",
     "spec/lib/fixtures/index.js"

@@ -3,15 +3,19 @@
 <head>
   <title>Test'em</title>
   <link rel="stylesheet" href="/spec/lib/mocha/mocha.css">
-  {{#dev_dependencies}}<script src="/{{.}}"></script>{{/dev_dependencies}}
+  {{#framework}}<script src="/{{.}}"></script>{{/framework}}
   <script src="/testem.js"></script>
-  <script>mocha.setup('bdd')</script>
+  <script>
+    mocha.setup('bdd')
+  </script>
+  {{#dev_dependencies}}<script src="/{{.}}"></script>{{/dev_dependencies}}
   {{#dependencies}}<script src="/{{.}}"></script>{{/dependencies}}
   {{#serve_files}}<script src="/{{src}}"></script>{{/serve_files}}
 </head>
 <body>
   <div id="mocha"></div>
     <script>
+    fixtures.path = '/spec/fixtures'
     mocha.run()
   </script>
   </body>
