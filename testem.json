@@ -4,17 +4,17 @@
   "test_page": "spec/runner.html",
   "src_files": ["dist/phalanx.debug.js", "spec/*.coffee"],
   "framework": [
-    "spec/lib/mocha/mocha.js"
+    "lib/mocha/mocha.js"
   ],
   "dev_dependencies": [
-    "spec/lib/expect/expect.js",
-    "spec/lib/sinon/lib/sinon.js",
-    "spec/lib/fixtures/index.js"
+    "lib/expect/expect.js",
+    "lib/sinon/lib/sinon.js",
+    "lib/fixtures/index.js"
   ],
   "dependencies": [
-    "spec/lib/jquery/jquery.js",
-    "spec/lib/lodash/lodash.js",
-    "spec/lib/backbone/backbone.js"
+    "lib/jquery/jquery.js",
+    "lib/lodash/lodash.js",
+    "lib/backbone/backbone.js"
   ],
   "serve_files": [
     "dist/phalanx.debug.js",
