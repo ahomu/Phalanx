@@ -1,5 +1,5 @@
 {
-  "before_tests": "coffee -c spec/*.coffee",
+  "before_tests": "./node_modules/coffee-script/bin/coffee -c spec/*.coffee",
   "on_exit": "rm spec/*.js",
   "test_page": "spec/runner.html",
   "src_files": ["dist/phalanx.debug.js", "spec/*.coffee"],

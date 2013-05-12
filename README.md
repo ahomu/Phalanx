@@ -1,6 +1,7 @@
-#Phalanx
+Phalanx [![Build Status](https://travis-ci.org/ahomu/Phalanx.png?branch=master)](https://travis-ci.org/ahomu/Phalanx)
+====
 
-Phalanx is a [Backbone](https://github.com/documentcloud/backbone) wrapper library. Focusing to decoupling view and managing ui component simply.
+Phalanx is a [Backbone](https://github.com/documentcloud/backbone) wrapper library. Focusing to decouple view and manage ui component simply.
 
 ![Phalanx](http://upload.wikimedia.org/wikipedia/commons/3/32/Phalanx.png)
 
@@ -28,9 +29,11 @@ via. [Ancient Macedonian battle tactics - Wikipedia, the free encyclopedia](http
 
 note: Require build before using sinon.js.
 
-  % bower install
-  % gem install juicer
-  % ./lib/sinon/build
+```
+% bower install
+% gem install juicer
+% ./lib/sinon/build
+```
 
 ##TODO
 
