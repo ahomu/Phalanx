@@ -6,6 +6,7 @@ module.exports = function(grunt) {
       BANNER_TEMPLATE_STRING  = '/*! <%= pkg.name %> - v<%= pkg.version %> ( <%= grunt.template.today("yyyy-mm-dd") %> ) - <%= pkg.license %> */',
       BUILD_ORDERED_LIST      = [
         'src/define_class.js',
+        'src/router.js',
         'src/view.js',
         'src/model.js',
         'src/collection.js',

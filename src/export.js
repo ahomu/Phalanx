@@ -7,6 +7,7 @@ var Phalanx = {
 
   defineClass: defineClass,
 
+  Router     : Router,
   Model      : Model,
   Collection : Collection,
 

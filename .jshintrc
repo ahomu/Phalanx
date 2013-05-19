@@ -7,6 +7,7 @@
     "$": true,
     "jQuery": true,
     "Zepto": true,
+    "Router": true,
     "Model": true,
     "Collection": true,
     "View": true,
