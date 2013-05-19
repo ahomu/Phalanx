@@ -27,6 +27,12 @@ describe 'Phalanx.Component is units of actionable ui', ->
     expect(component.uid).not.to.be null
     expect(component.uid).to.be 0
 
+  it 'has element', ->
+    component = new Button $('#component1', fixture)
+    expect(component.el).not.to.be undefined
+    expect(component.el).to.be $('#component1', fixture)[0]
+    expect(component.$el[0]).to.be $('#component1', fixture)[0]
+
   context 'component in the view', ->
 
     it 'receive delegated event', ->
@@ -47,6 +53,17 @@ describe 'Phalanx.Component is units of actionable ui', ->
       $nums.eq(2).click()
       $nums.eq(2).parent().click()
       expect($btns.eq(2).parent().attr('data-component-uid')).to.be undefined
+
+    it 'call `onSetElement` when fired component events', ->
+      view = new View el: $('#view', fixture)
+      $btns = $('[data-ui="btn"]', fixture)
+
+      Button.prototype.onSetElement = sinon.spy()
+
+      $btns.eq(1).click()
+      component = view.getComponent($btns.eq(1)[0])
+
+      expect(component.onSetElement.calledOnce).to.be true
 
   context 'mixed-in LifecycleCallbacks', ->
 
@@ -73,14 +90,6 @@ describe 'Phalanx.Component is units of actionable ui', ->
 
       view.destroy()
       expect(spy.calledOnce).to.be true
-
-  context 'mixed-in ElSettable', ->
-
-    it 'has element', ->
-      component = new Button $('#component1', fixture)
-      expect(component.el).not.to.be undefined
-      expect(component.el).to.be $('#component1', fixture)[0]
-      expect(component.$el[0]).to.be $('#component1', fixture)[0]
 
   context 'mixed-in UiLookupable', ->
 

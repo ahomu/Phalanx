@@ -52,6 +52,33 @@ describe 'Phalanx.Layout is layout map of document', ->
     layout.assign 'content', newContent
     expect(layout.onChange.calledOnce).to.be true
 
+  it 'has empty div element ( created without `el` )', ->
+    layout = new Layout
+    expect(layout.el).not.to.be undefined
+    expect(layout.el.tagName.toUpperCase()).to.be 'DIV'
+    expect(layout.el.parentNode).to.be null
+    expect(layout.$el.is('div')).to.be true
+
+  it 'has element ( created with `el` )', ->
+    layout = new Layout el: $('#layout', fixture)
+
+    expect(layout.el).not.to.be undefined
+    expect(layout.el).to.be $('#layout', fixture)[0]
+    expect(layout.$el[0]).to.be $('#layout', fixture)[0]
+
+  it 'call `onSetElement` when create layout with `el`', ->
+    Layout.prototype.onSetElement = sinon.spy()
+    layout = new Layout el: $('#layout', fixture)
+    expect(layout.onSetElement.calledOnce).to.be true
+
+  it 'call `onSetElement` when assign layout in the parent layout', ->
+    parent = new Layout el: $('#layout', fixture)
+    layout = new (Phalanx.Layout.extend({}))
+    layout.onSetElement = sinon.spy()
+
+    parent.assign 'content', layout
+    expect(layout.onSetElement.calledOnce).to.be true
+
   context 'mixed-in Observable', ->
 
     it 'has `Backbone.Events` interface', ->
@@ -78,32 +105,3 @@ describe 'Phalanx.Layout is layout map of document', ->
       layout.onDestroy = sinon.spy()
       layout.destroy()
       expect(layout.onDestroy.calledOnce).to.be true
-
-  context 'mixed-in ElSettable', ->
-
-    it 'has empty div element ( created without `el` )', ->
-      layout = new Layout
-      expect(layout.el).not.to.be undefined
-      expect(layout.el.tagName.toUpperCase()).to.be 'DIV'
-      expect(layout.el.parentNode).to.be null
-      expect(layout.$el.is('div')).to.be true
-
-    it 'has element ( created with `el` )', ->
-      layout = new Layout el: $('#layout', fixture)
-
-      expect(layout.el).not.to.be undefined
-      expect(layout.el).to.be $('#layout', fixture)[0]
-      expect(layout.$el[0]).to.be $('#layout', fixture)[0]
-
-    it 'call `onSetElement` when create layout with `el`', ->
-      Layout.prototype.onSetElement = sinon.spy()
-      layout = new Layout el: $('#layout', fixture)
-      expect(layout.onSetElement.calledOnce).to.be true
-
-    it 'call `onSetElement` when assign layout in the parent layout', ->
-      parent = new Layout el: $('#layout', fixture)
-      layout = new (Phalanx.Layout.extend({}))
-      layout.onSetElement = sinon.spy()
-
-      parent.assign 'content', layout
-      expect(layout.onSetElement.calledOnce).to.be true

@@ -3,20 +3,41 @@
 /**
  * @abstract
  * @class  Phalanx.Layout
+ * @extends Backbone.View
  * @mixins Phalanx.Trait.Observable
- * @mixins Phalanx.Trait.ElSettable
  * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var Layout = defineClass({
   /**
-   * @property {Object}
+   * @constructor
+   * @param {Object} options
    */
-  regions: {},
+  constructor: function(options) {
+    // init own object
+    this._assignedMap = {};
+    this.onCreate.apply(this, arguments);
+
+    Backbone.View.apply(this, arguments);
+  }
+});
+
+Layout.with(Trait.LifecycleCallbacks);
+
+_.extend(Layout.prototype, Backbone.View.prototype, {
+  /**
+   *     events: {
+   *       'click .js_event_selector': 'someMethodName'
+   *     }
+   *     // $('.js_event_selector').click() => someMethod()
+   *
+   * @property {Object.<String, String|Function>}
+   */
+  events: {},
 
   /**
-   * @property {Object}
+   * @property {Object.<String, String>}
    */
-  options: {},
+  regions: {},
 
   /**
    * Correspondence table of the region name and assigned View.
@@ -30,31 +51,15 @@ var Layout = defineClass({
   _assignedMap: {},
 
   /**
-   * @constructor
-   * @param {Object} options
+   * @see Backbone.View.setElement
+   * @param {HTMLElement} element
+   * @param {Boolean} delegate
    */
-  constructor: function(options) {
-    options || (options = {});
-
-    if (options.el) {
-      this.el = options.el;
+  setElement: function(element, delegate) {
+    Backbone.View.prototype.setElement.apply(this, arguments);
+    if (this.el && this.el.parentNode) {
+      this.onSetElement(this.el);
     }
-
-    if (options.regions) {
-      _.extend(this.regions, options.regions);
-    }
-
-    // init own object
-    this._assignedMap = {};
-    this.onCreate.apply(this, arguments);
-
-    if (this.el) {
-      this.setElement(this.el);
-    } else {
-      this.setElement('<div />');
-    }
-
-    this.initialize.apply(this, arguments);
   },
 
   /**
@@ -81,7 +86,7 @@ var Layout = defineClass({
     // old
     oldView && oldView.destroy();
 
-    // new
+    // new: View has `lookupUi` method but Layout hasn't that method.
     newView.lookupUi && newView.lookupUi(assignToEl);
     newView.setElement(assignToEl);
 
@@ -114,16 +119,26 @@ var Layout = defineClass({
   },
 
   /**
-   * When the layout is destroyed, View which encloses also destroy all.
+   * Destroy all regions assigned views.
    */
-  destroy: function() {
+  destroyRegions: function() {
     var i = 0, regions = Object.keys(this.regions),
-        iz = this.regions.length, regionName;
+      iz = this.regions.length, regionName;
 
     for (; i<iz; i++) {
       regionName = regions[i];
       this.withdraw(regionName);
     }
+  },
+
+  /**
+   * When the layout is destroyed, View which encloses also destroy all.
+   */
+  destroy: function() {
+
+    this.destroyRegions();
+
+    this.undelegateEvents();
 
     this.onDestroy();
 
@@ -132,14 +147,15 @@ var Layout = defineClass({
 
   /**
    * @abstract
+   * @param {HTMLElement} element
+   */
+  onSetElement: function(element) {},
+
+  /**
+   * @abstract
    * @param {String} regionName
    * @param {View} newView
    * @param {View} oldView
    */
   onChange: function(regionName, newView, oldView) {}
-
 });
-
-Layout.with(Trait.Observable)
-      .with(Trait.ElSettable)
-      .with(Trait.LifecycleCallbacks);

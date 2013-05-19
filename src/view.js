@@ -5,7 +5,6 @@
  * @class Phalanx.View
  * @extends Backbone.View
  * @mixins Phalanx.Trait.Observable
- * @mixins Phalanx.Trait.ElSettable
  * @mixins Phalanx.Trait.UiLookupable
  * @mixins Phalanx.Trait.LifecycleCallbacks
  */
@@ -15,8 +14,6 @@ var View = defineClass({
    * @param {Object} options
    */
   constructor: function(options) {
-    options || (options = {});
-
     // init own object
     this._createdComponents = {};
     this.onCreate.apply(this, arguments);
@@ -25,16 +22,13 @@ var View = defineClass({
   }
 });
 
-View.with(Trait.ElSettable)
-    .with(Trait.UiLookupable)
+View.with(Trait.UiLookupable)
     .with(Trait.LifecycleCallbacks);
 
-var PROTO_VIEW = Backbone.View.prototype,
-
-    ATTR_COMPONENT     = 'data-component',
+var ATTR_COMPONENT     = 'data-component',
     ATTR_COMPONENT_UID = 'data-component-uid';
 
-_.extend(View.prototype, PROTO_VIEW, {
+_.extend(View.prototype, Backbone.View.prototype, {
 
   /**
    *     events: {
@@ -68,7 +62,7 @@ _.extend(View.prototype, PROTO_VIEW, {
    * @param {Boolean} delegate
    */
   setElement: function(element, delegate) {
-    PROTO_VIEW.setElement.apply(this, arguments);
+    Backbone.View.prototype.setElement.apply(this, arguments);
     if (this.el && this.el.parentNode) {
       this.lookupUi(this.el);
       this.onSetElement(this.el);
@@ -93,9 +87,9 @@ _.extend(View.prototype, PROTO_VIEW, {
         eventClosures  = _.map(protoComponent.events, this._getComponentEventClosure);
         _.extend(componentEvents, _.object(eventKeys, eventClosures));
       }
-      PROTO_VIEW.delegateEvents.apply(this, [_.extend(componentEvents, this.events)]);
+      Backbone.View.prototype.delegateEvents.apply(this, [_.extend(componentEvents, this.events)]);
     } else {
-      PROTO_VIEW.delegateEvents.apply(this, arguments);
+      Backbone.View.prototype.delegateEvents.apply(this, arguments);
     }
 
   },
@@ -163,9 +157,9 @@ _.extend(View.prototype, PROTO_VIEW, {
    */
   destroy: function() {
 
-    this.undelegateEvents();
-
     this.destroyComponents();
+
+    this.undelegateEvents();
 
     this.releaseUi();
 
@@ -173,6 +167,12 @@ _.extend(View.prototype, PROTO_VIEW, {
 
     this.el = this.$el = null;
   },
+
+  /**
+   * @abstract
+   * @param {HTMLElement} element
+   */
+  onSetElement: function(element) {},
 
   /**
    * @abstract
