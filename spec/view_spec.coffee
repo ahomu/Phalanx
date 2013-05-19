@@ -88,7 +88,7 @@ describe 'Phalanx.View is units of controller element', ->
       expect(view.$ui.ad[0]).to.be $('[data-ui="ad"]', view.$el)[0]
 
       view.releaseUi()
-      expect(view.ui.nav).to.be undefined
-      expect(view.ui.ad).to.be undefined
-      expect(view.$ui.nav).to.be undefined
-      expect(view.$ui.ad).to.be undefined
+      expect(view.ui.nav).to.be null
+      expect(view.ui.ad).to.be null
+      expect(view.$ui.nav).to.be null
+      expect(view.$ui.ad).to.be null

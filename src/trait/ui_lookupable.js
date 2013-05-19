@@ -22,11 +22,6 @@ Trait.UiLookupable = {
   $ui: {},
 
   /**
-   * @property {Boolean}
-   */
-  _uiLookpped: false,
-
-  /**
    * From the selector defined by this.ui, caching to explore the elements.
    *
    * @params {HTMLElement|jQuery}
@@ -45,27 +40,19 @@ Trait.UiLookupable = {
       this.$ui[name] = $baseEl.find(selector);
       this.ui[name]  = this.$ui[name][0];
     }
-
-    this._uiLookupped = true;
   },
 
   /**
    * Release ui elements reference.
    */
   releaseUi: function() {
-    if (!this._uiLookupped) {
-      return;
-    }
-
     var name,
         i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
     for (; i<iz; i++) {
       name = keys[i];
       this.$ui[name] = null;
-      delete this.$ui[name];
       this.ui[name] = null;
-      delete this.ui[name];
     }
   }
 };

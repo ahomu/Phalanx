@@ -106,10 +106,10 @@ describe 'Phalanx.Component is units of actionable ui', ->
       expect(component.$ui.num[0]).to.be $('[data-ui="num"]', component.$el)[0]
 
       component.releaseUi()
-      expect(component.ui.btn).to.be undefined
-      expect(component.ui.num).to.be undefined
-      expect(component.$ui.btn).to.be undefined
-      expect(component.$ui.num).to.be undefined
+      expect(component.ui.btn).to.be null
+      expect(component.ui.num).to.be null
+      expect(component.$ui.btn).to.be null
+      expect(component.$ui.num).to.be null
 
   context 'mixed-in Observable', ->
 
