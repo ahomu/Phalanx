@@ -6,7 +6,7 @@ var INCREMENT_COMPONENT_UID = 0;
  * @abstract
  * @class Phalanx.Component
  * @mixins Phalanx.Trait.MappingUI
- * @mixins Bakcbone.Events
+ * @mixins Phalanx.Trait.Observable
  */
 var Component = defineClass({
   /**
@@ -84,4 +84,4 @@ var Component = defineClass({
    */
   onDestroy: function() {}
 
-}).with(Backbone.Events).with(Trait.MappingUI);
+}).with(Trait.Observable).with(Trait.MappingUI);

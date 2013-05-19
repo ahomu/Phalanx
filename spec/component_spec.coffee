@@ -33,14 +33,6 @@ describe 'Phalanx.Component is units of actionable ui', ->
     expect(component.uid).not.to.be null
     expect(component.uid).to.be 1
 
-  it 'has `Backbone.Events` interface', ->
-    component = new Button $('#component', fixture)
-    spy = sinon.spy()
-
-    component.on 'test', spy
-    component.trigger 'test'
-    expect(spy.calledOnce).to.be true
-
   context 'component in the view', ->
 
     it 'receive delegated event', ->
@@ -88,7 +80,7 @@ describe 'Phalanx.Component is units of actionable ui', ->
 
   context 'component mixed-in MappingUI', ->
 
-    it 'ui lookup and store to `ui` property', ->
+    it 'has `Trait.MappingUI` interface', ->
       component = new Button $('#component', fixture)
       expect(component.$ui.btn[0]).to.be $('[data-ui="btn"]', component.$el)[0]
       expect(component.ui.num).to.be $('[data-ui="num"]', component.$el)[0]
@@ -104,3 +96,12 @@ describe 'Phalanx.Component is units of actionable ui', ->
       expect(component.ui.num).to.be undefined
       expect(component.$ui.btn).to.be undefined
       expect(component.$ui.num).to.be undefined
+
+
+  it 'has `Trait.Observable` interface', ->
+    component = new Button $('#component', fixture)
+    spy = sinon.spy()
+
+    component.on 'test', spy
+    component.trigger 'test'
+    expect(spy.calledOnce).to.be true

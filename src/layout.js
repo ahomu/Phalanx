@@ -3,7 +3,7 @@
 /**
  * @abstract
  * @class Phalanx.Layout
- * @mixins Bakcbone.Events
+ * @mixins Phalanx.Trait.Observable
  */
 var Layout = defineClass({
   /**
@@ -163,4 +163,4 @@ var Layout = defineClass({
    */
   onDestroy: function() {}
 
-}).with(Backbone.Events);
+}).with(Trait.Observable);
