@@ -49,7 +49,7 @@ var Layout = defineClass({
     if (this.el) {
       this.setElement(this.el);
     } else {
-      this.setElement(document.body);
+      this.setElement('<div />');
     }
 
     this.onCreate.apply(this, arguments);

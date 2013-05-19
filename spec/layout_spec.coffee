@@ -18,11 +18,12 @@ describe 'Phalanx.Layout is layout map of document', ->
   afterEach ->
     fixtures.cleanUp()
 
-  it 'has document ( created without `el` )', ->
+  it 'has empty div element ( created without `el` )', ->
     layout = new Layout
     expect(layout.el).not.to.be undefined
-    expect(layout.el).to.be document.body
-    expect(layout.$el[0]).to.be document.body
+    expect(layout.el.tagName.toUpperCase()).to.be 'DIV'
+    expect(layout.el.parentNode).to.be null
+    expect(layout.$el.is('div')).to.be true
 
   it 'has element ( created with `el` )', ->
     layout = new Layout el: $('#layout', fixture)
