@@ -2,21 +2,12 @@
 
 /**
  * @abstract
- * @class Phalanx.Layout
+ * @class  Phalanx.Layout
  * @mixins Phalanx.Trait.Observable
+ * @mixins Phalanx.Trait.ElSettable
  * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var Layout = defineClass({
-  /**
-   * @property {HTMLElement}
-   */
-  el: null,
-
-  /**
-   * @property {jQuery|Zepto}
-   */
-  $el: null,
-
   /**
    * @property {Object}
    */
@@ -67,17 +58,6 @@ var Layout = defineClass({
   },
 
   /**
-   * @param {HTMLElement|String} element
-   */
-  setElement: function(element) {
-    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
-    this.el = this.$el[0];
-    if (this.el && this.el.parentNode) {
-      this.onSetElement(this.el);
-    }
-  },
-
-  /**
    * Assign new View to element in layout.
    * And destroy old View automatically.
    *
@@ -102,6 +82,7 @@ var Layout = defineClass({
     oldView && oldView.destroy();
 
     // new
+    newView.lookupUi && newView.lookupUi(assignToEl);
     newView.setElement(assignToEl);
 
     this._assignedMap[regionName] = newView;
@@ -136,8 +117,6 @@ var Layout = defineClass({
    * When the layout is destroyed, View which encloses also destroy all.
    */
   destroy: function() {
-    this.onDestroy();
-
     var i = 0, regions = Object.keys(this.regions),
         iz = this.regions.length, regionName;
 
@@ -145,12 +124,11 @@ var Layout = defineClass({
       regionName = regions[i];
       this.withdraw(regionName);
     }
-  },
 
-  /**
-   * @abstract
-   */
-  onSetElement: function(element) {},
+    this.onDestroy();
+
+    this.el = this.$el = null;
+  },
 
   /**
    * @abstract
@@ -163,4 +141,5 @@ var Layout = defineClass({
 });
 
 Layout.with(Trait.Observable)
+      .with(Trait.ElSettable)
       .with(Trait.LifecycleCallbacks);

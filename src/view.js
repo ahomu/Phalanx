@@ -4,7 +4,8 @@
  * @abstract
  * @class Phalanx.View
  * @extends Backbone.View
- * @mixins Phalanx.Trait.MappingUI
+ * @mixins Phalanx.Trait.ElSettable
+ * @mixins Phalanx.Trait.UiLookupable
  * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var View = defineClass({
@@ -23,7 +24,8 @@ var View = defineClass({
   }
 });
 
-View.with(Trait.MappingUI)
+View.with(Trait.ElSettable)
+    .with(Trait.UiLookupable)
     .with(Trait.LifecycleCallbacks);
 
 var PROTO_VIEW = Backbone.View.prototype,
@@ -67,7 +69,7 @@ _.extend(View.prototype, PROTO_VIEW, {
   setElement: function(element, delegate) {
     PROTO_VIEW.setElement.apply(this, arguments);
     if (this.el && this.el.parentNode) {
-      this.lookupUi();
+      this.lookupUi(this.el);
       this.onSetElement(this.el);
     }
   },
@@ -167,6 +169,8 @@ _.extend(View.prototype, PROTO_VIEW, {
     this.releaseUi();
 
     this.onDestroy();
+
+    this.el = this.$el = null;
   },
 
   /**
@@ -175,11 +179,5 @@ _.extend(View.prototype, PROTO_VIEW, {
    * @param {String} html
    * @return {*}
    */
-  render: function(html) { this.$el.html(html); return this; },
-
-  /**
-   * @abstract
-   * @param {HTMLElement} el
-   */
-  onSetElement: function(el) {}
+  render: function(html) { this.$el.html(html); return this; }
 });

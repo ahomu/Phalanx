@@ -22,16 +22,10 @@ describe 'Phalanx.Component is units of actionable ui', ->
   afterEach ->
     fixtures.cleanUp()
 
-  it 'has element', ->
-    component = new Button $('#component1', fixture)
-    expect(component.el).not.to.be undefined
-    expect(component.el).to.be $('#component1', fixture)[0]
-    expect(component.$el[0]).to.be $('#component1', fixture)[0]
-
   it 'has unique id', ->
     component = new Button $('#component2', fixture)
     expect(component.uid).not.to.be null
-    expect(component.uid).to.be 1
+    expect(component.uid).to.be 0
 
   context 'component in the view', ->
 
@@ -80,15 +74,24 @@ describe 'Phalanx.Component is units of actionable ui', ->
       view.destroy()
       expect(spy.calledOnce).to.be true
 
-  context 'mixed-in MappingUI', ->
+  context 'mixed-in ElSettable', ->
 
-    it 'has `Trait.MappingUI` interface', ->
-      component = new Button $('#component', fixture)
+    it 'has element', ->
+      component = new Button $('#component1', fixture)
+      expect(component.el).not.to.be undefined
+      expect(component.el).to.be $('#component1', fixture)[0]
+      expect(component.$el[0]).to.be $('#component1', fixture)[0]
+
+  context 'mixed-in UiLookupable', ->
+
+    it 'has `ui` & `$ui` property references', ->
+      component = new Button $('#component1', fixture)
+
       expect(component.$ui.btn[0]).to.be $('[data-ui="btn"]', component.$el)[0]
       expect(component.ui.num).to.be $('[data-ui="num"]', component.$el)[0]
 
     it 'release `ui` property references', ->
-      component = new Button $('#component', fixture)
+      component = new Button $('#component1', fixture)
 
       expect(component.ui.btn).to.be $('[data-ui="btn"]', component.$el)[0]
       expect(component.$ui.num[0]).to.be $('[data-ui="num"]', component.$el)[0]
@@ -102,7 +105,7 @@ describe 'Phalanx.Component is units of actionable ui', ->
   context 'mixed-in Observable', ->
 
     it 'has `Trait.Observable` interface', ->
-      component = new Button $('#component', fixture)
+      component = new Button $('#component1', fixture)
       spy = sinon.spy()
 
       component.on 'test', spy

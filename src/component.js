@@ -4,22 +4,13 @@ var INCREMENT_COMPONENT_UID = 0;
 
 /**
  * @abstract
- * @class Phalanx.Component
+ * @class  Phalanx.Component
  * @mixins Phalanx.Trait.Observable
- * @mixins Phalanx.Trait.MappingUI
+ * @mixins Phalanx.Trait.ElSettable
+ * @mixins Phalanx.Trait.UiLookupable
  * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var Component = defineClass({
-  /**
-   * @property {HTMLElement}
-   */
-  el: null,
-
-  /**
-   * @property {jQuery|Zepto}
-   */
-  $el: null,
-
   /**
    *     events: {
    *       'click .js_event_selector': 'someMethod'
@@ -41,37 +32,30 @@ var Component = defineClass({
    * @param {HTMLElement} el
    */
   constructor: function(el) {
-    this.setElement(el);
     this.uid = INCREMENT_COMPONENT_UID++;
-
-    this.lookupUi();
 
     this.onCreate.apply(this, arguments);
 
-    this.initialize.apply(this, arguments);
-  },
+    this.lookupUi(el);
+    this.setElement(el);
 
-  /**
-   * @param {HTMLElement} element
-   */
-  setElement: function(element) {
-    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
-    this.el = this.$el[0];
+    this.initialize.apply(this, arguments);
   },
 
   /**
    * Destory this component
    */
   destroy: function() {
-    this.el = this.$el = null;
-
     this.releaseUi();
 
     this.onDestroy();
+
+    this.el = this.$el = null;
   }
 
 });
 
 Component.with(Trait.Observable)
-         .with(Trait.MappingUI)
+         .with(Trait.ElSettable)
+         .with(Trait.UiLookupable)
          .with(Trait.LifecycleCallbacks);
