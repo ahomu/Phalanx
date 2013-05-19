@@ -45,7 +45,7 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"></i></a></h2>
-      <p class="stat">66.05</p>
+      <p class="stat">67.35</p>
     </div>
     <div class="span6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h2>
@@ -63,7 +63,7 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty"></i></a></h2>
-      <p class="stat">43.63</p>
+      <p class="stat">43.17</p>
     </div>
     <div class="span6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs"></i></a></h2>
@@ -97,7 +97,6 @@
  * @class Phalanx.View
  * @extends Backbone.View
  * @mixins Phalanx.Trait.Observable
- * @mixins Phalanx.Trait.ElSettable
  * @mixins Phalanx.Trait.UiLookupable
  * @mixins Phalanx.Trait.LifecycleCallbacks
  */
@@ -107,8 +106,6 @@ var View = defineClass({
    * @param {Object} options
    */
   constructor: function(options) {
-    options || (options = {});
-
     // init own object
     this._createdComponents = {};
     this.onCreate.apply(this, arguments);
@@ -117,16 +114,13 @@ var View = defineClass({
   }
 });
 
-View.with(Trait.ElSettable)
-    .with(Trait.UiLookupable)
+View.with(Trait.UiLookupable)
     .with(Trait.LifecycleCallbacks);
 
-var PROTO_VIEW = Backbone.View.prototype,
-
-    ATTR_COMPONENT     = 'data-component',
+var ATTR_COMPONENT     = 'data-component',
     ATTR_COMPONENT_UID = 'data-component-uid';
 
-_.extend(View.prototype, PROTO_VIEW, {
+_.extend(View.prototype, Backbone.View.prototype, {
 
   /**
    *     events: {
@@ -160,7 +154,7 @@ _.extend(View.prototype, PROTO_VIEW, {
    * @param {Boolean} delegate
    */
   setElement: function(element, delegate) {
-    PROTO_VIEW.setElement.apply(this, arguments);
+    Backbone.View.prototype.setElement.apply(this, arguments);
     if (this.el && this.el.parentNode) {
       this.lookupUi(this.el);
       this.onSetElement(this.el);
@@ -185,9 +179,9 @@ _.extend(View.prototype, PROTO_VIEW, {
         eventClosures  = _.map(protoComponent.events, this._getComponentEventClosure);
         _.extend(componentEvents, _.object(eventKeys, eventClosures));
       }
-      PROTO_VIEW.delegateEvents.apply(this, [_.extend(componentEvents, this.events)]);
+      Backbone.View.prototype.delegateEvents.apply(this, [_.extend(componentEvents, this.events)]);
     } else {
-      PROTO_VIEW.delegateEvents.apply(this, arguments);
+      Backbone.View.prototype.delegateEvents.apply(this, arguments);
     }
 
   },
@@ -255,9 +249,9 @@ _.extend(View.prototype, PROTO_VIEW, {
    */
   destroy: function() {
 
-    this.undelegateEvents();
-
     this.destroyComponents();
+
+    this.undelegateEvents();
 
     this.releaseUi();
 
@@ -265,6 +259,12 @@ _.extend(View.prototype, PROTO_VIEW, {
 
     this.el = this.$el = null;
   },
+
+  /**
+   * @abstract
+   * @param {HTMLElement} element
+   */
+  onSetElement: function(element) {},
 
   /**
    * @abstract

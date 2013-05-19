@@ -1,4 +1,4 @@
-/*! Phalanx - v0.0.2 ( 2013-05-19 ) - MIT */
+/*! Phalanx - v0.0.3 ( 2013-05-19 ) - MIT */
 (function(window) {
 
 "use strict";
@@ -175,38 +175,6 @@ Trait.AsyncCallbacks = {
   onFailure: function() {}
 };
 /**
- * @class Phalanx.Trait.ElSettable
- */
-Trait.ElSettable = {
-  /**
-   * @property {HTMLElement}
-   */
-  el: null,
-
-  /**
-   * @property {jQuery|Zepto}
-   */
-  $el: null,
-
-  /**
-   * @param {HTMLElement|String} element
-   */
-  setElement: function(element) {
-    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
-    this.el = this.$el[0];
-    if (this.el && this.el.parentNode) {
-      this.onSetElement(this.el);
-    }
-  },
-
-  /**
-   * @abstract
-   * @param {HTMLElement} element
-   */
-  onSetElement: function(element) {}
-};
-
-/**
  * @class Phalanx.Trait.LifecycleCallbacks
  */
 Trait.LifecycleCallbacks = {
@@ -256,11 +224,6 @@ Trait.UiLookupable = {
   $ui: {},
 
   /**
-   * @property {Boolean}
-   */
-  _uiLookpped: false,
-
-  /**
    * From the selector defined by this.ui, caching to explore the elements.
    *
    * @params {HTMLElement|jQuery}
@@ -279,27 +242,19 @@ Trait.UiLookupable = {
       this.$ui[name] = $baseEl.find(selector);
       this.ui[name]  = this.$ui[name][0];
     }
-
-    this._uiLookupped = true;
   },
 
   /**
    * Release ui elements reference.
    */
   releaseUi: function() {
-    if (!this._uiLookupped) {
-      return;
-    }
-
     var name,
         i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
     for (; i<iz; i++) {
       name = keys[i];
       this.$ui[name] = null;
-      delete this.$ui[name];
       this.ui[name] = null;
-      delete this.ui[name];
     }
   }
 };
@@ -339,7 +294,6 @@ _.extend(Router.prototype, Backbone.Router.prototype, {
  * @class Phalanx.View
  * @extends Backbone.View
  * @mixins Phalanx.Trait.Observable
- * @mixins Phalanx.Trait.ElSettable
  * @mixins Phalanx.Trait.UiLookupable
  * @mixins Phalanx.Trait.LifecycleCallbacks
  */
@@ -349,8 +303,6 @@ var View = defineClass({
    * @param {Object} options
    */
   constructor: function(options) {
-    options || (options = {});
-
     // init own object
     this._createdComponents = {};
     this.onCreate.apply(this, arguments);
@@ -359,16 +311,13 @@ var View = defineClass({
   }
 });
 
-View.with(Trait.ElSettable)
-    .with(Trait.UiLookupable)
+View.with(Trait.UiLookupable)
     .with(Trait.LifecycleCallbacks);
 
-var PROTO_VIEW = Backbone.View.prototype,
-
-    ATTR_COMPONENT     = 'data-component',
+var ATTR_COMPONENT     = 'data-component',
     ATTR_COMPONENT_UID = 'data-component-uid';
 
-_.extend(View.prototype, PROTO_VIEW, {
+_.extend(View.prototype, Backbone.View.prototype, {
 
   /**
    *     events: {
@@ -402,7 +351,7 @@ _.extend(View.prototype, PROTO_VIEW, {
    * @param {Boolean} delegate
    */
   setElement: function(element, delegate) {
-    PROTO_VIEW.setElement.apply(this, arguments);
+    Backbone.View.prototype.setElement.apply(this, arguments);
     if (this.el && this.el.parentNode) {
       this.lookupUi(this.el);
       this.onSetElement(this.el);
@@ -427,9 +376,9 @@ _.extend(View.prototype, PROTO_VIEW, {
         eventClosures  = _.map(protoComponent.events, this._getComponentEventClosure);
         _.extend(componentEvents, _.object(eventKeys, eventClosures));
       }
-      PROTO_VIEW.delegateEvents.apply(this, [_.extend(componentEvents, this.events)]);
+      Backbone.View.prototype.delegateEvents.apply(this, [_.extend(componentEvents, this.events)]);
     } else {
-      PROTO_VIEW.delegateEvents.apply(this, arguments);
+      Backbone.View.prototype.delegateEvents.apply(this, arguments);
     }
 
   },
@@ -497,9 +446,9 @@ _.extend(View.prototype, PROTO_VIEW, {
    */
   destroy: function() {
 
-    this.undelegateEvents();
-
     this.destroyComponents();
+
+    this.undelegateEvents();
 
     this.releaseUi();
 
@@ -507,6 +456,12 @@ _.extend(View.prototype, PROTO_VIEW, {
 
     this.el = this.$el = null;
   },
+
+  /**
+   * @abstract
+   * @param {HTMLElement} element
+   */
+  onSetElement: function(element) {},
 
   /**
    * @abstract
@@ -587,20 +542,41 @@ _.extend(Collection.prototype, Backbone.Collection.prototype, {
 /**
  * @abstract
  * @class  Phalanx.Layout
+ * @extends Backbone.View
  * @mixins Phalanx.Trait.Observable
- * @mixins Phalanx.Trait.ElSettable
  * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var Layout = defineClass({
   /**
-   * @property {Object}
+   * @constructor
+   * @param {Object} options
    */
-  regions: {},
+  constructor: function(options) {
+    // init own object
+    this._assignedMap = {};
+    this.onCreate.apply(this, arguments);
+
+    Backbone.View.apply(this, arguments);
+  }
+});
+
+Layout.with(Trait.LifecycleCallbacks);
+
+_.extend(Layout.prototype, Backbone.View.prototype, {
+  /**
+   *     events: {
+   *       'click .js_event_selector': 'someMethodName'
+   *     }
+   *     // $('.js_event_selector').click() => someMethod()
+   *
+   * @property {Object.<String, String|Function>}
+   */
+  events: {},
 
   /**
-   * @property {Object}
+   * @property {Object.<String, String>}
    */
-  options: {},
+  regions: {},
 
   /**
    * Correspondence table of the region name and assigned View.
@@ -614,31 +590,15 @@ var Layout = defineClass({
   _assignedMap: {},
 
   /**
-   * @constructor
-   * @param {Object} options
+   * @see Backbone.View.setElement
+   * @param {HTMLElement} element
+   * @param {Boolean} delegate
    */
-  constructor: function(options) {
-    options || (options = {});
-
-    if (options.el) {
-      this.el = options.el;
+  setElement: function(element, delegate) {
+    Backbone.View.prototype.setElement.apply(this, arguments);
+    if (this.el && this.el.parentNode) {
+      this.onSetElement(this.el);
     }
-
-    if (options.regions) {
-      _.extend(this.regions, options.regions);
-    }
-
-    // init own object
-    this._assignedMap = {};
-    this.onCreate.apply(this, arguments);
-
-    if (this.el) {
-      this.setElement(this.el);
-    } else {
-      this.setElement('<div />');
-    }
-
-    this.initialize.apply(this, arguments);
   },
 
   /**
@@ -665,7 +625,7 @@ var Layout = defineClass({
     // old
     oldView && oldView.destroy();
 
-    // new
+    // new: View has `lookupUi` method but Layout hasn't that method.
     newView.lookupUi && newView.lookupUi(assignToEl);
     newView.setElement(assignToEl);
 
@@ -698,16 +658,26 @@ var Layout = defineClass({
   },
 
   /**
-   * When the layout is destroyed, View which encloses also destroy all.
+   * Destroy all regions assigned views.
    */
-  destroy: function() {
+  destroyRegions: function() {
     var i = 0, regions = Object.keys(this.regions),
-        iz = this.regions.length, regionName;
+      iz = this.regions.length, regionName;
 
     for (; i<iz; i++) {
       regionName = regions[i];
       this.withdraw(regionName);
     }
+  },
+
+  /**
+   * When the layout is destroyed, View which encloses also destroy all.
+   */
+  destroy: function() {
+
+    this.destroyRegions();
+
+    this.undelegateEvents();
 
     this.onDestroy();
 
@@ -716,24 +686,24 @@ var Layout = defineClass({
 
   /**
    * @abstract
+   * @param {HTMLElement} element
+   */
+  onSetElement: function(element) {},
+
+  /**
+   * @abstract
    * @param {String} regionName
    * @param {View} newView
    * @param {View} oldView
    */
   onChange: function(regionName, newView, oldView) {}
-
 });
-
-Layout.with(Trait.Observable)
-      .with(Trait.ElSettable)
-      .with(Trait.LifecycleCallbacks);
 var INCREMENT_COMPONENT_UID = 0;
 
 /**
  * @abstract
  * @class  Phalanx.Component
  * @mixins Phalanx.Trait.Observable
- * @mixins Phalanx.Trait.ElSettable
  * @mixins Phalanx.Trait.UiLookupable
  * @mixins Phalanx.Trait.LifecycleCallbacks
  */
@@ -763,10 +733,18 @@ var Component = defineClass({
 
     this.onCreate.apply(this, arguments);
 
-    this.lookupUi(el);
     this.setElement(el);
 
     this.initialize.apply(this, arguments);
+  },
+
+  setElement: function(element) {
+    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
+    this.el = this.$el[0];
+    if (this.el && this.el.parentNode) {
+      this.lookupUi(this.el);
+      this.onSetElement(this.el);
+    }
   },
 
   /**
@@ -778,12 +756,16 @@ var Component = defineClass({
     this.onDestroy();
 
     this.el = this.$el = null;
-  }
+  },
 
+  /**
+   * @abstract
+   * @param {HTMLElement} element
+   */
+  onSetElement: function(element) {}
 });
 
 Component.with(Trait.Observable)
-         .with(Trait.ElSettable)
          .with(Trait.UiLookupable)
          .with(Trait.LifecycleCallbacks);
 

@@ -15,7 +15,7 @@
   </script>
 </head>
 <body onload="prettyPrint(); highlight();">
-  <pre class="prettyprint lang-js">/*! Phalanx - v0.0.2 ( 2013-05-19 ) - MIT */
+  <pre class="prettyprint lang-js">/*! Phalanx - v0.0.3 ( 2013-05-19 ) - MIT */
 (function(window) {
 
 &quot;use strict&quot;;
@@ -191,38 +191,6 @@ Trait.AsyncCallbacks = {
    */
   onFailure: function() {}
 };
-<span id='Phalanx-Trait-ElSettable'>/**
-</span> * @class Phalanx.Trait.ElSettable
- */
-Trait.ElSettable = {
-<span id='Phalanx-Trait-ElSettable-property-el'>  /**
-</span>   * @property {HTMLElement}
-   */
-  el: null,
-
-<span id='Phalanx-Trait-ElSettable-property-S-el'>  /**
-</span>   * @property {jQuery|Zepto}
-   */
-  $el: null,
-
-<span id='Phalanx-Trait-ElSettable-method-setElement'>  /**
-</span>   * @param {HTMLElement|String} element
-   */
-  setElement: function(element) {
-    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
-    this.el = this.$el[0];
-    if (this.el &amp;&amp; this.el.parentNode) {
-      this.onSetElement(this.el);
-    }
-  },
-
-<span id='Phalanx-Trait-ElSettable-method-onSetElement'>  /**
-</span>   * @abstract
-   * @param {HTMLElement} element
-   */
-  onSetElement: function(element) {}
-};
-
 <span id='Phalanx-Trait-LifecycleCallbacks'>/**
 </span> * @class Phalanx.Trait.LifecycleCallbacks
  */
@@ -272,11 +240,6 @@ Trait.UiLookupable = {
    */
   $ui: {},
 
-<span id='Phalanx-Trait-UiLookupable-property-_uiLookpped'>  /**
-</span>   * @property {Boolean}
-   */
-  _uiLookpped: false,
-
 <span id='Phalanx-Trait-UiLookupable-method-lookupUi'>  /**
 </span>   * From the selector defined by this.ui, caching to explore the elements.
    *
@@ -296,27 +259,19 @@ Trait.UiLookupable = {
       this.$ui[name] = $baseEl.find(selector);
       this.ui[name]  = this.$ui[name][0];
     }
-
-    this._uiLookupped = true;
   },
 
 <span id='Phalanx-Trait-UiLookupable-method-releaseUi'>  /**
 </span>   * Release ui elements reference.
    */
   releaseUi: function() {
-    if (!this._uiLookupped) {
-      return;
-    }
-
     var name,
         i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
     for (; i&lt;iz; i++) {
       name = keys[i];
       this.$ui[name] = null;
-      delete this.$ui[name];
       this.ui[name] = null;
-      delete this.ui[name];
     }
   }
 };
@@ -356,7 +311,6 @@ _.extend(Router.prototype, Backbone.Router.prototype, {
  * @class Phalanx.View
  * @extends Backbone.View
  * @mixins Phalanx.Trait.Observable
- * @mixins Phalanx.Trait.ElSettable
  * @mixins Phalanx.Trait.UiLookupable
  * @mixins Phalanx.Trait.LifecycleCallbacks
  */
@@ -366,8 +320,6 @@ var View = defineClass({
    * @param {Object} options
    */
   constructor: function(options) {
-    options || (options = {});
-
     // init own object
     this._createdComponents = {};
     this.onCreate.apply(this, arguments);
@@ -376,16 +328,13 @@ var View = defineClass({
   }
 });
 
-View.with(Trait.ElSettable)
-    .with(Trait.UiLookupable)
+View.with(Trait.UiLookupable)
     .with(Trait.LifecycleCallbacks);
 
-var PROTO_VIEW = Backbone.View.prototype,
-
-    ATTR_COMPONENT     = 'data-component',
+var ATTR_COMPONENT     = 'data-component',
     ATTR_COMPONENT_UID = 'data-component-uid';
 
-_.extend(View.prototype, PROTO_VIEW, {
+_.extend(View.prototype, Backbone.View.prototype, {
 
 <span id='Phalanx-View-property-events'>  /**
 </span>   *     events: {
@@ -419,7 +368,7 @@ _.extend(View.prototype, PROTO_VIEW, {
    * @param {Boolean} delegate
    */
   setElement: function(element, delegate) {
-    PROTO_VIEW.setElement.apply(this, arguments);
+    Backbone.View.prototype.setElement.apply(this, arguments);
     if (this.el &amp;&amp; this.el.parentNode) {
       this.lookupUi(this.el);
       this.onSetElement(this.el);
@@ -444,9 +393,9 @@ _.extend(View.prototype, PROTO_VIEW, {
         eventClosures  = _.map(protoComponent.events, this._getComponentEventClosure);
         _.extend(componentEvents, _.object(eventKeys, eventClosures));
       }
-      PROTO_VIEW.delegateEvents.apply(this, [_.extend(componentEvents, this.events)]);
+      Backbone.View.prototype.delegateEvents.apply(this, [_.extend(componentEvents, this.events)]);
     } else {
-      PROTO_VIEW.delegateEvents.apply(this, arguments);
+      Backbone.View.prototype.delegateEvents.apply(this, arguments);
     }
 
   },
@@ -514,9 +463,9 @@ _.extend(View.prototype, PROTO_VIEW, {
    */
   destroy: function() {
 
-    this.undelegateEvents();
-
     this.destroyComponents();
+
+    this.undelegateEvents();
 
     this.releaseUi();
 
@@ -524,6 +473,12 @@ _.extend(View.prototype, PROTO_VIEW, {
 
     this.el = this.$el = null;
   },
+
+<span id='Phalanx-View-method-onSetElement'>  /**
+</span>   * @abstract
+   * @param {HTMLElement} element
+   */
+  onSetElement: function(element) {},
 
 <span id='Phalanx-View-method-render'>  /**
 </span>   * @abstract
@@ -604,20 +559,41 @@ _.extend(Collection.prototype, Backbone.Collection.prototype, {
 <span id='Phalanx-Layout'>/**
 </span> * @abstract
  * @class  Phalanx.Layout
+ * @extends Backbone.View
  * @mixins Phalanx.Trait.Observable
- * @mixins Phalanx.Trait.ElSettable
  * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var Layout = defineClass({
+<span id='Phalanx-Layout-method-constructor'>  /**
+</span>   * @constructor
+   * @param {Object} options
+   */
+  constructor: function(options) {
+    // init own object
+    this._assignedMap = {};
+    this.onCreate.apply(this, arguments);
+
+    Backbone.View.apply(this, arguments);
+  }
+});
+
+Layout.with(Trait.LifecycleCallbacks);
+
+_.extend(Layout.prototype, Backbone.View.prototype, {
+<span id='Phalanx-Layout-property-events'>  /**
+</span>   *     events: {
+   *       'click .js_event_selector': 'someMethodName'
+   *     }
+   *     // $('.js_event_selector').click() =&gt; someMethod()
+   *
+   * @property {Object.&lt;String, String|Function&gt;}
+   */
+  events: {},
+
 <span id='Phalanx-Layout-property-regions'>  /**
-</span>   * @property {Object}
+</span>   * @property {Object.&lt;String, String&gt;}
    */
   regions: {},
-
-<span id='Phalanx-Layout-property-options'>  /**
-</span>   * @property {Object}
-   */
-  options: {},
 
 <span id='Phalanx-Layout-property-_assignedMap'>  /**
 </span>   * Correspondence table of the region name and assigned View.
@@ -630,32 +606,16 @@ var Layout = defineClass({
    */
   _assignedMap: {},
 
-<span id='Phalanx-Layout-method-constructor'>  /**
-</span>   * @constructor
-   * @param {Object} options
+<span id='Phalanx-Layout-method-setElement'>  /**
+</span>   * @see Backbone.View.setElement
+   * @param {HTMLElement} element
+   * @param {Boolean} delegate
    */
-  constructor: function(options) {
-    options || (options = {});
-
-    if (options.el) {
-      this.el = options.el;
+  setElement: function(element, delegate) {
+    Backbone.View.prototype.setElement.apply(this, arguments);
+    if (this.el &amp;&amp; this.el.parentNode) {
+      this.onSetElement(this.el);
     }
-
-    if (options.regions) {
-      _.extend(this.regions, options.regions);
-    }
-
-    // init own object
-    this._assignedMap = {};
-    this.onCreate.apply(this, arguments);
-
-    if (this.el) {
-      this.setElement(this.el);
-    } else {
-      this.setElement('&lt;div /&gt;');
-    }
-
-    this.initialize.apply(this, arguments);
   },
 
 <span id='Phalanx-Layout-method-assign'>  /**
@@ -682,7 +642,7 @@ var Layout = defineClass({
     // old
     oldView &amp;&amp; oldView.destroy();
 
-    // new
+    // new: View has `lookupUi` method but Layout hasn't that method.
     newView.lookupUi &amp;&amp; newView.lookupUi(assignToEl);
     newView.setElement(assignToEl);
 
@@ -714,22 +674,38 @@ var Layout = defineClass({
     return view;
   },
 
-<span id='Phalanx-Layout-method-destroy'>  /**
-</span>   * When the layout is destroyed, View which encloses also destroy all.
+<span id='Phalanx-Layout-method-destroyRegions'>  /**
+</span>   * Destroy all regions assigned views.
    */
-  destroy: function() {
+  destroyRegions: function() {
     var i = 0, regions = Object.keys(this.regions),
-        iz = this.regions.length, regionName;
+      iz = this.regions.length, regionName;
 
     for (; i&lt;iz; i++) {
       regionName = regions[i];
       this.withdraw(regionName);
     }
+  },
+
+<span id='Phalanx-Layout-method-destroy'>  /**
+</span>   * When the layout is destroyed, View which encloses also destroy all.
+   */
+  destroy: function() {
+
+    this.destroyRegions();
+
+    this.undelegateEvents();
 
     this.onDestroy();
 
     this.el = this.$el = null;
   },
+
+<span id='Phalanx-Layout-method-onSetElement'>  /**
+</span>   * @abstract
+   * @param {HTMLElement} element
+   */
+  onSetElement: function(element) {},
 
 <span id='Phalanx-Layout-method-onChange'>  /**
 </span>   * @abstract
@@ -738,19 +714,13 @@ var Layout = defineClass({
    * @param {View} oldView
    */
   onChange: function(regionName, newView, oldView) {}
-
 });
-
-Layout.with(Trait.Observable)
-      .with(Trait.ElSettable)
-      .with(Trait.LifecycleCallbacks);
 var INCREMENT_COMPONENT_UID = 0;
 
 <span id='Phalanx-Component'>/**
 </span> * @abstract
  * @class  Phalanx.Component
  * @mixins Phalanx.Trait.Observable
- * @mixins Phalanx.Trait.ElSettable
  * @mixins Phalanx.Trait.UiLookupable
  * @mixins Phalanx.Trait.LifecycleCallbacks
  */
@@ -780,10 +750,18 @@ var Component = defineClass({
 
     this.onCreate.apply(this, arguments);
 
-    this.lookupUi(el);
     this.setElement(el);
 
     this.initialize.apply(this, arguments);
+  },
+
+  setElement: function(element) {
+    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
+    this.el = this.$el[0];
+    if (this.el &amp;&amp; this.el.parentNode) {
+      this.lookupUi(this.el);
+      this.onSetElement(this.el);
+    }
   },
 
 <span id='Phalanx-Component-method-destroy'>  /**
@@ -795,12 +773,16 @@ var Component = defineClass({
     this.onDestroy();
 
     this.el = this.$el = null;
-  }
+  },
 
+<span id='Phalanx-Component-method-onSetElement'>  /**
+</span>   * @abstract
+   * @param {HTMLElement} element
+   */
+  onSetElement: function(element) {}
 });
 
 Component.with(Trait.Observable)
-         .with(Trait.ElSettable)
          .with(Trait.UiLookupable)
          .with(Trait.LifecycleCallbacks);
 
