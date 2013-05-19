@@ -45,11 +45,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"></i></a></h2>
-      <p class="stat">74.79</p>
+      <p class="stat">75.38</p>
     </div>
     <div class="span6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h2>
-      <p class="stat">125</p>
+      <p class="stat">61</p>
     </div>
   </div>
   <div class="row historical">
@@ -63,11 +63,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty"></i></a></h2>
-      <p class="stat">23.72</p>
+      <p class="stat">8.00</p>
     </div>
     <div class="span6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs"></i></a></h2>
-      <p class="stat">0.46</p>
+      <p class="stat">0.18</p>
     </div>
   </div>
 </div>
@@ -96,38 +96,22 @@ var INCREMENT_COMPONENT_UID = 0;
 
 /**
  * @abstract
- * @class Phalanx.Component
+ * @class  Phalanx.Component
+ * @mixins Phalanx.Trait.Observable
+ * @mixins Phalanx.Trait.ElSettable
+ * @mixins Phalanx.Trait.UiLookupable
+ * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var Component = defineClass({
-  /**
-   * @property {HTMLElement}
-   */
-  el: null,
-
-  /**
-   * @property {jQuery|Zepto}
-   */
-  $el: null,
-
   /**
    *     events: {
    *       'click .js_event_selector': 'someMethod'
    *     }
    *     // $('.js_event_selector').click() => someMethod()
    *
-   * @property {Object}
+   * @property {Object.<String, String|Function>}
    */
   events: {},
-
-  /**
-   *     ui: {
-   *       partOf: '.js_ui_selector'
-   *     }
-   *     // view.ui.partOf => element.js_ui_selector
-   *
-   * @property {Object}
-   */
-  ui: {},
 
   /**
    * instance's unique id nubmer
@@ -140,81 +124,33 @@ var Component = defineClass({
    * @param {HTMLElement} el
    */
   constructor: function(el) {
-    this.setElement(el);
     this.uid = INCREMENT_COMPONENT_UID++;
-
-    this.lookupUi();
 
     this.onCreate.apply(this, arguments);
 
-    this.initialize.apply(this, arguments);
-  },
+    this.lookupUi(el);
+    this.setElement(el);
 
-  /**
-   * @param {HTMLElement} element
-   */
-  setElement: function(element) {
-    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
-    this.el = this.$el[0];
+    this.initialize.apply(this, arguments);
   },
 
   /**
    * Destory this component
    */
   destroy: function() {
-    this.el = this.$el = null;
-
     this.releaseUi();
 
     this.onDestroy();
-  },
 
-  /**
-   * From the selector defined by this.ui, caching to explore the elements.
-   */
-  lookupUi: function() {
-    var name, selector, thisUi = {},
-        i = 0, keys = Object.keys(this.ui), iz = keys.length;
+    this.el = this.$el = null;
+  }
 
-    for (; i<iz; i++) {
-      name = keys[i];
-      selector = this.ui[name];
-      thisUi[name] = this.$el.find(selector);
-    }
+});
 
-    this.ui = thisUi;
-  },
-
-  /**
-   * Release ui elements reference.
-   */
-  releaseUi: function() {
-    var name,
-        i = 0, keys = Object.keys(this.ui), iz = keys.length;
-
-    for (; i<iz; i++) {
-      name = keys[i];
-      this.ui[name] = null;
-      delete this.ui[name];
-    }
-  },
-
-  /**
-   * @abstract
-   */
-  initialize: function() {},
-
-  /**
-   * @abstract
-   */
-  onCreate: function() {},
-
-  /**
-   * @abstract
-   */
-  onDestroy: function() {}
-
-}).with(Backbone.Events);</textarea>
+Component.with(Trait.Observable)
+         .with(Trait.ElSettable)
+         .with(Trait.UiLookupable)
+         .with(Trait.LifecycleCallbacks);</textarea>
   </div>
 </div>
 

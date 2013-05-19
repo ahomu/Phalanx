@@ -4,6 +4,7 @@
  * @abstract
  * @class Phalanx.View
  * @extends Backbone.View
+ * @mixins Phalanx.Trait.Observable
  * @mixins Phalanx.Trait.ElSettable
  * @mixins Phalanx.Trait.UiLookupable
  * @mixins Phalanx.Trait.LifecycleCallbacks

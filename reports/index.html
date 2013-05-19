@@ -13,7 +13,7 @@
   <![endif]-->
 
   <script>
-    var __options = {"flags":{"complexity":{"newmi":true},"jshint":{"options":{"maxlen":100,"quotmark":"single","maxparams":3,"maxdepth":3,"bitwise":true,"curly":true,"eqeqeq":true,"forin":true,"newcap":true,"noarg":true,"noempty":true,"nonew":true,"undef":true,"strict":true,"trailing":true,"browser":true,"devel":true,"jquery":true,"globalstrict":true,"es5":true,"eqnull":true,"expr":true},"globals":{"defineClass":true,"console":true,"Backbone":true,"_":true,"$":true,"jQuery":true,"Zepto":true,"Model":true,"Collection":true,"View":true,"Layout":true,"Component":true,"define":true,"exports":true,"module":true}}}}
+    var __options = {"flags":{"complexity":{"newmi":true},"jshint":{"options":{"maxlen":100,"quotmark":"single","maxparams":3,"maxdepth":3,"bitwise":true,"curly":true,"eqeqeq":true,"forin":true,"newcap":true,"noarg":true,"noempty":true,"nonew":true,"undef":true,"strict":true,"trailing":true,"browser":true,"devel":true,"jquery":true,"globalstrict":true,"es5":true,"eqnull":true,"expr":true},"globals":{"defineClass":true,"console":true,"Backbone":true,"_":true,"$":true,"jQuery":true,"Zepto":true,"Router":true,"Model":true,"Collection":true,"View":true,"Layout":true,"Component":true,"Trait":true,"define":true,"exports":true,"module":true}}}}
   </script>
 
   <link href="assets/css/vendor/bootstrap-3.0.0-wip.css" rel="stylesheet">
@@ -50,11 +50,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Total/Average Lines <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code" data-original-title="SLOC"></i></h2>
-      <p class="stat">779 / 111</p>
+      <p class="stat">839 / 64</p>
     </div>
     <div class="span6">
       <h2 class="header">Average Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"></i></a></h2>
-      <p class="stat">81.60</p>
+      <p class="stat">80.30</p>
     </div>
   </div>
 </div>
@@ -103,8 +103,8 @@
         <span class="span4 file"><a class="file-link" href="./files/collection_js/index.html">collection.js</a></span>
         <span class="span8 file-chart js-file-chart"
               data-lint="0"
-              data-sloc="37"
-              data-bugs="0.10"
+              data-sloc="35"
+              data-bugs="0.11"
               data-complexity="1"
           ></span>
       </li>
@@ -114,9 +114,9 @@
         <span class="span4 file"><a class="file-link" href="./files/component_js/index.html">component.js</a></span>
         <span class="span8 file-chart js-file-chart"
               data-lint="0"
-              data-sloc="125"
-              data-bugs="0.46"
-              data-complexity="4"
+              data-sloc="61"
+              data-bugs="0.18"
+              data-complexity="1"
           ></span>
       </li>
       
@@ -125,8 +125,8 @@
         <span class="span4 file"><a class="file-link" href="./files/define_class_js/index.html">define_class.js</a></span>
         <span class="span8 file-chart js-file-chart"
               data-lint="0"
-              data-sloc="156"
-              data-bugs="0.42"
+              data-sloc="158"
+              data-bugs="0.43"
               data-complexity="5"
           ></span>
       </li>
@@ -136,8 +136,8 @@
         <span class="span4 file"><a class="file-link" href="./files/export_js/index.html">export.js</a></span>
         <span class="span8 file-chart js-file-chart"
               data-lint="0"
-              data-sloc="34"
-              data-bugs="0.13"
+              data-sloc="36"
+              data-bugs="0.14"
               data-complexity="3"
           ></span>
       </li>
@@ -147,9 +147,9 @@
         <span class="span4 file"><a class="file-link" href="./files/layout_js/index.html">layout.js</a></span>
         <span class="span8 file-chart js-file-chart"
               data-lint="0"
-              data-sloc="160"
+              data-sloc="145"
               data-bugs="0.64"
-              data-complexity="8"
+              data-complexity="7"
           ></span>
       </li>
       
@@ -158,9 +158,75 @@
         <span class="span4 file"><a class="file-link" href="./files/model_js/index.html">model.js</a></span>
         <span class="span8 file-chart js-file-chart"
               data-lint="0"
-              data-sloc="37"
+              data-sloc="35"
+              data-bugs="0.12"
+              data-complexity="1"
+          ></span>
+      </li>
+      
+      <li class="span12">
+        <span class="fade-left fadeout visible-desktop"></span>
+        <span class="span4 file"><a class="file-link" href="./files/router_js/index.html">router.js</a></span>
+        <span class="span8 file-chart js-file-chart"
+              data-lint="0"
+              data-sloc="32"
               data-bugs="0.10"
               data-complexity="1"
+          ></span>
+      </li>
+      
+      <li class="span12">
+        <span class="fade-left fadeout visible-desktop"></span>
+        <span class="span4 file"><a class="file-link" href="./files/trait_async_callbacks_js/index.html">trait/async_callbacks.js</a></span>
+        <span class="span8 file-chart js-file-chart"
+              data-lint="0"
+              data-sloc="17"
+              data-bugs="0.02"
+              data-complexity="1"
+          ></span>
+      </li>
+      
+      <li class="span12">
+        <span class="fade-left fadeout visible-desktop"></span>
+        <span class="span4 file"><a class="file-link" href="./files/trait_el_settable_js/index.html">trait/el_settable.js</a></span>
+        <span class="span8 file-chart js-file-chart"
+              data-lint="0"
+              data-sloc="33"
+              data-bugs="0.10"
+              data-complexity="3"
+          ></span>
+      </li>
+      
+      <li class="span12">
+        <span class="fade-left fadeout visible-desktop"></span>
+        <span class="span4 file"><a class="file-link" href="./files/trait_lifecycle_callbacks_js/index.html">trait/lifecycle_callbacks.js</a></span>
+        <span class="span8 file-chart js-file-chart"
+              data-lint="0"
+              data-sloc="25"
+              data-bugs="0.02"
+              data-complexity="1"
+          ></span>
+      </li>
+      
+      <li class="span12">
+        <span class="fade-left fadeout visible-desktop"></span>
+        <span class="span4 file"><a class="file-link" href="./files/trait_observable_js/index.html">trait/observable.js</a></span>
+        <span class="span8 file-chart js-file-chart"
+              data-lint="0"
+              data-sloc="7"
+              data-bugs="0.01"
+              data-complexity="1"
+          ></span>
+      </li>
+      
+      <li class="span12">
+        <span class="fade-left fadeout visible-desktop"></span>
+        <span class="span4 file"><a class="file-link" href="./files/trait_ui_lookupable_js/index.html">trait/ui_lookupable.js</a></span>
+        <span class="span8 file-chart js-file-chart"
+              data-lint="0"
+              data-sloc="71"
+              data-bugs="0.35"
+              data-complexity="5"
           ></span>
       </li>
       
@@ -169,9 +235,9 @@
         <span class="span4 file"><a class="file-link" href="./files/view_js/index.html">view.js</a></span>
         <span class="span8 file-chart js-file-chart"
               data-lint="0"
-              data-sloc="230"
-              data-bugs="1.18"
-              data-complexity="9"
+              data-sloc="184"
+              data-bugs="1.00"
+              data-complexity="8"
           ></span>
       </li>
       

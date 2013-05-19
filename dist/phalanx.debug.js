@@ -1,4 +1,4 @@
-/*! Phalanx - v0.0.1 ( 2013-05-19 ) - MIT */
+/*! Phalanx - v0.0.2 ( 2013-05-19 ) - MIT */
 (function(window) {
 
 "use strict";
@@ -160,55 +160,154 @@ function __super(methodName, args) {
   return this.constructor.__super__[methodName].apply(this, args);
 }
 /**
- * @class Phalanx.Trait.MappingUI
+ * @class Phalanx.Trait.AsyncCallbacks
  */
-Trait.MappingUI = {
+Trait.AsyncCallbacks = {
 
   /**
+   * @abstract
+   */
+  onSuccess: function() {},
+
+  /**
+   * @abstract
+   */
+  onFailure: function() {}
+};
+/**
+ * @class Phalanx.Trait.ElSettable
+ */
+Trait.ElSettable = {
+  /**
+   * @property {HTMLElement}
+   */
+  el: null,
+
+  /**
+   * @property {jQuery|Zepto}
+   */
+  $el: null,
+
+  /**
+   * @param {HTMLElement|String} element
+   */
+  setElement: function(element) {
+    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
+    this.el = this.$el[0];
+    if (this.el && this.el.parentNode) {
+      this.onSetElement(this.el);
+    }
+  },
+
+  /**
+   * @abstract
+   * @param {HTMLElement} element
+   */
+  onSetElement: function(element) {}
+};
+
+/**
+ * @class Phalanx.Trait.LifecycleCallbacks
+ */
+Trait.LifecycleCallbacks = {
+
+  /**
+   * It is called the first instance is created.
+   * @abstract
+   */
+  onCreate: function() {},
+
+  /**
+   * It is called as a common initialization process. (derived from Backbone)
+   * @abstract
+   */
+  initialize: function() {},
+
+  /**
+   * It is called when destroying the instance.
+   * @abstract
+   */
+  onDestroy: function() {}
+};
+/**
+ * @class Phalanx.Trait.Observable
+ * @extends Backbone.Events
+ */
+Trait.Observable = Backbone.Events;
+var UI_FIND_PLACEHOLDER = '[data-ui="{name}"]';
+
+/**
+ * @class Phalanx.Trait.UiLookupable
+ */
+Trait.UiLookupable = {
+  /**
    *     ui: {
-   *       partOf: '.js_ui_selector'
+   *       hoge: null
    *     }
-   *     // view.ui.partOf => element.js_ui_selector
+   *     // view.ui.hoge => [data-ui="hoge"]
    *
-   * @property {Object}
+   * @property {Object.<String, Null>}
    */
   ui: {},
 
   /**
-   * From the selector defined by this.ui, caching to explore the elements.
+   * @property {Object.<String, jQuery>}
    */
-  lookupUi: function() {
-    var name, selector, thisUi = {},
+  $ui: {},
+
+  /**
+   * @property {Boolean}
+   */
+  _uiLookpped: false,
+
+  /**
+   * From the selector defined by this.ui, caching to explore the elements.
+   *
+   * @params {HTMLElement|jQuery}
+   */
+  lookupUi: function(element) {
+    var name, selector,
+        $baseEl = element instanceof Backbone.$ ? element : Backbone.$(element),
         i = 0, keys = Object.keys(this.ui), iz = keys.length;
+
+    this.ui  = {};
+    this.$ui = {};
 
     for (; i<iz; i++) {
       name = keys[i];
-      selector = this.ui[name];
-      thisUi[name] = this.$el.find(selector);
+      selector = UI_FIND_PLACEHOLDER.replace('{name}', name);
+      this.$ui[name] = $baseEl.find(selector);
+      this.ui[name]  = this.$ui[name][0];
     }
 
-    this.ui = thisUi;
+    this._uiLookupped = true;
   },
 
   /**
    * Release ui elements reference.
    */
   releaseUi: function() {
+    if (!this._uiLookupped) {
+      return;
+    }
+
     var name,
         i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
     for (; i<iz; i++) {
       name = keys[i];
+      this.$ui[name] = null;
+      delete this.$ui[name];
       this.ui[name] = null;
       delete this.ui[name];
     }
   }
-
 };
 /**
  * @abstract
  * @class Phalanx.Router
  * @extends Backbone.Router
+ * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var Router = defineClass({
   /**
@@ -224,28 +323,25 @@ var Router = defineClass({
   }
 });
 
+Router.with(Trait.LifecycleCallbacks);
+
 _.extend(Router.prototype, Backbone.Router.prototype, {
   /**
-   * @abstract
+   * destroy
    */
-  initialize: function() {},
-
-  /**
-   * @abstract
-   */
-  onCreate: function() {},
-
-  /**
-   * @abstract
-   */
-  onDestroy: function() {}
+  destroy: function() {
+    this.onDestroy();
+  }
 });
 
 /**
  * @abstract
  * @class Phalanx.View
  * @extends Backbone.View
- * @mixins Phalanax.Trait.MappingUI
+ * @mixins Phalanx.Trait.Observable
+ * @mixins Phalanx.Trait.ElSettable
+ * @mixins Phalanx.Trait.UiLookupable
+ * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var View = defineClass({
   /**
@@ -255,13 +351,17 @@ var View = defineClass({
   constructor: function(options) {
     options || (options = {});
 
+    // init own object
+    this._createdComponents = {};
     this.onCreate.apply(this, arguments);
 
     Backbone.View.apply(this, arguments);
   }
 });
 
-View.with(Trait.MappingUI);
+View.with(Trait.ElSettable)
+    .with(Trait.UiLookupable)
+    .with(Trait.LifecycleCallbacks);
 
 var PROTO_VIEW = Backbone.View.prototype,
 
@@ -276,7 +376,7 @@ _.extend(View.prototype, PROTO_VIEW, {
    *     }
    *     // $('.js_event_selector').click() => someMethod()
    *
-   * @property {Object}
+   * @property {Object.<String, String|Function>}
    */
   events: {},
 
@@ -286,13 +386,13 @@ _.extend(View.prototype, PROTO_VIEW, {
    *     }
    *     // <button data-component="likeBtn"></button> => LikeBtnComponent
    *
-   * @property {Object}
+   * @property {Object.<String, Phalanx.Component>}
    */
   components: {},
 
   /**
    * @private
-   * @property {Object}
+   * @property {Object.<Number, Phalanx.Component>}
    */
   _createdComponents: {},
 
@@ -304,7 +404,7 @@ _.extend(View.prototype, PROTO_VIEW, {
   setElement: function(element, delegate) {
     PROTO_VIEW.setElement.apply(this, arguments);
     if (this.el && this.el.parentNode) {
-      this.lookupUi();
+      this.lookupUi(this.el);
       this.onSetElement(this.el);
     }
   },
@@ -404,12 +504,9 @@ _.extend(View.prototype, PROTO_VIEW, {
     this.releaseUi();
 
     this.onDestroy();
-  },
 
-  /**
-   * @abstract
-   */
-  initialize: function() {},
+    this.el = this.$el = null;
+  },
 
   /**
    * @abstract
@@ -417,29 +514,14 @@ _.extend(View.prototype, PROTO_VIEW, {
    * @param {String} html
    * @return {*}
    */
-  render: function(html) { this.$el.html(html); return this; },
-
-  /**
-   * @abstract
-   */
-  onCreate: function() {},
-
-  /**
-   * @abstract
-   * @param {HTMLElement} el
-   */
-  onSetElement: function(el) {},
-
-  /**
-   * @abstract
-   */
-  onDestroy: function() {}
+  render: function(html) { this.$el.html(html); return this; }
 });
 
 /**
  * @abstract
  * @class Phalanx.Model
  * @extends Backbone.Model
+ * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var Model = defineClass({
   /**
@@ -456,27 +538,24 @@ var Model = defineClass({
   }
 });
 
+Model.with(Trait.LifecycleCallbacks);
+
 _.extend(Model.prototype, Backbone.Model.prototype, {
-  /**
-   * @abstract
-   */
-  initialize: function() {},
 
   /**
-   * @abstract
+   * destroy
    */
-  onCreate: function() {},
-
-  /**
-   * @abstract
-   */
-  onDestroy: function() {}
+  destroy: function() {
+    Backbone.Model.prototype.destroy.apply(this, arguments);
+    this.onDestroy();
+  }
 });
 
 /**
  * @abstract
  * @class Phalanx.Collection
  * @extends Backbone.Collection
+ * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var Collection = defineClass({
   /**
@@ -493,38 +572,26 @@ var Collection = defineClass({
   }
 });
 
+Collection.with(Trait.LifecycleCallbacks);
+
 _.extend(Collection.prototype, Backbone.Collection.prototype, {
-  /**
-   * @abstract
-   */
-  initialize: function() {},
 
   /**
-   * @abstract
+   * destroy
    */
-  onCreate: function() {},
-
-  /**
-   * @abstract
-   */
-  onDestroy: function() {}
+  destroy: function() {
+    this.reset();
+    this.onDestroy();
+  }
 });
 /**
  * @abstract
- * @class Phalanx.Layout
- * @mixins Bakcbone.Events
+ * @class  Phalanx.Layout
+ * @mixins Phalanx.Trait.Observable
+ * @mixins Phalanx.Trait.ElSettable
+ * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var Layout = defineClass({
-  /**
-   * @property {HTMLElement}
-   */
-  el: null,
-
-  /**
-   * @property {jQuery|Zepto}
-   */
-  $el: null,
-
   /**
    * @property {Object}
    */
@@ -542,7 +609,7 @@ var Layout = defineClass({
    *     // layout._assignedMap => { regionName: Phalanx.View }
    *
    * @private
-   * @property {Object}
+   * @property {Object.<String, Phalanx.View>}
    */
   _assignedMap: {},
 
@@ -561,23 +628,17 @@ var Layout = defineClass({
       _.extend(this.regions, options.regions);
     }
 
+    // init own object
+    this._assignedMap = {};
+    this.onCreate.apply(this, arguments);
+
     if (this.el) {
       this.setElement(this.el);
     } else {
       this.setElement('<div />');
     }
 
-    this.onCreate.apply(this, arguments);
-
     this.initialize.apply(this, arguments);
-  },
-
-  /**
-   * @param {HTMLElement} element
-   */
-  setElement: function(element) {
-    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
-    this.el = this.$el[0];
   },
 
   /**
@@ -588,13 +649,14 @@ var Layout = defineClass({
    * @param {View} newView
    */
   assign: function(regionName, newView) {
-    var selector, oldView;
+    var selector, oldView, assignToEl;
 
     selector = this.regions[regionName];
     oldView  = this.getRegionView(regionName);
+    assignToEl = this.$el.find(selector)[0];
 
-    if (!selector) {
-      throw new Error('Could not get a selector from the region ' + regionName);
+    if (!selector || !assignToEl) {
+      throw new Error('Could not get element of `'+ selector +'` from the region ' + regionName);
     }
 
     // change
@@ -604,7 +666,8 @@ var Layout = defineClass({
     oldView && oldView.destroy();
 
     // new
-    newView.setElement(this.$el.find(selector)[0]);
+    newView.lookupUi && newView.lookupUi(assignToEl);
+    newView.setElement(assignToEl);
 
     this._assignedMap[regionName] = newView;
   },
@@ -638,8 +701,6 @@ var Layout = defineClass({
    * When the layout is destroyed, View which encloses also destroy all.
    */
   destroy: function() {
-    this.onDestroy();
-
     var i = 0, regions = Object.keys(this.regions),
         iz = this.regions.length, regionName;
 
@@ -647,6 +708,10 @@ var Layout = defineClass({
       regionName = regions[i];
       this.withdraw(regionName);
     }
+
+    this.onDestroy();
+
+    this.el = this.$el = null;
   },
 
   /**
@@ -655,50 +720,31 @@ var Layout = defineClass({
    * @param {View} newView
    * @param {View} oldView
    */
-  onChange: function(regionName, newView, oldView) {},
+  onChange: function(regionName, newView, oldView) {}
 
-  /**
-   * @abstract
-   */
-  initialize: function() {},
+});
 
-  /**
-   * @abstract
-   */
-  onCreate: function() {},
-
-  /**
-   * @abstract
-   */
-  onDestroy: function() {}
-
-}).with(Backbone.Events);
+Layout.with(Trait.Observable)
+      .with(Trait.ElSettable)
+      .with(Trait.LifecycleCallbacks);
 var INCREMENT_COMPONENT_UID = 0;
 
 /**
  * @abstract
- * @class Phalanx.Component
- * @mixins Phalanax.Trait.MappingUI
- * @mixins Bakcbone.Events
+ * @class  Phalanx.Component
+ * @mixins Phalanx.Trait.Observable
+ * @mixins Phalanx.Trait.ElSettable
+ * @mixins Phalanx.Trait.UiLookupable
+ * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var Component = defineClass({
-  /**
-   * @property {HTMLElement}
-   */
-  el: null,
-
-  /**
-   * @property {jQuery|Zepto}
-   */
-  $el: null,
-
   /**
    *     events: {
    *       'click .js_event_selector': 'someMethod'
    *     }
    *     // $('.js_event_selector').click() => someMethod()
    *
-   * @property {Object}
+   * @property {Object.<String, String|Function>}
    */
   events: {},
 
@@ -713,51 +759,33 @@ var Component = defineClass({
    * @param {HTMLElement} el
    */
   constructor: function(el) {
-    this.setElement(el);
     this.uid = INCREMENT_COMPONENT_UID++;
-
-    this.lookupUi();
 
     this.onCreate.apply(this, arguments);
 
-    this.initialize.apply(this, arguments);
-  },
+    this.lookupUi(el);
+    this.setElement(el);
 
-  /**
-   * @param {HTMLElement} element
-   */
-  setElement: function(element) {
-    this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
-    this.el = this.$el[0];
+    this.initialize.apply(this, arguments);
   },
 
   /**
    * Destory this component
    */
   destroy: function() {
-    this.el = this.$el = null;
-
     this.releaseUi();
 
     this.onDestroy();
-  },
 
-  /**
-   * @abstract
-   */
-  initialize: function() {},
+    this.el = this.$el = null;
+  }
 
-  /**
-   * @abstract
-   */
-  onCreate: function() {},
+});
 
-  /**
-   * @abstract
-   */
-  onDestroy: function() {}
-
-}).with(Backbone.Events).with(Trait.MappingUI);
+Component.with(Trait.Observable)
+         .with(Trait.ElSettable)
+         .with(Trait.UiLookupable)
+         .with(Trait.LifecycleCallbacks);
 
 /**
  * @class Phalanx

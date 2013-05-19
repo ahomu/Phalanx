@@ -45,11 +45,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"></i></a></h2>
-      <p class="stat">69.47</p>
+      <p class="stat">66.05</p>
     </div>
     <div class="span6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h2>
-      <p class="stat">230</p>
+      <p class="stat">184</p>
     </div>
   </div>
   <div class="row historical">
@@ -63,11 +63,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty"></i></a></h2>
-      <p class="stat">50.67</p>
+      <p class="stat">43.63</p>
     </div>
     <div class="span6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs"></i></a></h2>
-      <p class="stat">1.18</p>
+      <p class="stat">1.00</p>
     </div>
   </div>
 </div>
@@ -95,6 +95,11 @@
 /**
  * @abstract
  * @class Phalanx.View
+ * @extends Backbone.View
+ * @mixins Phalanx.Trait.Observable
+ * @mixins Phalanx.Trait.ElSettable
+ * @mixins Phalanx.Trait.UiLookupable
+ * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var View = defineClass({
   /**
@@ -104,11 +109,17 @@ var View = defineClass({
   constructor: function(options) {
     options || (options = {});
 
+    // init own object
+    this._createdComponents = {};
     this.onCreate.apply(this, arguments);
 
     Backbone.View.apply(this, arguments);
   }
 });
+
+View.with(Trait.ElSettable)
+    .with(Trait.UiLookupable)
+    .with(Trait.LifecycleCallbacks);
 
 var PROTO_VIEW = Backbone.View.prototype,
 
@@ -123,19 +134,9 @@ _.extend(View.prototype, PROTO_VIEW, {
    *     }
    *     // $('.js_event_selector').click() => someMethod()
    *
-   * @property {Object}
+   * @property {Object.<String, String|Function>}
    */
   events: {},
-
-  /**
-   *     ui: {
-   *       partOf: '.js_ui_selector'
-   *     }
-   *     // view.ui.partOf => element.js_ui_selector
-   *
-   * @property {Object}
-   */
-  ui: {},
 
   /**
    *     components: {
@@ -143,13 +144,13 @@ _.extend(View.prototype, PROTO_VIEW, {
    *     }
    *     // <button data-component="likeBtn"></button> => LikeBtnComponent
    *
-   * @property {Object}
+   * @property {Object.<String, Phalanx.Component>}
    */
   components: {},
 
   /**
    * @private
-   * @property {Object}
+   * @property {Object.<Number, Phalanx.Component>}
    */
   _createdComponents: {},
 
@@ -159,9 +160,11 @@ _.extend(View.prototype, PROTO_VIEW, {
    * @param {Boolean} delegate
    */
   setElement: function(element, delegate) {
-    this.onSetElement(element);
     PROTO_VIEW.setElement.apply(this, arguments);
-    this.lookupUi();
+    if (this.el && this.el.parentNode) {
+      this.lookupUi(this.el);
+      this.onSetElement(this.el);
+    }
   },
 
   /**
@@ -232,36 +235,6 @@ _.extend(View.prototype, PROTO_VIEW, {
   },
 
   /**
-   * From the selector defined by this.ui, caching to explore the elements.
-   */
-  lookupUi: function() {
-    var name, selector, thisUi = {},
-        i = 0, keys = Object.keys(this.ui), iz = keys.length;
-
-    for (; i<iz; i++) {
-      name = keys[i];
-      selector = this.ui[name];
-      thisUi[name] = this.$el.find(selector);
-    }
-
-    this.ui = thisUi;
-  },
-
-  /**
-   * Release ui elements reference.
-   */
-  releaseUi: function() {
-    var name,
-        i = 0, keys = Object.keys(this.ui), iz = keys.length;
-
-    for (; i<iz; i++) {
-      name = keys[i];
-      this.ui[name] = null;
-      delete this.ui[name];
-    }
-  },
-
-  /**
    * Destroy all created componentns.
    */
   destroyComponents: function() {
@@ -289,12 +262,9 @@ _.extend(View.prototype, PROTO_VIEW, {
     this.releaseUi();
 
     this.onDestroy();
-  },
 
-  /**
-   * @abstract
-   */
-  initialize: function() {},
+    this.el = this.$el = null;
+  },
 
   /**
    * @abstract
@@ -302,23 +272,7 @@ _.extend(View.prototype, PROTO_VIEW, {
    * @param {String} html
    * @return {*}
    */
-  render: function(html) { this.$el.html(html); return this; },
-
-  /**
-   * @abstract
-   */
-  onCreate: function() {},
-
-  /**
-   * @abstract
-   * @param {HTMLElement} el
-   */
-  onSetElement: function(el) {},
-
-  /**
-   * @abstract
-   */
-  onDestroy: function() {}
+  render: function(html) { this.$el.html(html); return this; }
 });</textarea>
   </div>
 </div>
