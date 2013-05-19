@@ -1,5 +1,7 @@
 'use strict';
 
+var Trait = {};
+
 var DEFINE_NOT_WRITABLE   = {writable: false};
 
 /**

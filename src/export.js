@@ -13,7 +13,8 @@ var Phalanx = {
 
   View       : View,
   Layout     : Layout,
-  Component  : Component
+  Component  : Component,
+  Trait      : Trait
 };
 
 // for RequireJS

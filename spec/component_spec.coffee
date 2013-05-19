@@ -85,3 +85,19 @@ describe 'Phalanx.Component is units of actionable ui', ->
 
       view.destroy()
       expect(spy.calledOnce).to.be true
+
+  context 'component mixed-in MappingUI', ->
+
+    it 'ui lookup and store to `ui` property', ->
+      component = new Button $('#component', fixture)
+      expect(component.ui.btn[0]).to.be $('[data-btn]', component.$el)[0]
+      expect(component.ui.num[0]).to.be $('[data-num]', component.$el)[0]
+
+    it 'release `ui` property references', ->
+      component = new Button $('#component', fixture)
+      expect(component.ui.btn[0]).to.be $('[data-btn]', component.$el)[0]
+      expect(component.ui.num[0]).to.be $('[data-num]', component.$el)[0]
+
+      component.releaseUi()
+      expect(component.ui.btn).to.be undefined
+      expect(component.ui.num).to.be undefined

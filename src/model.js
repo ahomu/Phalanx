@@ -3,6 +3,7 @@
 /**
  * @abstract
  * @class Phalanx.Model
+ * @extends Backbone.Model
  */
 var Model = defineClass({
   /**

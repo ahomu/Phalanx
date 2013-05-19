@@ -5,6 +5,8 @@ var INCREMENT_COMPONENT_UID = 0;
 /**
  * @abstract
  * @class Phalanx.Component
+ * @mixins Phalanax.Trait.MappingUI
+ * @mixins Bakcbone.Events
  */
 var Component = defineClass({
   /**
@@ -26,16 +28,6 @@ var Component = defineClass({
    * @property {Object}
    */
   events: {},
-
-  /**
-   *     ui: {
-   *       partOf: '.js_ui_selector'
-   *     }
-   *     // view.ui.partOf => element.js_ui_selector
-   *
-   * @property {Object}
-   */
-  ui: {},
 
   /**
    * instance's unique id nubmer
@@ -78,36 +70,6 @@ var Component = defineClass({
   },
 
   /**
-   * From the selector defined by this.ui, caching to explore the elements.
-   */
-  lookupUi: function() {
-    var name, selector, thisUi = {},
-        i = 0, keys = Object.keys(this.ui), iz = keys.length;
-
-    for (; i<iz; i++) {
-      name = keys[i];
-      selector = this.ui[name];
-      thisUi[name] = this.$el.find(selector);
-    }
-
-    this.ui = thisUi;
-  },
-
-  /**
-   * Release ui elements reference.
-   */
-  releaseUi: function() {
-    var name,
-        i = 0, keys = Object.keys(this.ui), iz = keys.length;
-
-    for (; i<iz; i++) {
-      name = keys[i];
-      this.ui[name] = null;
-      delete this.ui[name];
-    }
-  },
-
-  /**
    * @abstract
    */
   initialize: function() {},
@@ -122,4 +84,4 @@ var Component = defineClass({
    */
   onDestroy: function() {}
 
-}).with(Backbone.Events);
+}).with(Backbone.Events).with(Trait.MappingUI);

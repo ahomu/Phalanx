@@ -3,6 +3,7 @@
 /**
  * @abstract
  * @class Phalanx.Layout
+ * @mixins Bakcbone.Events
  */
 var Layout = defineClass({
   /**
@@ -19,6 +20,11 @@ var Layout = defineClass({
    * @property {Object}
    */
   regions: {},
+
+  /**
+   * @property {Object}
+   */
+  options: {},
 
   /**
    * Correspondence table of the region name and assigned View.

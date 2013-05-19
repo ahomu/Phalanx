@@ -3,6 +3,8 @@
 /**
  * @abstract
  * @class Phalanx.View
+ * @extends Backbone.View
+ * @mixins Phalanax.Trait.MappingUI
  */
 var View = defineClass({
   /**
@@ -17,6 +19,8 @@ var View = defineClass({
     Backbone.View.apply(this, arguments);
   }
 });
+
+View.with(Trait.MappingUI);
 
 var PROTO_VIEW = Backbone.View.prototype,
 
@@ -34,16 +38,6 @@ _.extend(View.prototype, PROTO_VIEW, {
    * @property {Object}
    */
   events: {},
-
-  /**
-   *     ui: {
-   *       partOf: '.js_ui_selector'
-   *     }
-   *     // view.ui.partOf => element.js_ui_selector
-   *
-   * @property {Object}
-   */
-  ui: {},
 
   /**
    *     components: {
@@ -67,9 +61,11 @@ _.extend(View.prototype, PROTO_VIEW, {
    * @param {Boolean} delegate
    */
   setElement: function(element, delegate) {
-    this.onSetElement(element);
     PROTO_VIEW.setElement.apply(this, arguments);
-    this.lookupUi();
+    if (this.el && this.el.parentNode) {
+      this.lookupUi();
+      this.onSetElement(this.el);
+    }
   },
 
   /**
@@ -136,36 +132,6 @@ _.extend(View.prototype, PROTO_VIEW, {
       el.setAttribute(ATTR_COMPONENT_UID, uid);
       this._createdComponents[uid] = component;
       return component;
-    }
-  },
-
-  /**
-   * From the selector defined by this.ui, caching to explore the elements.
-   */
-  lookupUi: function() {
-    var name, selector, thisUi = {},
-        i = 0, keys = Object.keys(this.ui), iz = keys.length;
-
-    for (; i<iz; i++) {
-      name = keys[i];
-      selector = this.ui[name];
-      thisUi[name] = this.$el.find(selector);
-    }
-
-    this.ui = thisUi;
-  },
-
-  /**
-   * Release ui elements reference.
-   */
-  releaseUi: function() {
-    var name,
-        i = 0, keys = Object.keys(this.ui), iz = keys.length;
-
-    for (; i<iz; i++) {
-      name = keys[i];
-      this.ui[name] = null;
-      delete this.ui[name];
     }
   },
 

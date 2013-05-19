@@ -3,6 +3,7 @@
 /**
  * @abstract
  * @class Phalanx.Router
+ * @extends Backbone.Router
  */
 var Router = defineClass({
   /**

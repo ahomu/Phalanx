@@ -3,6 +3,7 @@
 /**
  * @abstract
  * @class Phalanx.Collection
+ * @extends Backbone.Collection
  */
 var Collection = defineClass({
   /**
