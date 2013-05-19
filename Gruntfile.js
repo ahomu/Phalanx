@@ -63,14 +63,6 @@ module.exports = function(grunt) {
         dest: 'dist/phalanx.min.js'
       }
     },
-    watch: {
-      files: ['src/**/*.js'],
-      tasks: ['concat:debug'],
-      options: {
-        nospawn: false,
-        interrupt: true
-      }
-    },
     jsduck: {
       options: {
         'builtin-classes': false,
@@ -91,12 +83,18 @@ module.exports = function(grunt) {
         src: ['src/**/*.js'],
         dest: 'reports'
       }
+    },
+    regarde: {
+      devel: {
+        files: ['src/**/*.js'],
+        tasks: ['concat:debug']
+      }
     }
   });
 
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-regarde');
   grunt.loadNpmTasks('grunt-jsduck');
   grunt.loadNpmTasks('grunt-plato');
 
@@ -104,6 +102,6 @@ module.exports = function(grunt) {
   grunt.registerTask('default', ['build']);
   grunt.registerTask('build',   ['concat', 'uglify']);
   grunt.registerTask('release', ['concat', 'uglify', 'jsduck', 'plato']);
-  grunt.registerTask('devel',   ['watch']);
+  grunt.registerTask('devel',   ['regarde']);
 
 };
