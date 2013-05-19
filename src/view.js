@@ -35,7 +35,7 @@ _.extend(View.prototype, PROTO_VIEW, {
    *     }
    *     // $('.js_event_selector').click() => someMethod()
    *
-   * @property {Object}
+   * @property {Object.<String, String|Function>}
    */
   events: {},
 
@@ -45,13 +45,13 @@ _.extend(View.prototype, PROTO_VIEW, {
    *     }
    *     // <button data-component="likeBtn"></button> => LikeBtnComponent
    *
-   * @property {Object}
+   * @property {Object.<String, Phalanx.Component>}
    */
   components: {},
 
   /**
    * @private
-   * @property {Object}
+   * @property {Object.<Number, Phalanx.Component>}
    */
   _createdComponents: {},
 

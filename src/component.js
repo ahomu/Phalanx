@@ -25,7 +25,7 @@ var Component = defineClass({
    *     }
    *     // $('.js_event_selector').click() => someMethod()
    *
-   * @property {Object}
+   * @property {Object.<String, String|Function>}
    */
   events: {},
 

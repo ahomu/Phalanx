@@ -33,7 +33,7 @@ var Layout = defineClass({
    *     // layout._assignedMap => { regionName: Phalanx.View }
    *
    * @private
-   * @property {Object}
+   * @property {Object.<String, Phalanx.View>}
    */
   _assignedMap: {},
 

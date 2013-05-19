@@ -2,12 +2,12 @@ describe 'Phalanx.Component is units of actionable ui', ->
 
   Button = Phalanx.Component.extend
     ui:
-      btn: '[data-btn]'
-      num: '[data-num]'
+      btn: null
+      num: null
     events:
-      'click [data-btn]': 'onClick'
+      'click [data-ui="btn"]': 'onClick'
     onClick: ->
-      @ui.num.text(parseInt(@ui.num.text(), 10) + 1)
+      @$ui.num.text(parseInt(@$ui.num.text(), 10) + 1)
 
   View = Phalanx.View.extend
     components:
@@ -45,8 +45,8 @@ describe 'Phalanx.Component is units of actionable ui', ->
 
     it 'receive delegated event', ->
       view = new View el: $('#view', fixture)
-      $btns = $('[data-btn]', fixture)
-      $nums = $('[data-num]', fixture)
+      $btns = $('[data-ui="btn"]', fixture)
+      $nums = $('[data-ui="num"]', fixture)
 
       # 要素をクリックしたときにコンポーネントが生成される
       $btns.eq(1).click()
@@ -64,7 +64,7 @@ describe 'Phalanx.Component is units of actionable ui', ->
 
     it 'call `onCreate` & `initialize` when fired component events', ->
       view = new View el: $('#view', fixture)
-      $btns = $('[data-btn]', fixture)
+      $btns = $('[data-ui="btn"]', fixture)
 
       Button.prototype.onCreate = sinon.spy()
       Button.prototype.initialize = sinon.spy()
@@ -77,7 +77,7 @@ describe 'Phalanx.Component is units of actionable ui', ->
 
     it 'call `onDestroy` when parent view destroy', ->
       view = new View el: $('#view', fixture)
-      $btns = $('[data-btn]', fixture)
+      $btns = $('[data-ui="btn"]', fixture)
 
       $btns.eq(1).click()
       component = view.getComponent($btns.eq(1)[0])
@@ -90,14 +90,17 @@ describe 'Phalanx.Component is units of actionable ui', ->
 
     it 'ui lookup and store to `ui` property', ->
       component = new Button $('#component', fixture)
-      expect(component.ui.btn[0]).to.be $('[data-btn]', component.$el)[0]
-      expect(component.ui.num[0]).to.be $('[data-num]', component.$el)[0]
+      expect(component.$ui.btn[0]).to.be $('[data-ui="btn"]', component.$el)[0]
+      expect(component.ui.num).to.be $('[data-ui="num"]', component.$el)[0]
 
     it 'release `ui` property references', ->
       component = new Button $('#component', fixture)
-      expect(component.ui.btn[0]).to.be $('[data-btn]', component.$el)[0]
-      expect(component.ui.num[0]).to.be $('[data-num]', component.$el)[0]
+
+      expect(component.ui.btn).to.be $('[data-ui="btn"]', component.$el)[0]
+      expect(component.$ui.num[0]).to.be $('[data-ui="num"]', component.$el)[0]
 
       component.releaseUi()
       expect(component.ui.btn).to.be undefined
       expect(component.ui.num).to.be undefined
+      expect(component.$ui.btn).to.be undefined
+      expect(component.$ui.num).to.be undefined

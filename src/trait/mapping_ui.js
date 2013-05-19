@@ -1,5 +1,7 @@
 'use strict';
 
+var UI_FIND_PLACEHOLDER = '[data-ui="{name}"]';
+
 /**
  * @class Phalanx.Trait.MappingUI
  */
@@ -7,28 +9,35 @@ Trait.MappingUI = {
 
   /**
    *     ui: {
-   *       partOf: '.js_ui_selector'
+   *       hoge: null
    *     }
-   *     // view.ui.partOf => element.js_ui_selector
+   *     // view.ui.hoge => [data-ui="hoge"]
    *
-   * @property {Object}
+   * @property {Object.<String:Null>}
    */
   ui: {},
+
+  /**
+   * @property {Object.<String:jQuery>}
+   */
+  $ui: {},
 
   /**
    * From the selector defined by this.ui, caching to explore the elements.
    */
   lookupUi: function() {
-    var name, selector, thisUi = {},
+    var name, selector,
         i = 0, keys = Object.keys(this.ui), iz = keys.length;
+
+    this.ui = {};
+    this.$ui = {};
 
     for (; i<iz; i++) {
       name = keys[i];
-      selector = this.ui[name];
-      thisUi[name] = this.$el.find(selector);
+      selector = UI_FIND_PLACEHOLDER.replace('{name}', name);
+      this.$ui[name] = this.$el.find(selector);
+      this.ui[name]  = this.$ui[name][0];
     }
-
-    this.ui = thisUi;
   },
 
   /**
@@ -40,9 +49,10 @@ Trait.MappingUI = {
 
     for (; i<iz; i++) {
       name = keys[i];
+      this.$ui[name] = null;
+      delete this.$ui[name];
       this.ui[name] = null;
       delete this.ui[name];
     }
   }
-
 };
