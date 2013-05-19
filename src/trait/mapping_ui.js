@@ -13,12 +13,12 @@ Trait.MappingUI = {
    *     }
    *     // view.ui.hoge => [data-ui="hoge"]
    *
-   * @property {Object.<String:Null>}
+   * @property {Object.<String, Null>}
    */
   ui: {},
 
   /**
-   * @property {Object.<String:jQuery>}
+   * @property {Object.<String, jQuery>}
    */
   $ui: {},
 

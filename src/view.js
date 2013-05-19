@@ -4,7 +4,7 @@
  * @abstract
  * @class Phalanx.View
  * @extends Backbone.View
- * @mixins Phalanax.Trait.MappingUI
+ * @mixins Phalanx.Trait.MappingUI
  */
 var View = defineClass({
   /**

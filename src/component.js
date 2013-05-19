@@ -5,7 +5,7 @@ var INCREMENT_COMPONENT_UID = 0;
 /**
  * @abstract
  * @class Phalanx.Component
- * @mixins Phalanax.Trait.MappingUI
+ * @mixins Phalanx.Trait.MappingUI
  * @mixins Bakcbone.Events
  */
 var Component = defineClass({
