@@ -5,8 +5,9 @@ var INCREMENT_COMPONENT_UID = 0;
 /**
  * @abstract
  * @class Phalanx.Component
- * @mixins Phalanx.Trait.MappingUI
  * @mixins Phalanx.Trait.Observable
+ * @mixins Phalanx.Trait.MappingUI
+ * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var Component = defineClass({
   /**
@@ -67,21 +68,10 @@ var Component = defineClass({
     this.releaseUi();
 
     this.onDestroy();
-  },
+  }
 
-  /**
-   * @abstract
-   */
-  initialize: function() {},
+});
 
-  /**
-   * @abstract
-   */
-  onCreate: function() {},
-
-  /**
-   * @abstract
-   */
-  onDestroy: function() {}
-
-}).with(Trait.Observable).with(Trait.MappingUI);
+Component.with(Trait.Observable)
+         .with(Trait.MappingUI)
+         .with(Trait.LifecycleCallbacks);

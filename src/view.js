@@ -5,6 +5,7 @@
  * @class Phalanx.View
  * @extends Backbone.View
  * @mixins Phalanx.Trait.MappingUI
+ * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var View = defineClass({
   /**
@@ -14,13 +15,16 @@ var View = defineClass({
   constructor: function(options) {
     options || (options = {});
 
+    // init own object
+    this._createdComponents = {};
     this.onCreate.apply(this, arguments);
 
     Backbone.View.apply(this, arguments);
   }
 });
 
-View.with(Trait.MappingUI);
+View.with(Trait.MappingUI)
+    .with(Trait.LifecycleCallbacks);
 
 var PROTO_VIEW = Backbone.View.prototype,
 
@@ -167,11 +171,6 @@ _.extend(View.prototype, PROTO_VIEW, {
 
   /**
    * @abstract
-   */
-  initialize: function() {},
-
-  /**
-   * @abstract
    * @chainable
    * @param {String} html
    * @return {*}
@@ -180,17 +179,7 @@ _.extend(View.prototype, PROTO_VIEW, {
 
   /**
    * @abstract
-   */
-  onCreate: function() {},
-
-  /**
-   * @abstract
    * @param {HTMLElement} el
    */
-  onSetElement: function(el) {},
-
-  /**
-   * @abstract
-   */
-  onDestroy: function() {}
+  onSetElement: function(el) {}
 });

@@ -26,15 +26,6 @@ describe 'Phalanx.View is units of controller element', ->
     expect(view.el).to.be $('#content', fixture)[0]
     expect(view.$el[0]).to.be $('#content', fixture)[0]
 
-  it 'call `onCreate` & `initialize` when create layout', ->
-    View.prototype.onCreate = sinon.spy()
-    View.prototype.initialize = sinon.spy()
-
-    view = new View
-
-    expect(view.onCreate.calledOnce).to.be true
-    expect(view.initialize.calledOnce).to.be true
-
   it 'call `onSetElement` when create view with `el`', ->
     View.prototype.onSetElement = sinon.spy()
     view = new View el: $('#content', fixture)
@@ -48,20 +39,31 @@ describe 'Phalanx.View is units of controller element', ->
     layout.assign 'content', view
     expect(view.onSetElement.calledOnce).to.be true
 
-  it 'call `onDestroy` when destroy view', ->
-    view = new View
-    view.onDestroy = sinon.spy()
-    view.destroy()
-    expect(view.onDestroy.calledOnce).to.be true
+  context 'mixed-in LifecycleCallbacks', ->
 
-  it 'call `onDestroy` when assign new view in the layout', ->
-    layout = new Layout el: $('#layout', fixture)
-    view = new View
-    newView = new View
-    view.onDestroy = sinon.spy()
+    it 'call `onCreate` & `initialize` when create layout', ->
+      View.prototype.onCreate = sinon.spy()
+      View.prototype.initialize = sinon.spy()
 
-    layout.assign 'content', view
-    expect(view.onDestroy.calledOnce).to.be false
+      view = new View
 
-    layout.assign 'content', newView
-    expect(view.onDestroy.calledOnce).to.be true
+      expect(view.onCreate.calledOnce).to.be true
+      expect(view.initialize.calledOnce).to.be true
+
+    it 'call `onDestroy` when destroy view', ->
+      view = new View
+      view.onDestroy = sinon.spy()
+      view.destroy()
+      expect(view.onDestroy.calledOnce).to.be true
+
+    it 'call `onDestroy` when assign new view in the layout', ->
+      layout = new Layout el: $('#layout', fixture)
+      view = new View
+      newView = new View
+      view.onDestroy = sinon.spy()
+
+      layout.assign 'content', view
+      expect(view.onDestroy.calledOnce).to.be false
+
+      layout.assign 'content', newView
+      expect(view.onDestroy.calledOnce).to.be true

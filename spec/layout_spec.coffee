@@ -17,6 +17,8 @@ describe 'Phalanx.Layout is layout map of document', ->
 
   afterEach ->
     fixtures.cleanUp()
+    Layout.prototype.onCreate = ->
+    Layout.prototype.initialize = ->
 
   it 'has empty div element ( created without `el` )', ->
     layout = new Layout
@@ -43,14 +45,18 @@ describe 'Phalanx.Layout is layout map of document', ->
     layout.assign('footer', footer)
     expect(layout.getRegionView('footer')).to.be footer
 
-  it 'call `onCreate` & `initialize` when create layout', ->
-    Layout.prototype.onCreate = sinon.spy()
-    Layout.prototype.initialize = sinon.spy()
-
+  it 'call `onSetElement` when create layout with `el`', ->
+    Layout.prototype.onSetElement = sinon.spy()
     layout = new Layout el: $('#layout', fixture)
+    expect(layout.onSetElement.calledOnce).to.be true
 
-    expect(layout.onCreate.calledOnce).to.be true
-    expect(layout.initialize.calledOnce).to.be true
+  it 'call `onSetElement` when assign layout in the parent layout', ->
+    parent = new Layout el: $('#layout', fixture)
+    layout = new (Phalanx.Layout.extend({}))
+    layout.onSetElement = sinon.spy()
+
+    parent.assign 'content', layout
+    expect(layout.onSetElement.calledOnce).to.be true
 
   it 'call `onChange` when change view of any region', ->
     layout = new Layout el: $('#layout', fixture)
@@ -73,16 +79,29 @@ describe 'Phalanx.Layout is layout map of document', ->
     layout.assign 'content', newContent
     expect(layout.onChange.calledOnce).to.be true
 
-  it 'call `onDestroy` when destroy layout', ->
-    layout = new Layout el: $('#layout', fixture)
-    layout.onDestroy = sinon.spy()
-    layout.destroy()
-    expect(layout.onDestroy.calledOnce).to.be true
+  context 'mixed-in Observable', ->
 
-  it 'has `Backbone.Events` interface', ->
-    layout = new Layout el: $('#layout', fixture)
-    spy = sinon.spy()
+    it 'has `Backbone.Events` interface', ->
+      layout = new Layout el: $('#layout', fixture)
+      spy = sinon.spy()
 
-    layout.on 'test', spy
-    layout.trigger 'test'
-    expect(spy.calledOnce).to.be true
+      layout.on 'test', spy
+      layout.trigger 'test'
+      expect(spy.calledOnce).to.be true
+
+  context 'mixed-in LifecycleCallbacks', ->
+
+    it 'call `onCreate` & `initialize` when create layout', ->
+      Layout.prototype.onCreate = sinon.spy()
+      Layout.prototype.initialize = sinon.spy()
+
+      layout = new Layout el: $('#layout', fixture)
+
+      expect(layout.onCreate.calledOnce).to.be true
+      expect(layout.initialize.calledOnce).to.be true
+
+    it 'call `onDestroy` when destroy layout', ->
+      layout = new Layout el: $('#layout', fixture)
+      layout.onDestroy = sinon.spy()
+      layout.destroy()
+      expect(layout.onDestroy.calledOnce).to.be true

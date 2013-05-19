@@ -4,6 +4,7 @@
  * @abstract
  * @class Phalanx.Model
  * @extends Backbone.Model
+ * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var Model = defineClass({
   /**
@@ -20,19 +21,15 @@ var Model = defineClass({
   }
 });
 
+Model.with(Trait.LifecycleCallbacks);
+
 _.extend(Model.prototype, Backbone.Model.prototype, {
-  /**
-   * @abstract
-   */
-  initialize: function() {},
 
   /**
-   * @abstract
+   * destroy
    */
-  onCreate: function() {},
-
-  /**
-   * @abstract
-   */
-  onDestroy: function() {}
+  destroy: function() {
+    Backbone.Model.prototype.destroy.apply(this, arguments);
+    this.onDestroy();
+  }
 });

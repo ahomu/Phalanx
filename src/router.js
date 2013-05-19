@@ -4,6 +4,7 @@
  * @abstract
  * @class Phalanx.Router
  * @extends Backbone.Router
+ * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var Router = defineClass({
   /**
@@ -19,19 +20,13 @@ var Router = defineClass({
   }
 });
 
+Router.with(Trait.LifecycleCallbacks);
+
 _.extend(Router.prototype, Backbone.Router.prototype, {
   /**
-   * @abstract
+   * destroy
    */
-  initialize: function() {},
-
-  /**
-   * @abstract
-   */
-  onCreate: function() {},
-
-  /**
-   * @abstract
-   */
-  onDestroy: function() {}
+  destroy: function() {
+    this.onDestroy();
+  }
 });

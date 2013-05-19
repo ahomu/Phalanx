@@ -4,6 +4,7 @@
  * @abstract
  * @class Phalanx.Layout
  * @mixins Phalanx.Trait.Observable
+ * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var Layout = defineClass({
   /**
@@ -52,23 +53,28 @@ var Layout = defineClass({
       _.extend(this.regions, options.regions);
     }
 
+    // init own object
+    this._assignedMap = {};
+    this.onCreate.apply(this, arguments);
+
     if (this.el) {
       this.setElement(this.el);
     } else {
       this.setElement('<div />');
     }
 
-    this.onCreate.apply(this, arguments);
-
     this.initialize.apply(this, arguments);
   },
 
   /**
-   * @param {HTMLElement} element
+   * @param {HTMLElement|String} element
    */
   setElement: function(element) {
     this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
     this.el = this.$el[0];
+    if (this.el && this.el.parentNode) {
+      this.onSetElement(this.el);
+    }
   },
 
   /**
@@ -79,13 +85,14 @@ var Layout = defineClass({
    * @param {View} newView
    */
   assign: function(regionName, newView) {
-    var selector, oldView;
+    var selector, oldView, assignToEl;
 
     selector = this.regions[regionName];
     oldView  = this.getRegionView(regionName);
+    assignToEl = this.$el.find(selector)[0];
 
-    if (!selector) {
-      throw new Error('Could not get a selector from the region ' + regionName);
+    if (!selector || !assignToEl) {
+      throw new Error('Could not get element of `'+ selector +'` from the region ' + regionName);
     }
 
     // change
@@ -95,7 +102,7 @@ var Layout = defineClass({
     oldView && oldView.destroy();
 
     // new
-    newView.setElement(this.$el.find(selector)[0]);
+    newView.setElement(assignToEl);
 
     this._assignedMap[regionName] = newView;
   },
@@ -142,25 +149,18 @@ var Layout = defineClass({
 
   /**
    * @abstract
+   */
+  onSetElement: function(element) {},
+
+  /**
+   * @abstract
    * @param {String} regionName
    * @param {View} newView
    * @param {View} oldView
    */
-  onChange: function(regionName, newView, oldView) {},
+  onChange: function(regionName, newView, oldView) {}
 
-  /**
-   * @abstract
-   */
-  initialize: function() {},
+});
 
-  /**
-   * @abstract
-   */
-  onCreate: function() {},
-
-  /**
-   * @abstract
-   */
-  onDestroy: function() {}
-
-}).with(Trait.Observable);
+Layout.with(Trait.Observable)
+      .with(Trait.LifecycleCallbacks);

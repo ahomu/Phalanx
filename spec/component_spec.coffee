@@ -54,6 +54,8 @@ describe 'Phalanx.Component is units of actionable ui', ->
       $nums.eq(2).parent().click()
       expect($btns.eq(2).parent().attr('data-component-uid')).to.be undefined
 
+  context 'mixed-in LifecycleCallbacks', ->
+
     it 'call `onCreate` & `initialize` when fired component events', ->
       view = new View el: $('#view', fixture)
       $btns = $('[data-ui="btn"]', fixture)
@@ -78,7 +80,7 @@ describe 'Phalanx.Component is units of actionable ui', ->
       view.destroy()
       expect(spy.calledOnce).to.be true
 
-  context 'component mixed-in MappingUI', ->
+  context 'mixed-in MappingUI', ->
 
     it 'has `Trait.MappingUI` interface', ->
       component = new Button $('#component', fixture)
@@ -97,11 +99,12 @@ describe 'Phalanx.Component is units of actionable ui', ->
       expect(component.$ui.btn).to.be undefined
       expect(component.$ui.num).to.be undefined
 
+  context 'mixed-in Observable', ->
 
-  it 'has `Trait.Observable` interface', ->
-    component = new Button $('#component', fixture)
-    spy = sinon.spy()
+    it 'has `Trait.Observable` interface', ->
+      component = new Button $('#component', fixture)
+      spy = sinon.spy()
 
-    component.on 'test', spy
-    component.trigger 'test'
-    expect(spy.calledOnce).to.be true
+      component.on 'test', spy
+      component.trigger 'test'
+      expect(spy.calledOnce).to.be true

@@ -4,6 +4,7 @@
  * @abstract
  * @class Phalanx.Collection
  * @extends Backbone.Collection
+ * @mixins Phalanx.Trait.LifecycleCallbacks
  */
 var Collection = defineClass({
   /**
@@ -20,19 +21,15 @@ var Collection = defineClass({
   }
 });
 
+Collection.with(Trait.LifecycleCallbacks);
+
 _.extend(Collection.prototype, Backbone.Collection.prototype, {
-  /**
-   * @abstract
-   */
-  initialize: function() {},
 
   /**
-   * @abstract
+   * destroy
    */
-  onCreate: function() {},
-
-  /**
-   * @abstract
-   */
-  onDestroy: function() {}
+  destroy: function() {
+    this.reset();
+    this.onDestroy();
+  }
 });
