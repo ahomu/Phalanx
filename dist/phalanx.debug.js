@@ -1,4 +1,4 @@
-/*! Phalanx - v0.0.3 ( 2013-05-19 ) - MIT */
+/*! Phalanx - v0.0.3 ( 2013-05-21 ) - MIT */
 (function(window) {
 
 "use strict";
@@ -143,7 +143,7 @@ function __with(trait, aliases) {
     }
   }
 
-  _.extend(this.prototype, processed_trait);
+  this.prototype = _.extend(processed_trait, this.prototype);
   return this;
 }
 
@@ -625,8 +625,7 @@ _.extend(Layout.prototype, Backbone.View.prototype, {
     // old
     oldView && oldView.destroy();
 
-    // new: View has `lookupUi` method but Layout hasn't that method.
-    newView.lookupUi && newView.lookupUi(assignToEl);
+    // new
     newView.setElement(assignToEl);
 
     this._assignedMap[regionName] = newView;
@@ -662,7 +661,7 @@ _.extend(Layout.prototype, Backbone.View.prototype, {
    */
   destroyRegions: function() {
     var i = 0, regions = Object.keys(this.regions),
-      iz = this.regions.length, regionName;
+        iz = this.regions.length, regionName;
 
     for (; i<iz; i++) {
       regionName = regions[i];

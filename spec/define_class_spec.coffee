@@ -60,7 +60,7 @@ describe '`defineClass` of basic OOP feture provider', ->
 
       expect(bruce.say()).to.be('Batman!')
       expect(bruce.batmanFly()).to.be('I can fly!')
-      expect(bruce.speed).to.be(3000)
+      expect(bruce.speed).to.be(30)
       expect(Batman.speed).to.be.a('undefined')
 
     it 'can call super class method', ->

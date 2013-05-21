@@ -86,8 +86,7 @@ _.extend(Layout.prototype, Backbone.View.prototype, {
     // old
     oldView && oldView.destroy();
 
-    // new: View has `lookupUi` method but Layout hasn't that method.
-    newView.lookupUi && newView.lookupUi(assignToEl);
+    // new
     newView.setElement(assignToEl);
 
     this._assignedMap[regionName] = newView;
@@ -123,7 +122,7 @@ _.extend(Layout.prototype, Backbone.View.prototype, {
    */
   destroyRegions: function() {
     var i = 0, regions = Object.keys(this.regions),
-      iz = this.regions.length, regionName;
+        iz = this.regions.length, regionName;
 
     for (; i<iz; i++) {
       regionName = regions[i];

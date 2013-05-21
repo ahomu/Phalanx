@@ -140,7 +140,7 @@ function __with(trait, aliases) {
     }
   }
 
-  _.extend(this.prototype, processed_trait);
+  this.prototype = _.extend(processed_trait, this.prototype);
   return this;
 }
 
