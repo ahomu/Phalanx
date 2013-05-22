@@ -24,12 +24,14 @@ describe 'Phalanx.Component is units of actionable ui', ->
 
   it 'has unique id', ->
     component = new Button $('#component2', fixture)
-    expect(component.uid).not.to.be null
     expect(component.uid).to.be 0
+
+  it 'has data model id', ->
+    component = new Button $('#component2', fixture)
+    expect(component.id).to.be 222
 
   it 'has element', ->
     component = new Button $('#component1', fixture)
-    expect(component.el).not.to.be undefined
     expect(component.el).to.be $('#component1', fixture)[0]
     expect(component.$el[0]).to.be $('#component1', fixture)[0]
 

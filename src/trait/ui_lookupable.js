@@ -38,7 +38,7 @@ Trait.UiLookupable = {
       name = keys[i];
       selector = UI_FIND_PLACEHOLDER.replace('{name}', name);
       this.$ui[name] = $baseEl.find(selector);
-      this.ui[name]  = this.$ui[name][0];
+      this.ui[name]  = this.$ui[name].length ? this.$ui[name][0] : null;
     }
   },
 

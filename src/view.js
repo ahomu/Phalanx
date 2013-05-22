@@ -64,7 +64,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
   setElement: function(element, delegate) {
     Backbone.View.prototype.setElement.apply(this, arguments);
     if (this.el && this.el.parentNode) {
-      this.lookupUi(this.el);
+      this.lookupUi(this.$el);
       this.onSetElement(this.el);
     }
   },

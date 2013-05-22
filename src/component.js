@@ -21,6 +21,12 @@ var Component = defineClass({
   events: {},
 
   /**
+   * If exists element having `data-id` attribute
+   *
+   */
+  id: null,
+
+  /**
    * instance's unique id nubmer
    * @property {Number}
    */
@@ -40,12 +46,19 @@ var Component = defineClass({
     this.initialize.apply(this, arguments);
   },
 
+  /**
+   * Set managing domain element
+   * @param element
+   */
   setElement: function(element) {
     this.$el = element instanceof Backbone.$ ? element : Backbone.$(element);
     this.el = this.$el[0];
+
     if (this.el && this.el.parentNode) {
-      this.lookupUi(this.el);
+      this.lookupUi(this.$el);
       this.onSetElement(this.el);
+
+      this.id = parseInt(this.el.getAttribute('data-id'), 10);
     }
   },
 
