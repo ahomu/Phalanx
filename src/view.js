@@ -58,6 +58,8 @@ _.extend(View.prototype, Backbone.View.prototype, {
    *       'customEvent likeBtn': 'receiveCustomEvent'
    *     }
    *     // component.trigger('customEvent') => view.receiveCustomEvent()
+   *
+   * @property {Object.<String, String>}
    */
   listeners: {},
 
@@ -79,7 +81,6 @@ _.extend(View.prototype, Backbone.View.prototype, {
   _processedListeners: {},
 
   /**
-   * @see Backbone.View.setElement
    * @param {HTMLElement} element
    * @param {Boolean} delegate
    */
@@ -92,7 +93,6 @@ _.extend(View.prototype, Backbone.View.prototype, {
   },
 
   /**
-   * @see Backbone.View.delegateEvents
    * @param {Object} [events]
    */
   delegateEvents: function(events) {
@@ -119,7 +119,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
   /**
    * @private
    * @param {String} methodName
-   * @returns {Function}
+   * @return {Function}
    */
   _getComponentEventClosure: function(methodName) {
     return function(evt) {
@@ -132,7 +132,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * TODO 要素からのcomponent取得と、componentの生成はメソッドを分割したほうが良い
    *
    * @param {HTMLElement} el
-   * @returns {*}
+   * @return {*}
    */
   getComponent: function(el) {
     var componentName, component, uid;
@@ -142,7 +142,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
     } while(!componentName && (el = el.parentNode));
 
     if (!componentName) {
-      throw new Error('Component name is not detected from ' + ATTR_COMPONENT);
+      throw new Error('Component name is not detected from `' + ATTR_COMPONENT + '`');
     }
 
     uid  = el.getAttribute(ATTR_COMPONENT_UID);
@@ -178,6 +178,9 @@ _.extend(View.prototype, Backbone.View.prototype, {
       for (; i<iz; i++) {
         event  = events[i];
         method = listeners[event];
+        if (!_.isFunction(this[method])) {
+          throw new Error('Method `' + method + '` is not exists this View');
+        }
         this.listenTo(component, event, this[method]);
       }
     }

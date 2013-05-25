@@ -52,7 +52,7 @@ _.extend(Layout.prototype, View.prototype, {
    * And destroy old View automatically.
    *
    * @param {String} regionName
-   * @param {View} newView
+   * @param {Phalanx.View} newView
    */
   assign: function(regionName, newView) {
     var selector, oldView, assignToEl;
@@ -79,7 +79,7 @@ _.extend(Layout.prototype, View.prototype, {
 
   /**
    * @param {String} regionName
-   * @returns {View}
+   * @returns {Phalanx.View}
    */
   getRegionView: function(regionName) {
     if (!(regionName in this.regions)) {
@@ -90,16 +90,11 @@ _.extend(Layout.prototype, View.prototype, {
 
   /**
    * @param {String} regionName
-   * @return {View}
    */
   withdraw: function(regionName) {
-    var view;
-
-    view = this.getRegionView(regionName);
+    var view = this.getRegionView(regionName);
     view.destroy();
     this._assignedMap[regionName] = null;
-
-    return view;
   },
 
   /**
@@ -118,8 +113,8 @@ _.extend(Layout.prototype, View.prototype, {
   /**
    * @abstract
    * @param {String} regionName
-   * @param {View} newView
-   * @param {View} oldView
+   * @param {Phalanx.View} newView
+   * @param {Phalanx.View} oldView
    */
   onChange: function(regionName, newView, oldView) {}
 });

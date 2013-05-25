@@ -41,7 +41,7 @@ describe 'Phalanx.Component is units of actionable ui', ->
 
   context 'component in the view', ->
 
-    it 'receive delegated event', ->
+    it 'delegate event', ->
       view = new View el: $('#view', fixture)
       view.onCustom = sinon.spy();
       $btns = $('[data-ui="btn"]', fixture)
@@ -50,6 +50,11 @@ describe 'Phalanx.Component is units of actionable ui', ->
       # 要素をクリックしたときにコンポーネントが生成される
       $btns.eq(1).click()
       expect($btns.eq(1).parent().attr('data-component-uid')).not.to.be undefined
+
+      # data-component="" からコンポーネントクラスを識別できなければError
+      expect(->
+        $btns.eq(2).click()
+      ).to.throwError()
 
       # クリックしたコンポーネントのテキストだけ加算されている
       expect($nums.eq(0).text()).to.be '0'
@@ -65,6 +70,29 @@ describe 'Phalanx.Component is units of actionable ui', ->
       component = view.getComponent($btns.eq(1)[0])
       component.trigger('custom');
       expect(view.onCustom.calledOnce).to.be true
+
+    it 'view listen to component event', ->
+      view = new View el: $('#view', fixture)
+      view.onCustom = sinon.spy();
+      $btns = $('[data-ui="btn"]', fixture)
+
+      $btns.eq(1).click()
+
+      component = view.getComponent($btns.eq(1)[0])
+      component.trigger('custom');
+      expect(view.onCustom.calledOnce).to.be true
+
+      view.destroy()
+
+      view = new (Phalanx.View.extend
+        listeners:
+          'custom btn': 'notExistsMethod'
+        components:
+          btn: Button
+      ) el: $('#view', fixture)
+      expect(->
+        $btns.eq(1).click()
+      ).to.throwError()
 
     it 'call `onSetElement` when fired component events', ->
       view = new View el: $('#view', fixture)
