@@ -217,6 +217,8 @@ _.extend(View.prototype, Backbone.View.prototype, {
 
     this.undelegateEvents();
 
+    this.stopListening();
+
     this.releaseUi();
 
     this.onDestroy();
