@@ -17,16 +17,7 @@ var View = defineClass({
     // init own object
     this._processedListeners = {};
     this._createdComponents  = {};
-
-    // process listeners
-    var i = 0, listeners = Object.keys(this.listeners), iz = listeners.length,
-        event_component, methodName;
-
-    for (; i<iz; i++) {
-      event_component = listeners[i].split(/\s+/);
-      methodName      = this.listeners[listeners[i]];
-      (this._processedListeners[event_component[1]] = {})[event_component[0]] = methodName;
-    }
+    this._processListeners();
 
     this.onCreate.apply(this, arguments);
 
@@ -53,12 +44,28 @@ _.extend(View.prototype, Backbone.View.prototype, {
   events: {},
 
   /**
+   *     components: {
+   *       likeBtn: LikeBtnComponent
+   *     }
+   *     // <button data-component="likeBtn"></button> => LikeBtnComponent
+   *
+   * @property {Object.<String, Phalanx.Component>}
+   */
+  components: {},
+
+  /**
    *     listeners: {
    *       'customEvent likeBtn': 'receiveCustomEvent'
    *     }
    *     // component.trigger('customEvent') => view.receiveCustomEvent()
    */
   listeners: {},
+
+  /**
+   * @private
+   * @property {Object.<Number, Phalanx.Component>}
+   */
+  _createdComponents: {},
 
   /**
    *     _processedListeners: {
@@ -70,22 +77,6 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * @property {Object.<String, Object<String, String>>}
    */
   _processedListeners: {},
-
-  /**
-   *     components: {
-   *       likeBtn: LikeBtnComponent
-   *     }
-   *     // <button data-component="likeBtn"></button> => LikeBtnComponent
-   *
-   * @property {Object.<String, Phalanx.Component>}
-   */
-  components: {},
-
-  /**
-   * @private
-   * @property {Object.<Number, Phalanx.Component>}
-   */
-  _createdComponents: {},
 
   /**
    * @see Backbone.View.setElement
@@ -193,6 +184,21 @@ _.extend(View.prototype, Backbone.View.prototype, {
   },
 
   /**
+   * Converted to processed the `listeners` property.
+   * @private
+   */
+  _processListeners: function() {
+    var i = 0, listeners = Object.keys(this.listeners), iz = listeners.length,
+        event_component, methodName;
+
+    for (; i<iz; i++) {
+      event_component = listeners[i].split(/\s+/);
+      methodName      = this.listeners[listeners[i]];
+      (this._processedListeners[event_component[1]] = {})[event_component[0]] = methodName;
+    }
+  },
+
+  /**
    * Destroy all created componentns.
    */
   destroyComponents: function() {
@@ -212,6 +218,8 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * Destory and teadown View.
    */
   destroy: function() {
+
+    this.destroyRegions && this.destroyRegions();
 
     this.destroyComponents();
 
