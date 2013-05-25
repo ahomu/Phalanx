@@ -10,8 +10,12 @@ describe 'Phalanx.Component is units of actionable ui', ->
       @$ui.num.text(parseInt(@$ui.num.text(), 10) + 1)
 
   View = Phalanx.View.extend
+    listeners:
+      'custom btn': 'onCustom'
     components:
       btn: Button
+    onCustom: ->
+      # noop
 
   fixture = null
 
@@ -39,6 +43,7 @@ describe 'Phalanx.Component is units of actionable ui', ->
 
     it 'receive delegated event', ->
       view = new View el: $('#view', fixture)
+      view.onCustom = sinon.spy();
       $btns = $('[data-ui="btn"]', fixture)
       $nums = $('[data-ui="num"]', fixture)
 
@@ -55,6 +60,11 @@ describe 'Phalanx.Component is units of actionable ui', ->
       $nums.eq(2).click()
       $nums.eq(2).parent().click()
       expect($btns.eq(2).parent().attr('data-component-uid')).to.be undefined
+
+      # カスタムイベント
+      component = view.getComponent($btns.eq(1)[0])
+      component.trigger('custom');
+      expect(view.onCustom.calledOnce).to.be true
 
     it 'call `onSetElement` when fired component events', ->
       view = new View el: $('#view', fixture)

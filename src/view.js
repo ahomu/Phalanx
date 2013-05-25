@@ -15,7 +15,19 @@ var View = defineClass({
    */
   constructor: function(options) {
     // init own object
-    this._createdComponents = {};
+    this._processedListeners = {};
+    this._createdComponents  = {};
+
+    // process listeners
+    var i = 0, listeners = Object.keys(this.listeners), iz = listeners.length,
+        event_component, methodName;
+
+    for (; i<iz; i++) {
+      event_component = listeners[i].split(/\s+/);
+      methodName      = this.listeners[listeners[i]];
+      (this._processedListeners[event_component[1]] = {})[event_component[0]] = methodName;
+    }
+
     this.onCreate.apply(this, arguments);
 
     Backbone.View.apply(this, arguments);
@@ -39,6 +51,25 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * @property {Object.<String, String|Function>}
    */
   events: {},
+
+  /**
+   *     listeners: {
+   *       'customEvent likeBtn': 'receiveCustomEvent'
+   *     }
+   *     // component.trigger('customEvent') => view.receiveCustomEvent()
+   */
+  listeners: {},
+
+  /**
+   *     _processedListeners: {
+   *       'likeBtn': {
+   *         'customeEvent': 'receiveCustomEvent'
+   *       }
+   *     }
+   * @private
+   * @property {Object.<String, Object<String, String>>}
+   */
+  _processedListeners: {},
 
   /**
    *     components: {
@@ -130,9 +161,34 @@ _.extend(View.prototype, Backbone.View.prototype, {
     } else {
       component = new this.components[componentName](el);
       uid = component.uid;
+
+      this._listenToComponent(component, componentName);
+
       el.setAttribute(ATTR_COMPONENT_UID, uid);
       this._createdComponents[uid] = component;
       return component;
+    }
+  },
+
+  /**
+   * @private
+   * @param {Phalanx.Component} component
+   * @param {String} componentName
+   */
+  _listenToComponent: function(component, componentName) {
+    var listeners, i, events, iz,
+        event, method;
+
+    if ((listeners = this._processedListeners[componentName])) {
+      i = 0;
+      events = Object.keys(listeners);
+      iz = events.length;
+
+      for (; i<iz; i++) {
+        event  = events[i];
+        method = listeners[event];
+        this.listenTo(component, event, this[method]);
+      }
     }
   },
 
