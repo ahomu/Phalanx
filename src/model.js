@@ -24,6 +24,29 @@ var Model = defineClass({
 Model.with(Trait.LifecycleCallbacks);
 
 _.extend(Model.prototype, Backbone.Model.prototype, {
+  /**
+   * Default params for using sync method
+   *
+   *     // if request to xml/html resource
+   *     syncParams: {
+   *       contentType: 'application/xml',
+   *       dataType: 'text'
+   *     }
+   *
+   * @property {Object}
+   */
+  syncParam: {},
+
+  /**
+   * @param {String} method
+   * @param {Phalanx.Model} model
+   * @param {Object} options
+   * @returns {*}
+   */
+  sync: function(method, model, options) {
+    _.extend(options, this.syncParam);
+    return Backbone.Model.prototype.sync.apply(this, arguments);
+  },
 
   /**
    * destroy
