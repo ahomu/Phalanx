@@ -133,7 +133,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
   _getComponentEventClosure: function(methodName) {
     return function(evt) {
       var component = this.getComponent(evt.target);
-      component[methodName].apply(component, arguments);
+      return component[methodName].apply(component, arguments);
     };
   },
 

@@ -2,8 +2,8 @@
 
 /**
  * @abstract
- * @class  Phalanx.Layout
- * @extends Backbone.View
+ * @class Phalanx.Layout
+ * @extends Phalanx.View
  * @mixins Phalanx.Trait.Observable
  * @mixins Phalanx.Trait.LifecycleCallbacks
  */
@@ -15,15 +15,12 @@ var Layout = defineClass({
   constructor: function(options) {
     // init own object
     this._assignedMap = {};
-    this.onCreate.apply(this, arguments);
 
-    Backbone.View.apply(this, arguments);
+    View.apply(this, arguments);
   }
 });
 
-Layout.with(Trait.LifecycleCallbacks);
-
-_.extend(Layout.prototype, Backbone.View.prototype, {
+_.extend(Layout.prototype, View.prototype, {
   /**
    *     events: {
    *       'click .js_event_selector': 'someMethodName'
@@ -49,18 +46,6 @@ _.extend(Layout.prototype, Backbone.View.prototype, {
    * @property {Object.<String, Phalanx.View>}
    */
   _assignedMap: {},
-
-  /**
-   * @see Backbone.View.setElement
-   * @param {HTMLElement} element
-   * @param {Boolean} delegate
-   */
-  setElement: function(element, delegate) {
-    Backbone.View.prototype.setElement.apply(this, arguments);
-    if (this.el && this.el.parentNode) {
-      this.onSetElement(this.el);
-    }
-  },
 
   /**
    * Assign new View to element in layout.
@@ -129,26 +114,6 @@ _.extend(Layout.prototype, Backbone.View.prototype, {
       this.withdraw(regionName);
     }
   },
-
-  /**
-   * When the layout is destroyed, View which encloses also destroy all.
-   */
-  destroy: function() {
-
-    this.destroyRegions();
-
-    this.undelegateEvents();
-
-    this.onDestroy();
-
-    this.el = this.$el = null;
-  },
-
-  /**
-   * @abstract
-   * @param {HTMLElement} element
-   */
-  onSetElement: function(element) {},
 
   /**
    * @abstract
