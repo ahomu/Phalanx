@@ -1,6 +1,6 @@
 {
   "name": "Phalanx",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "main": "dist/phalanx.js",
   "ignore": [
     "docs",

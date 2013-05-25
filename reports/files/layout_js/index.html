@@ -45,11 +45,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"></i></a></h2>
-      <p class="stat">72.69</p>
+      <p class="stat">71.77</p>
     </div>
     <div class="span6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h2>
-      <p class="stat">161</p>
+      <p class="stat">120</p>
     </div>
   </div>
   <div class="row historical">
@@ -63,11 +63,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty"></i></a></h2>
-      <p class="stat">30.20</p>
+      <p class="stat">27.40</p>
     </div>
     <div class="span6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs"></i></a></h2>
-      <p class="stat">0.66</p>
+      <p class="stat">0.44</p>
     </div>
   </div>
 </div>
@@ -94,8 +94,8 @@
 
 /**
  * @abstract
- * @class  Phalanx.Layout
- * @extends Backbone.View
+ * @class Phalanx.Layout
+ * @extends Phalanx.View
  * @mixins Phalanx.Trait.Observable
  * @mixins Phalanx.Trait.LifecycleCallbacks
  */
@@ -107,15 +107,12 @@ var Layout = defineClass({
   constructor: function(options) {
     // init own object
     this._assignedMap = {};
-    this.onCreate.apply(this, arguments);
 
-    Backbone.View.apply(this, arguments);
+    View.apply(this, arguments);
   }
 });
 
-Layout.with(Trait.LifecycleCallbacks);
-
-_.extend(Layout.prototype, Backbone.View.prototype, {
+_.extend(Layout.prototype, View.prototype, {
   /**
    *     events: {
    *       'click .js_event_selector': 'someMethodName'
@@ -143,23 +140,11 @@ _.extend(Layout.prototype, Backbone.View.prototype, {
   _assignedMap: {},
 
   /**
-   * @see Backbone.View.setElement
-   * @param {HTMLElement} element
-   * @param {Boolean} delegate
-   */
-  setElement: function(element, delegate) {
-    Backbone.View.prototype.setElement.apply(this, arguments);
-    if (this.el && this.el.parentNode) {
-      this.onSetElement(this.el);
-    }
-  },
-
-  /**
    * Assign new View to element in layout.
    * And destroy old View automatically.
    *
    * @param {String} regionName
-   * @param {View} newView
+   * @param {Phalanx.View} newView
    */
   assign: function(regionName, newView) {
     var selector, oldView, assignToEl;
@@ -178,8 +163,7 @@ _.extend(Layout.prototype, Backbone.View.prototype, {
     // old
     oldView && oldView.destroy();
 
-    // new: View has `lookupUi` method but Layout hasn't that method.
-    newView.lookupUi && newView.lookupUi(assignToEl);
+    // new
     newView.setElement(assignToEl);
 
     this._assignedMap[regionName] = newView;
@@ -187,7 +171,7 @@ _.extend(Layout.prototype, Backbone.View.prototype, {
 
   /**
    * @param {String} regionName
-   * @returns {View}
+   * @returns {Phalanx.View}
    */
   getRegionView: function(regionName) {
     if (!(regionName in this.regions)) {
@@ -198,16 +182,11 @@ _.extend(Layout.prototype, Backbone.View.prototype, {
 
   /**
    * @param {String} regionName
-   * @return {View}
    */
   withdraw: function(regionName) {
-    var view;
-
-    view = this.getRegionView(regionName);
+    var view = this.getRegionView(regionName);
     view.destroy();
     this._assignedMap[regionName] = null;
-
-    return view;
   },
 
   /**
@@ -215,7 +194,7 @@ _.extend(Layout.prototype, Backbone.View.prototype, {
    */
   destroyRegions: function() {
     var i = 0, regions = Object.keys(this.regions),
-      iz = this.regions.length, regionName;
+        iz = this.regions.length, regionName;
 
     for (; i<iz; i++) {
       regionName = regions[i];
@@ -224,30 +203,10 @@ _.extend(Layout.prototype, Backbone.View.prototype, {
   },
 
   /**
-   * When the layout is destroyed, View which encloses also destroy all.
-   */
-  destroy: function() {
-
-    this.destroyRegions();
-
-    this.undelegateEvents();
-
-    this.onDestroy();
-
-    this.el = this.$el = null;
-  },
-
-  /**
-   * @abstract
-   * @param {HTMLElement} element
-   */
-  onSetElement: function(element) {},
-
-  /**
    * @abstract
    * @param {String} regionName
-   * @param {View} newView
-   * @param {View} oldView
+   * @param {Phalanx.View} newView
+   * @param {Phalanx.View} oldView
    */
   onChange: function(regionName, newView, oldView) {}
 });</textarea>
