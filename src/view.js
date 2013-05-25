@@ -129,13 +129,13 @@ _.extend(View.prototype, Backbone.View.prototype, {
   },
 
   /**
-   * TODO 要素からのcomponent取得と、componentの生成はメソッドを分割したほうが良い
+   * Flywieght component getter.
    *
    * @param {HTMLElement} el
    * @return {*}
    */
   getComponent: function(el) {
-    var componentName, component, uid;
+    var componentName, uid;
 
     do {
       componentName = el.getAttribute(ATTR_COMPONENT);
@@ -147,18 +147,29 @@ _.extend(View.prototype, Backbone.View.prototype, {
 
     uid  = el.getAttribute(ATTR_COMPONENT_UID);
 
-    if (uid && this._createdComponents[uid]) {
+    if (this._createdComponents[uid]) {
       return this._createdComponents[uid];
     } else {
-      component = new this.components[componentName](el);
-      uid = component.uid;
-
-      this._listenToComponent(component, componentName);
-
-      el.setAttribute(ATTR_COMPONENT_UID, uid);
-      this._createdComponents[uid] = component;
-      return component;
+      return this._newComponent(componentName, el);
     }
+  },
+
+  /**
+   * @param {String} componentName
+   * @param {HTMLElement} el
+   * @return {Phalanx.Component}
+   */
+  _newComponent: function(componentName, el) {
+    var component, uid;
+
+    component = new this.components[componentName](el);
+    uid = component.uid;
+
+    this._listenToComponent(component, componentName);
+
+    el.setAttribute(ATTR_COMPONENT_UID, uid);
+    this._createdComponents[uid] = component;
+    return component;
   },
 
   /**
