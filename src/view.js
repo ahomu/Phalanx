@@ -222,6 +222,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
     for (; i<iz; i++) {
       uid = keys[i];
       component = this._createdComponents[uid];
+      this.stopListening(component);
       component.destroy();
       this._createdComponents[uid] = null;
       delete this._createdComponents[uid];
@@ -238,8 +239,6 @@ _.extend(View.prototype, Backbone.View.prototype, {
     this.destroyComponents();
 
     this.undelegateEvents();
-
-    this.stopListening();
 
     this.releaseUi();
 

@@ -1,4 +1,4 @@
-/*! Phalanx - v0.0.3 ( 2013-05-25 ) - MIT */
+/*! Phalanx - v0.0.4 ( 2013-05-27 ) - MIT */
 (function(window) {
 
 "use strict";
@@ -173,6 +173,50 @@ Trait.AsyncCallbacks = {
    * @abstract
    */
   onFailure: function() {}
+};
+/**
+ * @class Phalanx.Trait.EntityObserver
+ */
+Trait.EntityObserver = {
+
+  /**
+     * @property {Phalanx.Model|Phalanx.Collection}
+   */
+  entity: null,
+
+  /**
+   *     entitylListeners: {
+   *       'change': 'modelChanged'
+   *     }
+   *     // model.trigger('change') => observer.modelChanged()
+   *
+   * @property {Object.<String, String>}
+   */
+  entitylListeners: {},
+
+  /**
+   * Listen to entity events
+   */
+  listenToEntity: function() {
+    var i = 0, events = Object.keys(this.entitylListeners), iz = events.length,
+        event, method;
+
+    for (; i<iz; i++) {
+      event  = events[i];
+      method = this.entitylListeners[event];
+      if (!_.isFunction(this[method])) {
+        throw new Error('Method `' + method + '` is not exists this Entity');
+      }
+      this.listenTo(this.entity, event, this[method]);
+    }
+  },
+
+  /**
+   * Unlisten to bound model events
+   */
+  unlistenToEntity: function() {
+    this.stopListening(this.entity);
+  }
 };
 /**
  * @class Phalanx.Trait.LifecycleCallbacks
@@ -511,6 +555,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
     for (; i<iz; i++) {
       uid = keys[i];
       component = this._createdComponents[uid];
+      this.stopListening(component);
       component.destroy();
       this._createdComponents[uid] = null;
       delete this._createdComponents[uid];
@@ -527,8 +572,6 @@ _.extend(View.prototype, Backbone.View.prototype, {
     this.destroyComponents();
 
     this.undelegateEvents();
-
-    this.stopListening();
 
     this.releaseUi();
 
