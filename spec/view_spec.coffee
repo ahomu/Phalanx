@@ -42,6 +42,14 @@ describe 'Phalanx.View is units of controller element', ->
     layout.assign 'content', view
     expect(view.onSetElement.calledOnce).to.be true
 
+  it 'undefined component name is specified when throw Error', ->
+    expect(->
+      new (View.extend
+        components:
+          dummy: undefined
+      )
+    ).to.throwError()
+
   context 'mixed-in LifecycleCallbacks', ->
 
     it 'call `onCreate` & `initialize` when create layout', ->

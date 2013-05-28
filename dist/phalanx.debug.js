@@ -1,4 +1,4 @@
-/*! Phalanx - v0.0.4 ( 2013-05-27 ) - MIT */
+/*! Phalanx - v0.0.3 ( 2013-05-27 ) - MIT */
 (function(window) {
 
 "use strict";
@@ -437,6 +437,9 @@ _.extend(View.prototype, Backbone.View.prototype, {
     if (events == null) {
       for (; i<iz; i++) {
         componentName  = keys[i];
+        if (this.components[componentName] == null) {
+          throw new Error(componentName + ' Class is not exists.');
+        }
         protoComponent = this.components[componentName].prototype;
         eventKeys      = _.keys(protoComponent.events),
         eventClosures  = _.map(protoComponent.events, this._getComponentEventClosure);
