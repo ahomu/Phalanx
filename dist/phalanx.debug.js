@@ -1,4 +1,4 @@
-/*! Phalanx - v0.0.3 ( 2013-05-27 ) - MIT */
+/*! Phalanx - v0.0.3 ( 2013-05-30 ) - MIT */
 (function(window) {
 
 "use strict";
@@ -429,27 +429,38 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * @param {Object} [events]
    */
   delegateEvents: function(events) {
+    var componentEvents;
+
+    if (events == null) {
+      componentEvents = this._getComponentEvents();
+      Backbone.View.prototype.delegateEvents.apply(this, [_.extend(componentEvents, this.events)]);
+    } else {
+      Backbone.View.prototype.delegateEvents.apply(this, arguments);
+    }
+  },
+
+  /**
+   * @private
+   * @return {Object.<String, String>}
+   */
+  _getComponentEvents: function() {
     var componentEvents = {},
         componentName, protoComponent,
         eventKeys, eventClosures,
         i = 0, keys = Object.keys(this.components), iz = keys.length;
 
-    if (events == null) {
-      for (; i<iz; i++) {
-        componentName  = keys[i];
-        if (this.components[componentName] == null) {
-          throw new Error(componentName + ' Class is not exists.');
-        }
-        protoComponent = this.components[componentName].prototype;
-        eventKeys      = _.keys(protoComponent.events),
-        eventClosures  = _.map(protoComponent.events, this._getComponentEventClosure);
-        _.extend(componentEvents, _.object(eventKeys, eventClosures));
+    for (; i<iz; i++) {
+      componentName  = keys[i];
+      if (this.components[componentName] == null) {
+        throw new Error(componentName + ' Class is not exists.');
       }
-      Backbone.View.prototype.delegateEvents.apply(this, [_.extend(componentEvents, this.events)]);
-    } else {
-      Backbone.View.prototype.delegateEvents.apply(this, arguments);
+      protoComponent = this.components[componentName].prototype;
+      eventKeys      = _.keys(protoComponent.events),
+      eventClosures  = _.map(protoComponent.events, this._getComponentEventClosure);
+      _.extend(componentEvents, _.object(eventKeys, eventClosures));
     }
 
+    return componentEvents;
   },
 
   /**
@@ -468,7 +479,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * Flywieght component getter.
    *
    * @param {HTMLElement} el
-   * @return {*}
+   * @return {Phalanx.Component}
    */
   getComponent: function(el) {
     var componentName, uid;
@@ -491,6 +502,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
   },
 
   /**
+   * @private
    * @param {String} componentName
    * @param {HTMLElement} el
    * @return {Phalanx.Component}
@@ -535,6 +547,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
 
   /**
    * Converted to processed the `listeners` property.
+   * Call at once when view instance created.
    * @private
    */
   _processListeners: function() {
