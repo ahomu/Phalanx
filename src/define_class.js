@@ -2,8 +2,6 @@
 
 var Trait = {};
 
-var DEFINE_NOT_WRITABLE   = {writable: false};
-
 /**
  * `defineClass` is Helper function, to generate Object like Class with basic oop fetures
  *
@@ -65,7 +63,6 @@ function defineClass(constructor_or_members, members) {
    * @return {Klass}
    */
   Constructor.extend = Backbone.View.extend;
-  Object.defineProperty(Constructor, 'extend', DEFINE_NOT_WRITABLE);
 
   /**
    * Mixin the trait in the `prototype` of the class.
@@ -87,7 +84,6 @@ function defineClass(constructor_or_members, members) {
    * @return {Klass}
    */
   Constructor.with = __with;
-  Object.defineProperty(Constructor, 'with', DEFINE_NOT_WRITABLE);
 
   /**
    * Method which can be used instead of the `new` statement
@@ -98,7 +94,6 @@ function defineClass(constructor_or_members, members) {
    * @return {*}
    */
   Constructor.create = __create;
-  Object.defineProperty(Constructor, 'create', DEFINE_NOT_WRITABLE);
 
   /**
    * Call a specific method of the parent class
