@@ -21,7 +21,7 @@ var Model = defineClass({
   }
 });
 
-Model.with(Trait.LifecycleCallbacks);
+Model.mixin(Trait.LifecycleCallbacks);
 
 _.extend(Model.prototype, Backbone.Model.prototype, {
   /**

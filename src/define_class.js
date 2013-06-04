@@ -73,17 +73,17 @@ function defineClass(constructor_or_members, members) {
    *       // ...
    *     };
    *     var ExtendedWithTrait = SomeClass.extend(classDefinition)
-   *                                      .with(AsyncCallbackTrait)
-   *                                      .with(ObservableTrait, {
+   *                                      .mixin(AsyncCallbackTrait)
+   *                                      .mixin(ObservableTrait, {
    *                                        method: 'aliasedMethod'
    *                                      });
    *
-   * @method with
+   * @method mixin
    * @param {Object} trait
    * @param {Object} [aliases]
    * @return {Klass}
    */
-  Constructor.with = __with;
+  Constructor.mixin = __mixin;
 
   /**
    * Method which can be used instead of the `new` statement
@@ -119,7 +119,7 @@ function defineClass(constructor_or_members, members) {
   return Constructor;
 }
 
-function __with(trait, aliases) {
+function __mixin(trait, aliases) {
   /*jshint validthis:true */
   var i = 0, keys = Object.keys(trait), iz = keys.length,
       prop, processed_trait = {};

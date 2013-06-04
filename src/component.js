@@ -80,6 +80,6 @@ var Component = defineClass({
   onSetElement: function(element) {}
 });
 
-Component.with(Trait.Observable)
-         .with(Trait.UiLookupable)
-         .with(Trait.LifecycleCallbacks);
+Component.mixin(Trait.Observable)
+         .mixin(Trait.UiLookupable)
+         .mixin(Trait.LifecycleCallbacks);

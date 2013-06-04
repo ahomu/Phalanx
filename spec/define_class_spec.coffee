@@ -54,7 +54,7 @@ describe '`defineClass` of basic OOP feture provider', ->
         say: ->
           'Batman!'
         speed: 30
-      ).with(BatWing, {fly: 'batmanFly'})
+      ).mixin(BatWing, {fly: 'batmanFly'})
 
       bruce = new Batman(39, 'male')
 

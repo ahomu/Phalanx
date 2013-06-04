@@ -25,8 +25,8 @@ var View = defineClass({
   }
 });
 
-View.with(Trait.UiLookupable)
-    .with(Trait.LifecycleCallbacks);
+View.mixin(Trait.UiLookupable)
+    .mixin(Trait.LifecycleCallbacks);
 
 var ATTR_COMPONENT     = 'data-component',
     ATTR_COMPONENT_UID = 'data-component-uid';

@@ -21,7 +21,7 @@ var Collection = defineClass({
   }
 });
 
-Collection.with(Trait.LifecycleCallbacks);
+Collection.mixin(Trait.LifecycleCallbacks);
 
 _.extend(Collection.prototype, Backbone.Collection.prototype, {
   /**

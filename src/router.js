@@ -20,7 +20,7 @@ var Router = defineClass({
   }
 });
 
-Router.with(Trait.LifecycleCallbacks);
+Router.mixin(Trait.LifecycleCallbacks);
 
 _.extend(Router.prototype, Backbone.Router.prototype, {
   /**

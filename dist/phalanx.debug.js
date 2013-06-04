@@ -76,17 +76,17 @@ function defineClass(constructor_or_members, members) {
    *       // ...
    *     };
    *     var ExtendedWithTrait = SomeClass.extend(classDefinition)
-   *                                      .with(AsyncCallbackTrait)
-   *                                      .with(ObservableTrait, {
+   *                                      .mixin(AsyncCallbackTrait)
+   *                                      .mixin(ObservableTrait, {
    *                                        method: 'aliasedMethod'
    *                                      });
    *
-   * @method with
+   * @method mixin
    * @param {Object} trait
    * @param {Object} [aliases]
    * @return {Klass}
    */
-  Constructor.with = __with;
+  Constructor.mixin = __mixin;
 
   /**
    * Method which can be used instead of the `new` statement
@@ -122,7 +122,7 @@ function defineClass(constructor_or_members, members) {
   return Constructor;
 }
 
-function __with(trait, aliases) {
+function __mixin(trait, aliases) {
   /*jshint validthis:true */
   var i = 0, keys = Object.keys(trait), iz = keys.length,
       prop, processed_trait = {};
@@ -317,7 +317,7 @@ var Router = defineClass({
   }
 });
 
-Router.with(Trait.LifecycleCallbacks);
+Router.mixin(Trait.LifecycleCallbacks);
 
 _.extend(Router.prototype, Backbone.Router.prototype, {
   /**
@@ -353,8 +353,8 @@ var View = defineClass({
   }
 });
 
-View.with(Trait.UiLookupable)
-    .with(Trait.LifecycleCallbacks);
+View.mixin(Trait.UiLookupable)
+    .mixin(Trait.LifecycleCallbacks);
 
 var ATTR_COMPONENT     = 'data-component',
     ATTR_COMPONENT_UID = 'data-component-uid';
@@ -627,7 +627,7 @@ var Model = defineClass({
   }
 });
 
-Model.with(Trait.LifecycleCallbacks);
+Model.mixin(Trait.LifecycleCallbacks);
 
 _.extend(Model.prototype, Backbone.Model.prototype, {
   /**
@@ -684,7 +684,7 @@ var Collection = defineClass({
   }
 });
 
-Collection.with(Trait.LifecycleCallbacks);
+Collection.mixin(Trait.LifecycleCallbacks);
 
 _.extend(Collection.prototype, Backbone.Collection.prototype, {
   /**
@@ -917,9 +917,9 @@ var Component = defineClass({
   onSetElement: function(element) {}
 });
 
-Component.with(Trait.Observable)
-         .with(Trait.UiLookupable)
-         .with(Trait.LifecycleCallbacks);
+Component.mixin(Trait.Observable)
+         .mixin(Trait.UiLookupable)
+         .mixin(Trait.LifecycleCallbacks);
 
 /**
  * @class Phalanx
