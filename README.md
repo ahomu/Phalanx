@@ -234,3 +234,7 @@ testem #run specs
 ##TODO
 
 - Conceptual diagram
+- template declaration (assign Fucntion or element's selector)
+- permanent view instance handling
+- rename `onSetElement` to `ready`
+- support Component parameter from (DOM attributes | View's model or collection) declaration

@@ -33,11 +33,19 @@ var Component = defineClass({
   uid: null,
 
   /**
+   * placeholder of instance parameters
+   * @property {Object}
+   */
+  params: {},
+
+  /**
    * @constructor
    * @param {HTMLElement} el
    */
   constructor: function(el) {
     this.uid = INCREMENT_COMPONENT_UID++;
+
+    this.params = _.clone(this.params);
 
     this.onCreate.apply(this, arguments);
 

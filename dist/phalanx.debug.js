@@ -1,4 +1,4 @@
-/*! Phalanx - v0.0.4 ( 2013-06-04 ) - MIT */
+/*! Phalanx - v0.0.4 ( 2013-06-09 ) - MIT */
 (function(window) {
 
 "use strict";
@@ -870,11 +870,19 @@ var Component = defineClass({
   uid: null,
 
   /**
+   * placeholder of instance parameters
+   * @property {Object}
+   */
+  params: {},
+
+  /**
    * @constructor
    * @param {HTMLElement} el
    */
   constructor: function(el) {
     this.uid = INCREMENT_COMPONENT_UID++;
+
+    this.params = _.clone(this.params);
 
     this.onCreate.apply(this, arguments);
 

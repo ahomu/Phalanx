@@ -13,9 +13,17 @@ Trait.LifecycleCallbacks = {
 
   /**
    * It is called as a common initialization process. (derived from Backbone)
+   * In Layout, View, Component...After set initial element & Before event delegation.
    * @abstract
    */
   initialize: function() {},
+
+  /**
+   * It is called when new element assigned.
+   * called only Layout, View, Component.
+   * @abstract
+   */
+  ready: function() {},
 
   /**
    * It is called when destroying the instance.
