@@ -12,9 +12,12 @@ describe 'Phalanx.Component is units of actionable ui', ->
   View = Phalanx.View.extend
     listeners:
       'custom btn': 'onCustom'
+      'custom2 btn': 'onCustom2'
     components:
       btn: Button
     onCustom: ->
+      # noop
+    onCustom2: ->
       # noop
 
   fixture = null
@@ -43,7 +46,8 @@ describe 'Phalanx.Component is units of actionable ui', ->
 
     it 'delegate event', ->
       view = new View el: $('#view', fixture)
-      view.onCustom = sinon.spy();
+      view.onCustom  = sinon.spy();
+      view.onCustom2 = sinon.spy();
       $btns = $('[data-ui="btn"]', fixture)
       $nums = $('[data-ui="num"]', fixture)
 
@@ -70,6 +74,10 @@ describe 'Phalanx.Component is units of actionable ui', ->
       component = view.getComponent($btns.eq(1)[0])
       component.trigger('custom');
       expect(view.onCustom.calledOnce).to.be true
+
+      component = view.getComponent($btns.eq(1)[0])
+      component.trigger('custom2');
+      expect(view.onCustom2.calledOnce).to.be true
 
     it 'view listen to component event', ->
       view = new View el: $('#view', fixture)

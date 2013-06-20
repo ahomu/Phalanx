@@ -547,12 +547,15 @@ _.extend(View.prototype, Backbone.View.prototype, {
    */
   _processListeners: function() {
     var i = 0, listeners = Object.keys(this.listeners), iz = listeners.length,
-        event_component, methodName;
+        event_component, methodName, eventMap;
 
     for (; i<iz; i++) {
       event_component = listeners[i].split(/\s+/);
       methodName      = this.listeners[listeners[i]];
-      (this._processedListeners[event_component[1]] = {})[event_component[0]] = methodName;
+      eventMap        = this._processedListeners[event_component[1]];
+
+      eventMap || (eventMap = this._processedListeners[event_component[1]] = {});
+      eventMap[event_component[0]] = methodName;
     }
   },
 
