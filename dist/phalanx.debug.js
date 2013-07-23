@@ -1,4 +1,4 @@
-/*! Phalanx - v0.0.4 ( 2013-06-09 ) - MIT */
+/*! Phalanx - v0.0.4 ( 2013-07-23 ) - MIT */
 (function(window) {
 
 "use strict";
@@ -226,9 +226,27 @@ Trait.LifecycleCallbacks = {
 
   /**
    * It is called as a common initialization process. (derived from Backbone)
+   * In Layout, View, Component...After set initial element & Before event delegation.
    * @abstract
    */
   initialize: function() {},
+
+  /**
+   * It is called when new element assigned.
+   * called only Layout, View, Component.
+   * @abstract
+   */
+  onSetElement: function() {},
+
+  /**
+   * @abstract
+   */
+  onPause: function() {},
+
+  /**
+   * @abstract
+   */
+  onResume: function() {},
 
   /**
    * It is called when destroying the instance.
@@ -569,7 +587,6 @@ _.extend(View.prototype, Backbone.View.prototype, {
     for (; i<iz; i++) {
       uid = keys[i];
       component = this._createdComponents[uid];
-      this.stopListening(component);
       component.destroy();
       this._createdComponents[uid] = null;
       delete this._createdComponents[uid];
@@ -587,11 +604,43 @@ _.extend(View.prototype, Backbone.View.prototype, {
 
     this.undelegateEvents();
 
+    this.stopListening();
+
     this.releaseUi();
 
     this.onDestroy();
 
     this.el = this.$el = null;
+  },
+
+  /**
+   * @property {Boolean}
+   */
+  persistent: false,
+
+  /**
+   * @property {Boolean}
+   */
+  paused: false,
+
+  /**
+   * Pause events
+   */
+  pause: function() {
+    this.paused = true;
+    this.undelegateEvents();
+    this.releaseUi();
+    this.onPause();
+  },
+
+  /**
+   * Resume events
+   */
+  resume: function() {
+    this.paused = false;
+    this.delegateEvents();
+    this.lookupUi();
+    this.onResume();
   },
 
   /**
@@ -777,7 +826,7 @@ _.extend(Layout.prototype, View.prototype, {
    * @param {Phalanx.View} newView
    */
   assign: function(regionName, newView) {
-    var selector, oldView, assignToEl;
+    var selector, oldView, assignToEl, replaceToEl;
 
     selector = this.regions[regionName];
     oldView  = this.getRegionView(regionName);
@@ -791,12 +840,45 @@ _.extend(Layout.prototype, View.prototype, {
     this.onChange(regionName, newView, oldView);
 
     // old
-    oldView && oldView.destroy();
+    if (oldView) {
+      if (oldView.persistent) {
+        // create new element
+        replaceToEl = document.createElement(assignToEl.tagName);
+        this._copyAttrs(assignToEl, replaceToEl);
+
+        // replace new element & keeping old element (oldView has refrence of old element)
+        assignToEl.parentNode.replaceChild(replaceToEl, assignToEl);
+        assignToEl = replaceToEl;
+        oldView.pause();
+      } else {
+        oldView.destroy();
+      }
+    }
 
     // new
-    newView.setElement(assignToEl);
+    if (newView.persistent && newView.paused) {
+      this._copyAttrs(assignToEl, newView.el);
+
+      $(assignToEl).replaceWith(newView.$el);
+      newView.resume();
+    } else {
+      newView.setElement(assignToEl);
+    }
 
     this._assignedMap[regionName] = newView;
+  },
+
+  /**
+   * Copy to some specified attributes
+   *
+   * @private
+   * @param {HTMLElement} fromEl
+   * @param {HTMLElement} toEl
+   */
+  _copyAttrs: function(fromEl, toEl) {
+    toEl.setAttribute('id',    fromEl.getAttribute('id')    || '');
+    toEl.setAttribute('class', fromEl.getAttribute('class') || '');
+    toEl.setAttribute('style', fromEl.getAttribute('style') || '');
   },
 
   /**

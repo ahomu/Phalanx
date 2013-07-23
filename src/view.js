@@ -241,7 +241,6 @@ _.extend(View.prototype, Backbone.View.prototype, {
     for (; i<iz; i++) {
       uid = keys[i];
       component = this._createdComponents[uid];
-      this.stopListening(component);
       component.destroy();
       this._createdComponents[uid] = null;
       delete this._createdComponents[uid];
@@ -259,11 +258,43 @@ _.extend(View.prototype, Backbone.View.prototype, {
 
     this.undelegateEvents();
 
+    this.stopListening();
+
     this.releaseUi();
 
     this.onDestroy();
 
     this.el = this.$el = null;
+  },
+
+  /**
+   * @property {Boolean}
+   */
+  persistent: false,
+
+  /**
+   * @property {Boolean}
+   */
+  paused: false,
+
+  /**
+   * Pause events
+   */
+  pause: function() {
+    this.paused = true;
+    this.undelegateEvents();
+    this.releaseUi();
+    this.onPause();
+  },
+
+  /**
+   * Resume events
+   */
+  resume: function() {
+    this.paused = false;
+    this.delegateEvents();
+    this.lookupUi();
+    this.onResume();
   },
 
   /**

@@ -55,7 +55,7 @@ _.extend(Layout.prototype, View.prototype, {
    * @param {Phalanx.View} newView
    */
   assign: function(regionName, newView) {
-    var selector, oldView, assignToEl;
+    var selector, oldView, assignToEl, replaceToEl;
 
     selector = this.regions[regionName];
     oldView  = this.getRegionView(regionName);
@@ -69,12 +69,45 @@ _.extend(Layout.prototype, View.prototype, {
     this.onChange(regionName, newView, oldView);
 
     // old
-    oldView && oldView.destroy();
+    if (oldView) {
+      if (oldView.persistent) {
+        // create new element
+        replaceToEl = document.createElement(assignToEl.tagName);
+        this._copyAttrs(assignToEl, replaceToEl);
+
+        // replace new element & keeping old element (oldView has refrence of old element)
+        assignToEl.parentNode.replaceChild(replaceToEl, assignToEl);
+        assignToEl = replaceToEl;
+        oldView.pause();
+      } else {
+        oldView.destroy();
+      }
+    }
 
     // new
-    newView.setElement(assignToEl);
+    if (newView.persistent && newView.paused) {
+      this._copyAttrs(assignToEl, newView.el);
+
+      $(assignToEl).replaceWith(newView.$el);
+      newView.resume();
+    } else {
+      newView.setElement(assignToEl);
+    }
 
     this._assignedMap[regionName] = newView;
+  },
+
+  /**
+   * Copy to some specified attributes
+   *
+   * @private
+   * @param {HTMLElement} fromEl
+   * @param {HTMLElement} toEl
+   */
+  _copyAttrs: function(fromEl, toEl) {
+    toEl.setAttribute('id',    fromEl.getAttribute('id')    || '');
+    toEl.setAttribute('class', fromEl.getAttribute('class') || '');
+    toEl.setAttribute('style', fromEl.getAttribute('style') || '');
   },
 
   /**
