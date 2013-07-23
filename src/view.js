@@ -81,6 +81,16 @@ _.extend(View.prototype, Backbone.View.prototype, {
   _processedListeners: {},
 
   /**
+   * @property {Boolean}
+   */
+  persistent: false,
+
+  /**
+   * @property {Boolean}
+   */
+  paused: false,
+
+  /**
    * @param {HTMLElement} element
    * @param {Boolean} delegate
    */
@@ -251,31 +261,14 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * Destory and teadown View.
    */
   destroy: function() {
-
-    this.destroyRegions && this.destroyRegions();
-
     this.destroyComponents();
-
     this.undelegateEvents();
-
     this.stopListening();
-
     this.releaseUi();
 
     this.onDestroy();
-
     this.el = this.$el = null;
   },
-
-  /**
-   * @property {Boolean}
-   */
-  persistent: false,
-
-  /**
-   * @property {Boolean}
-   */
-  paused: false,
 
   /**
    * Pause events
@@ -284,6 +277,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
     this.paused = true;
     this.undelegateEvents();
     this.releaseUi();
+
     this.onPause();
   },
 
@@ -294,6 +288,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
     this.paused = false;
     this.delegateEvents();
     this.lookupUi();
+
     this.onResume();
   },
 

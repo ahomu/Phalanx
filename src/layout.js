@@ -131,16 +131,42 @@ _.extend(Layout.prototype, View.prototype, {
   },
 
   /**
-   * Destroy all regions assigned views.
+   * @override Phalanx.View.destroy
    */
-  destroyRegions: function() {
+  destroy: function() {
     var i = 0, regions = Object.keys(this.regions),
-        iz = this.regions.length, regionName;
+        regionName;
 
-    for (; i<iz; i++) {
-      regionName = regions[i];
+    while ((regionName = regions[i++])) {
       this.withdraw(regionName);
     }
+    View.prototype.destroy.apply(this, arguments);
+  },
+
+  /**
+   * @override Phalanx.View.pause
+   */
+  pause: function() {
+    var i = 0, regions = Object.keys(this.regions),
+        regionName;
+
+    while ((regionName = regions[i++])) {
+      this.getRegionView(regionName).pause();
+    }
+    View.prototype.pause.apply(this, arguments);
+  },
+
+  /**
+   * @override Phalanx.View.resume
+   */
+  resume: function() {
+    var i = 0, regions = Object.keys(this.regions),
+        regionName;
+
+    while ((regionName = regions[i++])) {
+      this.getRegionView(regionName).resume();
+    }
+    View.prototype.resume.apply(this, arguments);
   },
 
   /**

@@ -427,6 +427,16 @@ _.extend(View.prototype, Backbone.View.prototype, {
   _processedListeners: {},
 
   /**
+   * @property {Boolean}
+   */
+  persistent: false,
+
+  /**
+   * @property {Boolean}
+   */
+  paused: false,
+
+  /**
    * @param {HTMLElement} element
    * @param {Boolean} delegate
    */
@@ -597,31 +607,14 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * Destory and teadown View.
    */
   destroy: function() {
-
-    this.destroyRegions && this.destroyRegions();
-
     this.destroyComponents();
-
     this.undelegateEvents();
-
     this.stopListening();
-
     this.releaseUi();
 
     this.onDestroy();
-
     this.el = this.$el = null;
   },
-
-  /**
-   * @property {Boolean}
-   */
-  persistent: false,
-
-  /**
-   * @property {Boolean}
-   */
-  paused: false,
 
   /**
    * Pause events
@@ -630,6 +623,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
     this.paused = true;
     this.undelegateEvents();
     this.releaseUi();
+
     this.onPause();
   },
 
@@ -640,6 +634,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
     this.paused = false;
     this.delegateEvents();
     this.lookupUi();
+
     this.onResume();
   },
 
@@ -902,16 +897,42 @@ _.extend(Layout.prototype, View.prototype, {
   },
 
   /**
-   * Destroy all regions assigned views.
+   * @override Phalanx.View.destroy
    */
-  destroyRegions: function() {
+  destroy: function() {
     var i = 0, regions = Object.keys(this.regions),
-        iz = this.regions.length, regionName;
+        regionName;
 
-    for (; i<iz; i++) {
-      regionName = regions[i];
+    while ((regionName = regions[i++])) {
       this.withdraw(regionName);
     }
+    View.prototype.destroy.apply(this, arguments);
+  },
+
+  /**
+   * @override Phalanx.View.pause
+   */
+  pause: function() {
+    var i = 0, regions = Object.keys(this.regions),
+        regionName;
+
+    while ((regionName = regions[i++])) {
+      this.getRegionView(regionName).pause();
+    }
+    View.prototype.pause.apply(this, arguments);
+  },
+
+  /**
+   * @override Phalanx.View.resume
+   */
+  resume: function() {
+    var i = 0, regions = Object.keys(this.regions),
+        regionName;
+
+    while ((regionName = regions[i++])) {
+      this.getRegionView(regionName).resume();
+    }
+    View.prototype.resume.apply(this, arguments);
   },
 
   /**
