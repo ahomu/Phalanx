@@ -1,4 +1,4 @@
-/*! Phalanx - v0.0.4 ( 2013-07-23 ) - MIT */
+/*! Phalanx - v0.0.4 ( 2013-07-26 ) - MIT */
 (function(window) {
 
 "use strict";
@@ -614,17 +614,18 @@ _.extend(View.prototype, Backbone.View.prototype, {
 
     this.onDestroy();
     this.el = this.$el = null;
+    this.model = this.collection = null;
   },
 
   /**
    * Pause events
    */
   pause: function() {
+    this.onPause();
+
     this.paused = true;
     this.undelegateEvents();
     this.releaseUi();
-
-    this.onPause();
   },
 
   /**
@@ -837,6 +838,8 @@ _.extend(Layout.prototype, View.prototype, {
     // old
     if (oldView) {
       if (oldView.persistent) {
+        oldView.pause();
+
         // create new element
         replaceToEl = document.createElement(assignToEl.tagName);
         this._copyAttrs(assignToEl, replaceToEl);
@@ -844,23 +847,23 @@ _.extend(Layout.prototype, View.prototype, {
         // replace new element & keeping old element (oldView has refrence of old element)
         assignToEl.parentNode.replaceChild(replaceToEl, assignToEl);
         assignToEl = replaceToEl;
-        oldView.pause();
       } else {
         oldView.destroy();
       }
     }
 
+    this._assignedMap[regionName] = newView;
+
     // new
     if (newView.persistent && newView.paused) {
       this._copyAttrs(assignToEl, newView.el);
 
-      $(assignToEl).replaceWith(newView.$el);
+      assignToEl.parentNode.replaceChild(newView.el, assignToEl);
       newView.resume();
     } else {
       newView.setElement(assignToEl);
     }
 
-    this._assignedMap[regionName] = newView;
   },
 
   /**
@@ -892,8 +895,8 @@ _.extend(Layout.prototype, View.prototype, {
    */
   withdraw: function(regionName) {
     var view = this.getRegionView(regionName);
-    view.destroy();
     this._assignedMap[regionName] = null;
+    view && view.destroy();
   },
 
   /**
@@ -917,7 +920,7 @@ _.extend(Layout.prototype, View.prototype, {
         regionName;
 
     while ((regionName = regions[i++])) {
-      this.getRegionView(regionName).pause();
+      this.getRegionView(regionName) && this.getRegionView(regionName).pause();
     }
     View.prototype.pause.apply(this, arguments);
   },
@@ -930,7 +933,7 @@ _.extend(Layout.prototype, View.prototype, {
         regionName;
 
     while ((regionName = regions[i++])) {
-      this.getRegionView(regionName).resume();
+      this.getRegionView(regionName) && this.getRegionView(regionName).resume();
     }
     View.prototype.resume.apply(this, arguments);
   },
