@@ -268,17 +268,18 @@ _.extend(View.prototype, Backbone.View.prototype, {
 
     this.onDestroy();
     this.el = this.$el = null;
+    this.model = this.collection = null;
   },
 
   /**
    * Pause events
    */
   pause: function() {
+    this.onPause();
+
     this.paused = true;
     this.undelegateEvents();
     this.releaseUi();
-
-    this.onPause();
   },
 
   /**

@@ -20,5 +20,6 @@
     "dist/phalanx.debug.js",
     "spec/*_spec.js"
   ],
-  "launch_in_dev": ["PhantomJS"]
+  "launch_in_dev": ["PhantomJS"],
+  "launch_in_ci": ["PhantomJS"]
 }
