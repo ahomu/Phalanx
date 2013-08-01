@@ -63,8 +63,8 @@ var Component = defineClass({
     this.el = this.$el[0];
 
     if (this.el && this.el.parentNode) {
-      this.lookupUi(this.$el);
-      this.onSetElement(this.el);
+      this.lookupUi();
+      this.onSetElement();
 
       this.id = parseInt(this.el.getAttribute('data-id'), 10);
     }
@@ -83,9 +83,8 @@ var Component = defineClass({
 
   /**
    * @abstract
-   * @param {HTMLElement} element
    */
-  onSetElement: function(element) {}
+  onSetElement: function() {}
 });
 
 Component.mixin(Trait.Observable)

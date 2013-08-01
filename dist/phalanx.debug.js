@@ -1,4 +1,4 @@
-/*! Phalanx - v0.0.4 ( 2013-07-26 ) - MIT */
+/*! Phalanx - v0.0.4 ( 2013-08-01 ) - MIT */
 (function(window) {
 
 "use strict";
@@ -266,6 +266,11 @@ var UI_FIND_PLACEHOLDER = '[data-ui="{name}"]';
  */
 Trait.UiLookupable = {
   /**
+   * @property {HTMLElement|jQuery}
+   */
+  el: null,
+
+  /**
    *     ui: {
    *       hoge: null
    *     }
@@ -282,12 +287,10 @@ Trait.UiLookupable = {
 
   /**
    * From the selector defined by this.ui, caching to explore the elements.
-   *
-   * @params {HTMLElement|jQuery}
    */
-  lookupUi: function(element) {
+  lookupUi: function() {
     var name, selector,
-        $baseEl = element instanceof Backbone.$ ? element : Backbone.$(element),
+        $baseEl = this.el instanceof Backbone.$ ? this.el : Backbone.$(this.el),
         i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
     this.ui  = {};
@@ -443,8 +446,8 @@ _.extend(View.prototype, Backbone.View.prototype, {
   setElement: function(element, delegate) {
     Backbone.View.prototype.setElement.apply(this, arguments);
     if (this.el && this.el.parentNode) {
-      this.lookupUi(this.$el);
-      this.onSetElement(this.el);
+      this.lookupUi();
+      this.onSetElement();
     }
   },
 
@@ -615,6 +618,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
     this.onDestroy();
     this.el = this.$el = null;
     this.model = this.collection = null;
+    this.options = this._processedListeners = null;
   },
 
   /**
@@ -641,9 +645,8 @@ _.extend(View.prototype, Backbone.View.prototype, {
 
   /**
    * @abstract
-   * @param {HTMLElement} element
    */
-  onSetElement: function(element) {},
+  onSetElement: function() {},
 
   /**
    * @abstract
@@ -1009,8 +1012,8 @@ var Component = defineClass({
     this.el = this.$el[0];
 
     if (this.el && this.el.parentNode) {
-      this.lookupUi(this.$el);
-      this.onSetElement(this.el);
+      this.lookupUi();
+      this.onSetElement();
 
       this.id = parseInt(this.el.getAttribute('data-id'), 10);
     }
@@ -1029,9 +1032,8 @@ var Component = defineClass({
 
   /**
    * @abstract
-   * @param {HTMLElement} element
    */
-  onSetElement: function(element) {}
+  onSetElement: function() {}
 });
 
 Component.mixin(Trait.Observable)

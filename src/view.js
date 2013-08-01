@@ -97,8 +97,8 @@ _.extend(View.prototype, Backbone.View.prototype, {
   setElement: function(element, delegate) {
     Backbone.View.prototype.setElement.apply(this, arguments);
     if (this.el && this.el.parentNode) {
-      this.lookupUi(this.$el);
-      this.onSetElement(this.el);
+      this.lookupUi();
+      this.onSetElement();
     }
   },
 
@@ -269,6 +269,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
     this.onDestroy();
     this.el = this.$el = null;
     this.model = this.collection = null;
+    this.options = this._processedListeners = null;
   },
 
   /**
@@ -295,9 +296,8 @@ _.extend(View.prototype, Backbone.View.prototype, {
 
   /**
    * @abstract
-   * @param {HTMLElement} element
    */
-  onSetElement: function(element) {},
+  onSetElement: function() {},
 
   /**
    * @abstract
