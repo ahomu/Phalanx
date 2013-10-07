@@ -276,10 +276,12 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * Pause events
    */
   pause: function() {
+    this.paused = true;
     this.onPause();
 
-    this.paused = true;
+    this.destroyComponents();
     this.undelegateEvents();
+    this.stopListening();
     this.releaseUi();
   },
 
@@ -288,6 +290,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
    */
   resume: function() {
     this.paused = false;
+
     this.delegateEvents();
     this.lookupUi();
 

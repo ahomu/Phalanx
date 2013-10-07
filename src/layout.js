@@ -55,10 +55,15 @@ _.extend(Layout.prototype, View.prototype, {
    * @param {Phalanx.View} newView
    */
   assign: function(regionName, newView) {
-    var selector, oldView, assignToEl, replaceToEl;
+    var selector, oldView, assignToEl;
 
     selector = this.regions[regionName];
     oldView  = this.getRegionView(regionName);
+
+    if (!this.$el) {
+      // maybe already destroy
+      return;
+    }
     assignToEl = this.$el.find(selector)[0];
 
     if (!selector || !assignToEl) {
@@ -72,14 +77,7 @@ _.extend(Layout.prototype, View.prototype, {
     if (oldView) {
       if (oldView.persistent) {
         oldView.pause();
-
-        // create new element
-        replaceToEl = document.createElement(assignToEl.tagName);
-        this._copyAttrs(assignToEl, replaceToEl);
-
-        // replace new element & keeping old element (oldView has refrence of old element)
-        assignToEl.parentNode.replaceChild(replaceToEl, assignToEl);
-        assignToEl = replaceToEl;
+        oldView.$pausingCache = oldView.$el.children();
       } else {
         oldView.destroy();
       }
@@ -89,9 +87,8 @@ _.extend(Layout.prototype, View.prototype, {
 
     // new
     if (newView.persistent && newView.paused) {
-      this._copyAttrs(assignToEl, newView.el);
-
-      assignToEl.parentNode.replaceChild(newView.el, assignToEl);
+      newView.$el.empty().append(newView.$pausingCache);
+      newView.$pausingCache = null;
       newView.resume();
     } else {
       newView.setElement(assignToEl);
