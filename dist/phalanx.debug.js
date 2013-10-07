@@ -887,7 +887,10 @@ _.extend(Layout.prototype, View.prototype, {
    * @return {Boolean}
    */
   isRegionExists: function(regionName) {
-    return !!this.regions[regionName] && !!this.$el.find(this.regions[regionName]).length;
+    if (!(regionName in this.regions)) {
+      throw new Error('Specified region `' + regionName + '` is not declared');
+    }
+    return !!this.$el.find(this.regions[regionName]).length;
   },
 
   /**
