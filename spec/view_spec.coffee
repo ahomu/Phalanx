@@ -100,3 +100,38 @@ describe 'Phalanx.View is units of controller element', ->
       expect(view.ui.ad).to.be null
       expect(view.$ui.nav).to.be null
       expect(view.$ui.ad).to.be null
+
+  context 'persistently View', ->
+
+    it 'call `onPause` when change & pausing on Layout', ->
+      layout = new Layout el: $('#layout', fixture)
+
+      viewA = new View
+      viewA.persistent = true
+
+      viewB = new View
+      viewA.onPause = sinon.spy();
+
+      layout.assign 'header', viewA
+      layout.assign 'header', viewB
+
+      expect(_.compact(_.values(viewA.ui)).length).to.be 0
+      expect(_.compact(_.values(viewA.$ui)).length).to.be 0
+      expect(viewA.onPause.calledOnce).to.be true
+
+    it 'call `onPause` when change & resuming on Layout', ->
+      layout = new Layout el: $('#layout', fixture)
+
+      viewA = new View
+      viewA.persistent = true
+
+      viewB = new View
+      viewA.onResume = sinon.spy();
+
+      layout.assign 'header', viewA
+      layout.assign 'header', viewB
+      layout.assign 'header', viewA
+
+      expect(_.compact(_.values(viewA.ui)).length).to.be 2
+      expect(_.compact(_.values(viewA.$ui)).length).to.be 2
+      expect(viewA.onResume.calledOnce).to.be true
