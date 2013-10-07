@@ -66,6 +66,13 @@ describe 'Phalanx.Layout is layout map of document', ->
     expect(layout.el).to.be $('#layout', fixture)[0]
     expect(layout.$el[0]).to.be $('#layout', fixture)[0]
 
+  it 'call `isRegionExists` return bool', ->
+    layout = new Layout el: $('#layout', fixture)
+    layout.regions.someone = '#js-isnot-existing-element';
+    expect(layout.isRegionExists('content')).to.be true
+    expect(layout.isRegionExists('undefined-region-name')).to.be false
+    expect(layout.isRegionExists('someone')).to.be false
+
   it 'call `onSetElement` when create layout with `el`', ->
     Layout.prototype.onSetElement = sinon.spy()
     layout = new Layout el: $('#layout', fixture)

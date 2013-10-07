@@ -884,6 +884,14 @@ _.extend(Layout.prototype, View.prototype, {
 
   /**
    * @param {String} regionName
+   * @return {Boolean}
+   */
+  isRegionExists: function(regionName) {
+    return this.regions[regionName] && !!this.$el.find(this.regions[regionName]).length;
+  },
+
+  /**
+   * @param {String} regionName
    * @returns {Phalanx.View}
    */
   getRegionView: function(regionName) {
