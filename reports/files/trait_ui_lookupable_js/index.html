@@ -45,11 +45,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"></i></a></h2>
-      <p class="stat">60.99</p>
+      <p class="stat">60.85</p>
     </div>
     <div class="span6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h2>
-      <p class="stat">58</p>
+      <p class="stat">61</p>
     </div>
   </div>
   <div class="row historical">
@@ -63,11 +63,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty"></i></a></h2>
-      <p class="stat">21.11</p>
+      <p class="stat">22.00</p>
     </div>
     <div class="span6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs"></i></a></h2>
-      <p class="stat">0.30</p>
+      <p class="stat">0.31</p>
     </div>
   </div>
 </div>
@@ -90,45 +90,48 @@
 
 <div class="container">
   <div class="row">
-    <textarea id="file-source" class="span12">'use strict';
+    <textarea id="file-source" class="span12">&#039;use strict&#039;;
 
-var UI_FIND_PLACEHOLDER = '[data-ui="{name}"]';
+var UI_FIND_PLACEHOLDER = &#039;[data-ui=&quot;{name}&quot;]&#039;;
 
 /**
  * @class Phalanx.Trait.UiLookupable
  */
 Trait.UiLookupable = {
   /**
+   * @property {HTMLElement|jQuery}
+   */
+  el: null,
+
+  /**
    *     ui: {
    *       hoge: null
    *     }
-   *     // view.ui.hoge => [data-ui="hoge"]
+   *     // view.ui.hoge =&gt; [data-ui=&quot;hoge&quot;]
    *
-   * @property {Object.<String, Null>}
+   * @property {Object.&lt;String, Null&gt;}
    */
   ui: {},
 
   /**
-   * @property {Object.<String, jQuery>}
+   * @property {Object.&lt;String, jQuery&gt;}
    */
   $ui: {},
 
   /**
    * From the selector defined by this.ui, caching to explore the elements.
-   *
-   * @params {HTMLElement|jQuery}
    */
-  lookupUi: function(element) {
+  lookupUi: function() {
     var name, selector,
-        $baseEl = element instanceof Backbone.$ ? element : Backbone.$(element),
+        $baseEl = this.el instanceof Backbone.$ ? this.el : Backbone.$(this.el),
         i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
     this.ui  = {};
     this.$ui = {};
 
-    for (; i<iz; i++) {
+    for (; i&lt;iz; i++) {
       name = keys[i];
-      selector = UI_FIND_PLACEHOLDER.replace('{name}', name);
+      selector = UI_FIND_PLACEHOLDER.replace(&#039;{name}&#039;, name);
       this.$ui[name] = $baseEl.find(selector);
       this.ui[name]  = this.$ui[name].length ? this.$ui[name][0] : null;
     }
@@ -141,7 +144,7 @@ Trait.UiLookupable = {
     var name,
         i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
-    for (; i<iz; i++) {
+    for (; i&lt;iz; i++) {
       name = keys[i];
       this.$ui[name] = null;
       this.ui[name] = null;

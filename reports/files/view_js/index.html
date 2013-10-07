@@ -45,11 +45,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"></i></a></h2>
-      <p class="stat">65.96</p>
+      <p class="stat">66.46</p>
     </div>
     <div class="span6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h2>
-      <p class="stat">264</p>
+      <p class="stat">312</p>
     </div>
   </div>
   <div class="row historical">
@@ -63,11 +63,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty"></i></a></h2>
-      <p class="stat">48.19</p>
+      <p class="stat">50.55</p>
     </div>
     <div class="span6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs"></i></a></h2>
-      <p class="stat">1.47</p>
+      <p class="stat">1.74</p>
     </div>
   </div>
 </div>
@@ -90,7 +90,7 @@
 
 <div class="container">
   <div class="row">
-    <textarea id="file-source" class="span12">'use strict';
+    <textarea id="file-source" class="span12">&#039;use strict&#039;;
 
 /**
  * @abstract
@@ -117,21 +117,21 @@ var View = defineClass({
   }
 });
 
-View.with(Trait.UiLookupable)
-    .with(Trait.LifecycleCallbacks);
+View.mixin(Trait.UiLookupable)
+    .mixin(Trait.LifecycleCallbacks);
 
-var ATTR_COMPONENT     = 'data-component',
-    ATTR_COMPONENT_UID = 'data-component-uid';
+var ATTR_COMPONENT     = &#039;data-component&#039;,
+    ATTR_COMPONENT_UID = &#039;data-component-uid&#039;;
 
 _.extend(View.prototype, Backbone.View.prototype, {
 
   /**
    *     events: {
-   *       'click .js_event_selector': 'someMethodName'
+   *       &#039;click .js_event_selector&#039;: &#039;someMethodName&#039;
    *     }
-   *     // $('.js_event_selector').click() => someMethod()
+   *     // $(&#039;.js_event_selector&#039;).click() =&gt; someMethod()
    *
-   * @property {Object.<String, String|Function>}
+   * @property {Object.&lt;String, String|Function&gt;}
    */
   events: {},
 
@@ -139,38 +139,48 @@ _.extend(View.prototype, Backbone.View.prototype, {
    *     components: {
    *       likeBtn: LikeBtnComponent
    *     }
-   *     // <button data-component="likeBtn"></button> => LikeBtnComponent
+   *     // &lt;button data-component=&quot;likeBtn&quot;&gt;&lt;/button&gt; =&gt; LikeBtnComponent
    *
-   * @property {Object.<String, Phalanx.Component>}
+   * @property {Object.&lt;String, Phalanx.Component&gt;}
    */
   components: {},
 
   /**
    *     listeners: {
-   *       'customEvent likeBtn': 'receiveCustomEvent'
+   *       &#039;customEvent likeBtn&#039;: &#039;receiveCustomEvent&#039;
    *     }
-   *     // component.trigger('customEvent') => view.receiveCustomEvent()
+   *     // component.trigger(&#039;customEvent&#039;) =&gt; view.receiveCustomEvent()
    *
-   * @property {Object.<String, String>}
+   * @property {Object.&lt;String, String&gt;}
    */
   listeners: {},
 
   /**
    * @private
-   * @property {Object.<Number, Phalanx.Component>}
+   * @property {Object.&lt;Number, Phalanx.Component&gt;}
    */
   _createdComponents: {},
 
   /**
    *     _processedListeners: {
-   *       'likeBtn': {
-   *         'customeEvent': 'receiveCustomEvent'
+   *       &#039;likeBtn&#039;: {
+   *         &#039;customeEvent&#039;: &#039;receiveCustomEvent&#039;
    *       }
    *     }
    * @private
-   * @property {Object.<String, Object<String, String>>}
+   * @property {Object.&lt;String, Object&lt;String, String&gt;&gt;}
    */
   _processedListeners: {},
+
+  /**
+   * @property {Boolean}
+   */
+  persistent: false,
+
+  /**
+   * @property {Boolean}
+   */
+  paused: false,
 
   /**
    * @param {HTMLElement} element
@@ -178,9 +188,9 @@ _.extend(View.prototype, Backbone.View.prototype, {
    */
   setElement: function(element, delegate) {
     Backbone.View.prototype.setElement.apply(this, arguments);
-    if (this.el && this.el.parentNode) {
-      this.lookupUi(this.$el);
-      this.onSetElement(this.el);
+    if (this.el &amp;&amp; this.el.parentNode) {
+      this.lookupUi();
+      this.onSetElement();
     }
   },
 
@@ -188,24 +198,38 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * @param {Object} [events]
    */
   delegateEvents: function(events) {
+    var componentEvents;
+
+    if (events == null) {
+      componentEvents = this._getComponentEvents();
+      Backbone.View.prototype.delegateEvents.apply(this, [_.extend(componentEvents, this.events)]);
+    } else {
+      Backbone.View.prototype.delegateEvents.apply(this, arguments);
+    }
+  },
+
+  /**
+   * @private
+   * @return {Object.&lt;String, String&gt;}
+   */
+  _getComponentEvents: function() {
     var componentEvents = {},
         componentName, protoComponent,
         eventKeys, eventClosures,
         i = 0, keys = Object.keys(this.components), iz = keys.length;
 
-    if (events == null) {
-      for (; i<iz; i++) {
-        componentName  = keys[i];
-        protoComponent = this.components[componentName].prototype;
-        eventKeys      = _.keys(protoComponent.events),
-        eventClosures  = _.map(protoComponent.events, this._getComponentEventClosure);
-        _.extend(componentEvents, _.object(eventKeys, eventClosures));
+    for (; i&lt;iz; i++) {
+      componentName  = keys[i];
+      if (this.components[componentName] == null) {
+        throw new Error(componentName + &#039; Class is not exists.&#039;);
       }
-      Backbone.View.prototype.delegateEvents.apply(this, [_.extend(componentEvents, this.events)]);
-    } else {
-      Backbone.View.prototype.delegateEvents.apply(this, arguments);
+      protoComponent = this.components[componentName].prototype;
+      eventKeys      = _.keys(protoComponent.events),
+      eventClosures  = _.map(protoComponent.events, this._getComponentEventClosure);
+      _.extend(componentEvents, _.object(eventKeys, eventClosures));
     }
 
+    return componentEvents;
   },
 
   /**
@@ -224,17 +248,17 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * Flywieght component getter.
    *
    * @param {HTMLElement} el
-   * @return {*}
+   * @return {Phalanx.Component}
    */
   getComponent: function(el) {
     var componentName, uid;
 
     do {
       componentName = el.getAttribute(ATTR_COMPONENT);
-    } while(!componentName && (el = el.parentNode));
+    } while(!componentName &amp;&amp; (el = el.parentNode));
 
     if (!componentName) {
-      throw new Error('Component name is not detected from `' + ATTR_COMPONENT + '`');
+      throw new Error(&#039;Component name is not detected from `&#039; + ATTR_COMPONENT + &#039;`&#039;);
     }
 
     uid  = el.getAttribute(ATTR_COMPONENT_UID);
@@ -247,6 +271,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
   },
 
   /**
+   * @private
    * @param {String} componentName
    * @param {HTMLElement} el
    * @return {Phalanx.Component}
@@ -278,11 +303,11 @@ _.extend(View.prototype, Backbone.View.prototype, {
       events = Object.keys(listeners);
       iz = events.length;
 
-      for (; i<iz; i++) {
+      for (; i&lt;iz; i++) {
         event  = events[i];
         method = listeners[event];
         if (!_.isFunction(this[method])) {
-          throw new Error('Method `' + method + '` is not exists this View');
+          throw new Error(&#039;Method `&#039; + method + &#039;` is not exists this View&#039;);
         }
         this.listenTo(component, event, this[method]);
       }
@@ -291,16 +316,20 @@ _.extend(View.prototype, Backbone.View.prototype, {
 
   /**
    * Converted to processed the `listeners` property.
+   * Call at once when view instance created.
    * @private
    */
   _processListeners: function() {
     var i = 0, listeners = Object.keys(this.listeners), iz = listeners.length,
-        event_component, methodName;
+        event_component, methodName, eventMap;
 
-    for (; i<iz; i++) {
+    for (; i&lt;iz; i++) {
       event_component = listeners[i].split(/\s+/);
       methodName      = this.listeners[listeners[i]];
-      (this._processedListeners[event_component[1]] = {})[event_component[0]] = methodName;
+      eventMap        = this._processedListeners[event_component[1]];
+
+      eventMap || (eventMap = this._processedListeners[event_component[1]] = {});
+      eventMap[event_component[0]] = methodName;
     }
   },
 
@@ -311,7 +340,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
     var uid, component,
         i = 0, keys = Object.keys(this._createdComponents), iz = keys.length;
 
-    for (; i<iz; i++) {
+    for (; i&lt;iz; i++) {
       uid = keys[i];
       component = this._createdComponents[uid];
       component.destroy();
@@ -324,27 +353,46 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * Destory and teadown View.
    */
   destroy: function() {
-
-    this.destroyRegions && this.destroyRegions();
-
     this.destroyComponents();
-
     this.undelegateEvents();
-
     this.stopListening();
-
     this.releaseUi();
 
     this.onDestroy();
-
     this.el = this.$el = null;
+    this.model = this.collection = null;
+    this.options = this._processedListeners = null;
+  },
+
+  /**
+   * Pause events
+   */
+  pause: function() {
+    this.paused = true;
+    this.onPause();
+
+    this.destroyComponents();
+    this.undelegateEvents();
+    this.stopListening();
+    this.releaseUi();
+  },
+
+  /**
+   * Resume events
+   */
+  resume: function() {
+    this.paused = false;
+
+    this.delegateEvents();
+    this.lookupUi();
+
+    this.onResume();
   },
 
   /**
    * @abstract
-   * @param {HTMLElement} element
    */
-  onSetElement: function(element) {},
+  onSetElement: function() {},
 
   /**
    * @abstract

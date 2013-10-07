@@ -37,7 +37,7 @@
 
 <div class="jumbotron">
   <div class="container">
-    <h1>collection.js</h1>
+    <h1>trait/entity_observer.js</h1>
   </div>
 </div>
 
@@ -45,11 +45,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"></i></a></h2>
-      <p class="stat">81.47</p>
+      <p class="stat">67.72</p>
     </div>
     <div class="span6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h2>
-      <p class="stat">58</p>
+      <p class="stat">46</p>
     </div>
   </div>
   <div class="row historical">
@@ -63,7 +63,7 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty"></i></a></h2>
-      <p class="stat">10.44</p>
+      <p class="stat">15.29</p>
     </div>
     <div class="span6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs"></i></a></h2>
@@ -93,61 +93,49 @@
     <textarea id="file-source" class="span12">&#039;use strict&#039;;
 
 /**
- * @abstract
- * @class Phalanx.Collection
- * @extends Backbone.Collection
- * @mixins Phalanx.Trait.LifecycleCallbacks
+ * @class Phalanx.Trait.EntityObserver
  */
-var Collection = defineClass({
+Trait.EntityObserver = {
+
   /**
-   * @constructor
-   * @param {Object} attributes
-   * @param {Object} options
+     * @property {Phalanx.Model|Phalanx.Collection}
    */
-  constructor: function(attributes, options) {
-    options || (options = {});
+  entity: null,
 
-    this.onCreate.apply(this, arguments);
-
-    Backbone.Collection.apply(this, arguments);
-  }
-});
-
-Collection.mixin(Trait.LifecycleCallbacks);
-
-_.extend(Collection.prototype, Backbone.Collection.prototype, {
   /**
-   * Default params for using sync method
-   *
-   *     // if request to xml/html resource
-   *     syncParams: {
-   *       contentType: &#039;application/xml&#039;,
-   *       dataType: &#039;text&#039;
+   *     entitylListeners: {
+   *       &#039;change&#039;: &#039;modelChanged&#039;
    *     }
+   *     // model.trigger(&#039;change&#039;) =&gt; observer.modelChanged()
    *
-   * @property {Object}
+   * @property {Object.&lt;String, String&gt;}
    */
-  syncParam: {},
+  entitylListeners: {},
 
   /**
-   * @param {String} method
-   * @param {Phalanx.Model} model
-   * @param {Object} options
-   * @returns {*}
+   * Listen to entity events
    */
-  sync: function(method, model, options) {
-    _.extend(options, this.syncParam);
-    return Backbone.Collection.prototype.sync.apply(this, arguments);
+  listenToEntity: function() {
+    var i = 0, events = Object.keys(this.entitylListeners), iz = events.length,
+        event, method;
+
+    for (; i&lt;iz; i++) {
+      event  = events[i];
+      method = this.entitylListeners[event];
+      if (!_.isFunction(this[method])) {
+        throw new Error(&#039;Method `&#039; + method + &#039;` is not exists this Entity&#039;);
+      }
+      this.listenTo(this.entity, event, this[method]);
+    }
   },
 
   /**
-   * destroy
+   * Unlisten to bound model events
    */
-  destroy: function() {
-    this.reset();
-    this.onDestroy();
+  unlistenToEntity: function() {
+    this.stopListening(this.entity);
   }
-});</textarea>
+};</textarea>
   </div>
 </div>
 

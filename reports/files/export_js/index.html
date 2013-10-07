@@ -90,7 +90,7 @@
 
 <div class="container">
   <div class="row">
-    <textarea id="file-source" class="span12">'use strict';
+    <textarea id="file-source" class="span12">&#039;use strict&#039;;
 
 /**
  * @class Phalanx
@@ -110,14 +110,14 @@ var Phalanx = {
 };
 
 // for RequireJS
-if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
+if (typeof define === &#039;function&#039; &amp;&amp; typeof define.amd === &#039;object&#039; &amp;&amp; define.amd) {
   window.define(function() {
     return Phalanx;
   });
 }
-// for Node.js & browserify
-else if (typeof module === 'object' && module &&
-  typeof exports === 'object' && exports &&
+// for Node.js &amp; browserify
+else if (typeof module === &#039;object&#039; &amp;&amp; module &amp;&amp;
+  typeof exports === &#039;object&#039; &amp;&amp; exports &amp;&amp;
   module.exports === exports
   ) {
   module.exports = Phalanx;
