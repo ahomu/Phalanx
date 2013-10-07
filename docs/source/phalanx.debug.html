@@ -15,14 +15,12 @@
   </script>
 </head>
 <body onload="prettyPrint(); highlight();">
-  <pre class="prettyprint lang-js">/*! Phalanx - v0.0.3 ( 2013-05-30 ) - MIT */
+  <pre class="prettyprint lang-js">/*! Phalanx - v0.0.5 ( 2013-10-07 ) - MIT */
 (function(window) {
 
 &quot;use strict&quot;;
 
 var Trait = {};
-
-var DEFINE_NOT_WRITABLE   = {writable: false};
 
 <span id='global-method-defineClass'>/**
 </span> * `defineClass` is Helper function, to generate Object like Class with basic oop fetures
@@ -30,19 +28,19 @@ var DEFINE_NOT_WRITABLE   = {writable: false};
  *     // e.g 1
  *     var Klass = Phalanx.defineClass{
  *       constructor: function() {
- *         console.log('Hello World');
+ *         console.log(&#39;Hello World&#39;);
  *       },
- *       foo: 'bar',
- *       baz: 'qux'
+ *       foo: &#39;bar&#39;,
+ *       baz: &#39;qux&#39;
  *     });
  *
  *     // e.g 2
  *     function NewClass() {
- *       console.log('This is constructor');
+ *       console.log(&#39;This is constructor&#39;);
  *     }
  *     Phalanx.defineClass(NewClass, {
- *       hoge: 'fuga',
- *       hige: 'piyo'
+ *       hoge: &#39;fuga&#39;,
+ *       hige: &#39;piyo&#39;
  *     };
  *
  * @param {Function|Object} constructor_or_members
@@ -59,11 +57,11 @@ function defineClass(constructor_or_members, members) {
    */
   var Constructor;
 
-  if (typeof constructor_or_members === 'function') {
+  if (typeof constructor_or_members === &#39;function&#39;) {
     Constructor = constructor_or_members;
   } else {
     members = constructor_or_members;
-    Constructor = members.hasOwnProperty('constructor') ? members.constructor
+    Constructor = members.hasOwnProperty(&#39;constructor&#39;) ? members.constructor
                                                         : function() {};
   }
 
@@ -85,9 +83,8 @@ function defineClass(constructor_or_members, members) {
    * @return {Klass}
    */
   Constructor.extend = Backbone.View.extend;
-  Object.defineProperty(Constructor, 'extend', DEFINE_NOT_WRITABLE);
 
-<span id='Klass-method-with'>  /**
+<span id='Klass-method-mixin'>  /**
 </span>   * Mixin the trait in the `prototype` of the class.
    * Is a feature that is for a simple mixin, not the exact trait.
    * Not support multiple inheritance like &quot;Squeak Smalltalk&quot;.
@@ -96,18 +93,17 @@ function defineClass(constructor_or_members, members) {
    *       // ...
    *     };
    *     var ExtendedWithTrait = SomeClass.extend(classDefinition)
-   *                                      .with(AsyncCallbackTrait)
-   *                                      .with(ObservableTrait, {
-   *                                        method: 'aliasedMethod'
+   *                                      .mixin(AsyncCallbackTrait)
+   *                                      .mixin(ObservableTrait, {
+   *                                        method: &#39;aliasedMethod&#39;
    *                                      });
    *
-   * @method with
+   * @method mixin
    * @param {Object} trait
    * @param {Object} [aliases]
    * @return {Klass}
    */
-  Constructor.with = __with;
-  Object.defineProperty(Constructor, 'with', DEFINE_NOT_WRITABLE);
+  Constructor.mixin = __mixin;
 
 <span id='Klass-method-create'>  /**
 </span>   * Method which can be used instead of the `new` statement
@@ -118,33 +114,32 @@ function defineClass(constructor_or_members, members) {
    * @return {*}
    */
   Constructor.create = __create;
-  Object.defineProperty(Constructor, 'create', DEFINE_NOT_WRITABLE);
 
-<span id='Klass-method-super'>  /**
-</span>   * Call a specific method of the parent class
+<span id='Klass-method-callSuper'>  /**
+</span>   * Call a specific method of the super class
    *
    *     var SuperClass = Klass.of({
    *       onCreate: function() {
-   *         alert('Yup!');
+   *         alert(&#39;Yup!&#39;);
    *       }
    *     });
    *     var SubClass = SuperClass.extends({
    *       onCreate: function() {
-   *         this.super('onCreate', arguments); // =&gt; alert('Yup!')
+   *         this.callSuper(&#39;onCreate&#39;, arguments); // =&gt; alert(&#39;Yup!&#39;)
    *       }
    *     });
    *
-   * @method super
+   * @method callSuper
    * @param {String} methodName
    * @param {Object|Arguments} args
    * @type {Function}
    */
-  Constructor.prototype.super = __super;
+  Constructor.prototype.callSuper = __callSuper;
 
   return Constructor;
 }
 
-function __with(trait, aliases) {
+function __mixin(trait, aliases) {
   /*jshint validthis:true */
   var i = 0, keys = Object.keys(trait), iz = keys.length,
       prop, processed_trait = {};
@@ -171,9 +166,9 @@ function __create() {
   return instance;
 }
 
-function __super(methodName, args) {
+function __callSuper(methodName, args) {
   /*jshint validthis:true */
-  // TODO: this.super() で連鎖的に先祖のメソッドを呼び出したい
+  // TODO: this.callSuper() で連鎖的に先祖のメソッドを呼び出したい
   return this.constructor.__super__[methodName].apply(this, args);
 }
 <span id='Phalanx-Trait-AsyncCallbacks'>/**
@@ -203,9 +198,9 @@ Trait.EntityObserver = {
 
 <span id='Phalanx-Trait-EntityObserver-property-entitylListeners'>  /**
 </span>   *     entitylListeners: {
-   *       'change': 'modelChanged'
+   *       &#39;change&#39;: &#39;modelChanged&#39;
    *     }
-   *     // model.trigger('change') =&gt; observer.modelChanged()
+   *     // model.trigger(&#39;change&#39;) =&gt; observer.modelChanged()
    *
    * @property {Object.&lt;String, String&gt;}
    */
@@ -222,7 +217,7 @@ Trait.EntityObserver = {
       event  = events[i];
       method = this.entitylListeners[event];
       if (!_.isFunction(this[method])) {
-        throw new Error('Method `' + method + '` is not exists this Entity');
+        throw new Error(&#39;Method `&#39; + method + &#39;` is not exists this Entity&#39;);
       }
       this.listenTo(this.entity, event, this[method]);
     }
@@ -248,9 +243,27 @@ Trait.LifecycleCallbacks = {
 
 <span id='Phalanx-Trait-LifecycleCallbacks-method-initialize'>  /**
 </span>   * It is called as a common initialization process. (derived from Backbone)
+   * In Layout, View, Component...After set initial element &amp; Before event delegation.
    * @abstract
    */
   initialize: function() {},
+
+<span id='Phalanx-Trait-LifecycleCallbacks-method-onSetElement'>  /**
+</span>   * It is called when new element assigned.
+   * called only Layout, View, Component.
+   * @abstract
+   */
+  onSetElement: function() {},
+
+<span id='Phalanx-Trait-LifecycleCallbacks-method-onPause'>  /**
+</span>   * @abstract
+   */
+  onPause: function() {},
+
+<span id='Phalanx-Trait-LifecycleCallbacks-method-onResume'>  /**
+</span>   * @abstract
+   */
+  onResume: function() {},
 
 <span id='Phalanx-Trait-LifecycleCallbacks-method-onDestroy'>  /**
 </span>   * It is called when destroying the instance.
@@ -263,12 +276,17 @@ Trait.LifecycleCallbacks = {
  * @extends Backbone.Events
  */
 Trait.Observable = Backbone.Events;
-var UI_FIND_PLACEHOLDER = '[data-ui=&quot;{name}&quot;]';
+var UI_FIND_PLACEHOLDER = &#39;[data-ui=&quot;{name}&quot;]&#39;;
 
 <span id='Phalanx-Trait-UiLookupable'>/**
 </span> * @class Phalanx.Trait.UiLookupable
  */
 Trait.UiLookupable = {
+<span id='Phalanx-Trait-UiLookupable-property-el'>  /**
+</span>   * @property {HTMLElement|jQuery}
+   */
+  el: null,
+
 <span id='Phalanx-Trait-UiLookupable-property-ui'>  /**
 </span>   *     ui: {
    *       hoge: null
@@ -286,12 +304,10 @@ Trait.UiLookupable = {
 
 <span id='Phalanx-Trait-UiLookupable-method-lookupUi'>  /**
 </span>   * From the selector defined by this.ui, caching to explore the elements.
-   *
-   * @params {HTMLElement|jQuery}
    */
-  lookupUi: function(element) {
+  lookupUi: function() {
     var name, selector,
-        $baseEl = element instanceof Backbone.$ ? element : Backbone.$(element),
+        $baseEl = this.el instanceof Backbone.$ ? this.el : Backbone.$(this.el),
         i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
     this.ui  = {};
@@ -299,7 +315,7 @@ Trait.UiLookupable = {
 
     for (; i&lt;iz; i++) {
       name = keys[i];
-      selector = UI_FIND_PLACEHOLDER.replace('{name}', name);
+      selector = UI_FIND_PLACEHOLDER.replace(&#39;{name}&#39;, name);
       this.$ui[name] = $baseEl.find(selector);
       this.ui[name]  = this.$ui[name].length ? this.$ui[name][0] : null;
     }
@@ -339,7 +355,7 @@ var Router = defineClass({
   }
 });
 
-Router.with(Trait.LifecycleCallbacks);
+Router.mixin(Trait.LifecycleCallbacks);
 
 _.extend(Router.prototype, Backbone.Router.prototype, {
 <span id='Phalanx-Router-method-destroy'>  /**
@@ -375,19 +391,19 @@ var View = defineClass({
   }
 });
 
-View.with(Trait.UiLookupable)
-    .with(Trait.LifecycleCallbacks);
+View.mixin(Trait.UiLookupable)
+    .mixin(Trait.LifecycleCallbacks);
 
-var ATTR_COMPONENT     = 'data-component',
-    ATTR_COMPONENT_UID = 'data-component-uid';
+var ATTR_COMPONENT     = &#39;data-component&#39;,
+    ATTR_COMPONENT_UID = &#39;data-component-uid&#39;;
 
 _.extend(View.prototype, Backbone.View.prototype, {
 
 <span id='Phalanx-View-property-events'>  /**
 </span>   *     events: {
-   *       'click .js_event_selector': 'someMethodName'
+   *       &#39;click .js_event_selector&#39;: &#39;someMethodName&#39;
    *     }
-   *     // $('.js_event_selector').click() =&gt; someMethod()
+   *     // $(&#39;.js_event_selector&#39;).click() =&gt; someMethod()
    *
    * @property {Object.&lt;String, String|Function&gt;}
    */
@@ -405,9 +421,9 @@ _.extend(View.prototype, Backbone.View.prototype, {
 
 <span id='Phalanx-View-property-listeners'>  /**
 </span>   *     listeners: {
-   *       'customEvent likeBtn': 'receiveCustomEvent'
+   *       &#39;customEvent likeBtn&#39;: &#39;receiveCustomEvent&#39;
    *     }
-   *     // component.trigger('customEvent') =&gt; view.receiveCustomEvent()
+   *     // component.trigger(&#39;customEvent&#39;) =&gt; view.receiveCustomEvent()
    *
    * @property {Object.&lt;String, String&gt;}
    */
@@ -421,14 +437,24 @@ _.extend(View.prototype, Backbone.View.prototype, {
 
 <span id='Phalanx-View-property-_processedListeners'>  /**
 </span>   *     _processedListeners: {
-   *       'likeBtn': {
-   *         'customeEvent': 'receiveCustomEvent'
+   *       &#39;likeBtn&#39;: {
+   *         &#39;customeEvent&#39;: &#39;receiveCustomEvent&#39;
    *       }
    *     }
    * @private
    * @property {Object.&lt;String, Object&lt;String, String&gt;&gt;}
    */
   _processedListeners: {},
+
+<span id='Phalanx-View-property-persistent'>  /**
+</span>   * @property {Boolean}
+   */
+  persistent: false,
+
+<span id='Phalanx-View-property-paused'>  /**
+</span>   * @property {Boolean}
+   */
+  paused: false,
 
 <span id='Phalanx-View-method-setElement'>  /**
 </span>   * @param {HTMLElement} element
@@ -437,8 +463,8 @@ _.extend(View.prototype, Backbone.View.prototype, {
   setElement: function(element, delegate) {
     Backbone.View.prototype.setElement.apply(this, arguments);
     if (this.el &amp;&amp; this.el.parentNode) {
-      this.lookupUi(this.$el);
-      this.onSetElement(this.el);
+      this.lookupUi();
+      this.onSetElement();
     }
   },
 
@@ -469,7 +495,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
     for (; i&lt;iz; i++) {
       componentName  = keys[i];
       if (this.components[componentName] == null) {
-        throw new Error(componentName + ' Class is not exists.');
+        throw new Error(componentName + &#39; Class is not exists.&#39;);
       }
       protoComponent = this.components[componentName].prototype;
       eventKeys      = _.keys(protoComponent.events),
@@ -506,7 +532,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
     } while(!componentName &amp;&amp; (el = el.parentNode));
 
     if (!componentName) {
-      throw new Error('Component name is not detected from `' + ATTR_COMPONENT + '`');
+      throw new Error(&#39;Component name is not detected from `&#39; + ATTR_COMPONENT + &#39;`&#39;);
     }
 
     uid  = el.getAttribute(ATTR_COMPONENT_UID);
@@ -555,7 +581,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
         event  = events[i];
         method = listeners[event];
         if (!_.isFunction(this[method])) {
-          throw new Error('Method `' + method + '` is not exists this View');
+          throw new Error(&#39;Method `&#39; + method + &#39;` is not exists this View&#39;);
         }
         this.listenTo(component, event, this[method]);
       }
@@ -569,12 +595,15 @@ _.extend(View.prototype, Backbone.View.prototype, {
    */
   _processListeners: function() {
     var i = 0, listeners = Object.keys(this.listeners), iz = listeners.length,
-        event_component, methodName;
+        event_component, methodName, eventMap;
 
     for (; i&lt;iz; i++) {
       event_component = listeners[i].split(/\s+/);
       methodName      = this.listeners[listeners[i]];
-      (this._processedListeners[event_component[1]] = {})[event_component[0]] = methodName;
+      eventMap        = this._processedListeners[event_component[1]];
+
+      eventMap || (eventMap = this._processedListeners[event_component[1]] = {});
+      eventMap[event_component[0]] = methodName;
     }
   },
 
@@ -588,7 +617,6 @@ _.extend(View.prototype, Backbone.View.prototype, {
     for (; i&lt;iz; i++) {
       uid = keys[i];
       component = this._createdComponents[uid];
-      this.stopListening(component);
       component.destroy();
       this._createdComponents[uid] = null;
       delete this._createdComponents[uid];
@@ -599,25 +627,46 @@ _.extend(View.prototype, Backbone.View.prototype, {
 </span>   * Destory and teadown View.
    */
   destroy: function() {
-
-    this.destroyRegions &amp;&amp; this.destroyRegions();
-
     this.destroyComponents();
-
     this.undelegateEvents();
-
+    this.stopListening();
     this.releaseUi();
 
     this.onDestroy();
-
     this.el = this.$el = null;
+    this.model = this.collection = null;
+    this.options = this._processedListeners = null;
+  },
+
+<span id='Phalanx-View-method-pause'>  /**
+</span>   * Pause events
+   */
+  pause: function() {
+    this.paused = true;
+    this.onPause();
+
+    this.destroyComponents();
+    this.undelegateEvents();
+    this.stopListening();
+    this.releaseUi();
+  },
+
+<span id='Phalanx-View-method-resume'>  /**
+</span>   * Resume events
+   */
+  resume: function() {
+    this.paused = false;
+
+    this.delegateEvents();
+    this.lookupUi();
+
+    this.onResume();
   },
 
 <span id='Phalanx-View-method-onSetElement'>  /**
 </span>   * @abstract
-   * @param {HTMLElement} element
    */
-  onSetElement: function(element) {},
+  onSetElement: function() {},
 
 <span id='Phalanx-View-method-render'>  /**
 </span>   * @abstract
@@ -649,7 +698,7 @@ var Model = defineClass({
   }
 });
 
-Model.with(Trait.LifecycleCallbacks);
+Model.mixin(Trait.LifecycleCallbacks);
 
 _.extend(Model.prototype, Backbone.Model.prototype, {
 <span id='Phalanx-Model-property-syncParam'>  /**
@@ -657,8 +706,8 @@ _.extend(Model.prototype, Backbone.Model.prototype, {
    *
    *     // if request to xml/html resource
    *     syncParams: {
-   *       contentType: 'application/xml',
-   *       dataType: 'text'
+   *       contentType: &#39;application/xml&#39;,
+   *       dataType: &#39;text&#39;
    *     }
    *
    * @property {Object}
@@ -706,7 +755,7 @@ var Collection = defineClass({
   }
 });
 
-Collection.with(Trait.LifecycleCallbacks);
+Collection.mixin(Trait.LifecycleCallbacks);
 
 _.extend(Collection.prototype, Backbone.Collection.prototype, {
 <span id='Phalanx-Collection-property-syncParam'>  /**
@@ -714,8 +763,8 @@ _.extend(Collection.prototype, Backbone.Collection.prototype, {
    *
    *     // if request to xml/html resource
    *     syncParams: {
-   *       contentType: 'application/xml',
-   *       dataType: 'text'
+   *       contentType: &#39;application/xml&#39;,
+   *       dataType: &#39;text&#39;
    *     }
    *
    * @property {Object}
@@ -764,9 +813,9 @@ var Layout = defineClass({
 _.extend(Layout.prototype, View.prototype, {
 <span id='Phalanx-Layout-property-events'>  /**
 </span>   *     events: {
-   *       'click .js_event_selector': 'someMethodName'
+   *       &#39;click .js_event_selector&#39;: &#39;someMethodName&#39;
    *     }
-   *     // $('.js_event_selector').click() =&gt; someMethod()
+   *     // $(&#39;.js_event_selector&#39;).click() =&gt; someMethod()
    *
    * @property {Object.&lt;String, String|Function&gt;}
    */
@@ -800,22 +849,65 @@ _.extend(Layout.prototype, View.prototype, {
 
     selector = this.regions[regionName];
     oldView  = this.getRegionView(regionName);
+
+    if (!this.$el) {
+      // maybe already destroy
+      return;
+    }
     assignToEl = this.$el.find(selector)[0];
 
     if (!selector || !assignToEl) {
-      throw new Error('Could not get element of `'+ selector +'` from the region ' + regionName);
+      throw new Error(&#39;Could not get element of `&#39;+ selector +&#39;` from the region &#39; + regionName);
     }
 
     // change
     this.onChange(regionName, newView, oldView);
 
     // old
-    oldView &amp;&amp; oldView.destroy();
-
-    // new
-    newView.setElement(assignToEl);
+    if (oldView) {
+      if (oldView.persistent) {
+        oldView.pause();
+        oldView.$pausingCache = oldView.$el.children();
+      } else {
+        oldView.destroy();
+      }
+    }
 
     this._assignedMap[regionName] = newView;
+
+    // new
+    if (newView.persistent &amp;&amp; newView.paused) {
+      newView.$el.empty().append(newView.$pausingCache);
+      newView.$pausingCache = null;
+      newView.resume();
+    } else {
+      newView.setElement(assignToEl);
+    }
+
+  },
+
+<span id='Phalanx-Layout-method-_copyAttrs'>  /**
+</span>   * Copy to some specified attributes
+   *
+   * @private
+   * @param {HTMLElement} fromEl
+   * @param {HTMLElement} toEl
+   */
+  _copyAttrs: function(fromEl, toEl) {
+    toEl.setAttribute(&#39;id&#39;,    fromEl.getAttribute(&#39;id&#39;)    || &#39;&#39;);
+    toEl.setAttribute(&#39;class&#39;, fromEl.getAttribute(&#39;class&#39;) || &#39;&#39;);
+    toEl.setAttribute(&#39;style&#39;, fromEl.getAttribute(&#39;style&#39;) || &#39;&#39;);
+  },
+
+<span id='Phalanx-Layout-method-isRegionExists'>  /**
+</span>   * @param {String} regionName
+   * @return {Boolean}
+   */
+  isRegionExists: function(regionName) {
+    if (!(regionName in this.regions)) {
+      throw new Error(&#39;Specified region `&#39; + regionName + &#39;` is not declared&#39;);
+    }
+    return !!this.$el.find(this.regions[regionName]).length;
   },
 
 <span id='Phalanx-Layout-method-getRegionView'>  /**
@@ -824,7 +916,7 @@ _.extend(Layout.prototype, View.prototype, {
    */
   getRegionView: function(regionName) {
     if (!(regionName in this.regions)) {
-      throw new Error('Specified region `' + regionName + '` is not declared');
+      throw new Error(&#39;Specified region `&#39; + regionName + &#39;` is not declared&#39;);
     }
     return this._assignedMap[regionName];
   },
@@ -834,21 +926,47 @@ _.extend(Layout.prototype, View.prototype, {
    */
   withdraw: function(regionName) {
     var view = this.getRegionView(regionName);
-    view.destroy();
     this._assignedMap[regionName] = null;
+    view &amp;&amp; view.destroy();
   },
 
-<span id='Phalanx-Layout-method-destroyRegions'>  /**
-</span>   * Destroy all regions assigned views.
+<span id='Phalanx-Layout-method-destroy'>  /**
+</span>   * @override Phalanx.View.destroy
    */
-  destroyRegions: function() {
+  destroy: function() {
     var i = 0, regions = Object.keys(this.regions),
-        iz = this.regions.length, regionName;
+        regionName;
 
-    for (; i&lt;iz; i++) {
-      regionName = regions[i];
+    while ((regionName = regions[i++])) {
       this.withdraw(regionName);
     }
+    View.prototype.destroy.apply(this, arguments);
+  },
+
+<span id='Phalanx-Layout-method-pause'>  /**
+</span>   * @override Phalanx.View.pause
+   */
+  pause: function() {
+    var i = 0, regions = Object.keys(this.regions),
+        regionName;
+
+    while ((regionName = regions[i++])) {
+      this.getRegionView(regionName) &amp;&amp; this.getRegionView(regionName).pause();
+    }
+    View.prototype.pause.apply(this, arguments);
+  },
+
+<span id='Phalanx-Layout-method-resume'>  /**
+</span>   * @override Phalanx.View.resume
+   */
+  resume: function() {
+    var i = 0, regions = Object.keys(this.regions),
+        regionName;
+
+    while ((regionName = regions[i++])) {
+      this.getRegionView(regionName) &amp;&amp; this.getRegionView(regionName).resume();
+    }
+    View.prototype.resume.apply(this, arguments);
   },
 
 <span id='Phalanx-Layout-method-onChange'>  /**
@@ -871,9 +989,9 @@ var INCREMENT_COMPONENT_UID = 0;
 var Component = defineClass({
 <span id='Phalanx-Component-property-events'>  /**
 </span>   *     events: {
-   *       'click .js_event_selector': 'someMethod'
+   *       &#39;click .js_event_selector&#39;: &#39;someMethod&#39;
    *     }
-   *     // $('.js_event_selector').click() =&gt; someMethod()
+   *     // $(&#39;.js_event_selector&#39;).click() =&gt; someMethod()
    *
    * @property {Object.&lt;String, String|Function&gt;}
    */
@@ -886,10 +1004,16 @@ var Component = defineClass({
   id: null,
 
 <span id='Phalanx-Component-property-uid'>  /**
-</span>   * instance's unique id nubmer
+</span>   * instance&#39;s unique id nubmer
    * @property {Number}
    */
   uid: null,
+
+<span id='Phalanx-Component-property-params'>  /**
+</span>   * placeholder of instance parameters
+   * @property {Object}
+   */
+  params: {},
 
 <span id='Phalanx-Component-method-constructor'>  /**
 </span>   * @constructor
@@ -897,6 +1021,8 @@ var Component = defineClass({
    */
   constructor: function(el) {
     this.uid = INCREMENT_COMPONENT_UID++;
+
+    this.params = _.clone(this.params);
 
     this.onCreate.apply(this, arguments);
 
@@ -914,10 +1040,10 @@ var Component = defineClass({
     this.el = this.$el[0];
 
     if (this.el &amp;&amp; this.el.parentNode) {
-      this.lookupUi(this.$el);
-      this.onSetElement(this.el);
+      this.lookupUi();
+      this.onSetElement();
 
-      this.id = parseInt(this.el.getAttribute('data-id'), 10);
+      this.id = parseInt(this.el.getAttribute(&#39;data-id&#39;), 10);
     }
   },
 
@@ -934,14 +1060,13 @@ var Component = defineClass({
 
 <span id='Phalanx-Component-method-onSetElement'>  /**
 </span>   * @abstract
-   * @param {HTMLElement} element
    */
-  onSetElement: function(element) {}
+  onSetElement: function() {}
 });
 
-Component.with(Trait.Observable)
-         .with(Trait.UiLookupable)
-         .with(Trait.LifecycleCallbacks);
+Component.mixin(Trait.Observable)
+         .mixin(Trait.UiLookupable)
+         .mixin(Trait.LifecycleCallbacks);
 
 <span id='Phalanx'>/**
 </span> * @class Phalanx
@@ -961,14 +1086,14 @@ var Phalanx = {
 };
 
 // for RequireJS
-if (typeof define === 'function' &amp;&amp; typeof define.amd === 'object' &amp;&amp; define.amd) {
+if (typeof define === &#39;function&#39; &amp;&amp; typeof define.amd === &#39;object&#39; &amp;&amp; define.amd) {
   window.define(function() {
     return Phalanx;
   });
 }
 // for Node.js &amp; browserify
-else if (typeof module === 'object' &amp;&amp; module &amp;&amp;
-  typeof exports === 'object' &amp;&amp; exports &amp;&amp;
+else if (typeof module === &#39;object&#39; &amp;&amp; module &amp;&amp;
+  typeof exports === &#39;object&#39; &amp;&amp; exports &amp;&amp;
   module.exports === exports
   ) {
   module.exports = Phalanx;
