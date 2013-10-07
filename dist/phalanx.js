@@ -1,11 +1,9 @@
-/*! Phalanx - v0.0.3 ( 2013-05-25 ) - MIT */
+/*! Phalanx - v0.0.4 ( 2013-10-07 ) - MIT */
 (function(window) {
 
 "use strict";
 
 var Trait = {};
-
-var DEFINE_NOT_WRITABLE   = {writable: false};
 
 /**
  * `defineClass` is Helper function, to generate Object like Class with basic oop fetures
@@ -68,7 +66,6 @@ function defineClass(constructor_or_members, members) {
    * @return {Klass}
    */
   Constructor.extend = Backbone.View.extend;
-  Object.defineProperty(Constructor, 'extend', DEFINE_NOT_WRITABLE);
 
   /**
    * Mixin the trait in the `prototype` of the class.
@@ -79,18 +76,17 @@ function defineClass(constructor_or_members, members) {
    *       // ...
    *     };
    *     var ExtendedWithTrait = SomeClass.extend(classDefinition)
-   *                                      .with(AsyncCallbackTrait)
-   *                                      .with(ObservableTrait, {
+   *                                      .mixin(AsyncCallbackTrait)
+   *                                      .mixin(ObservableTrait, {
    *                                        method: 'aliasedMethod'
    *                                      });
    *
-   * @method with
+   * @method mixin
    * @param {Object} trait
    * @param {Object} [aliases]
    * @return {Klass}
    */
-  Constructor.with = __with;
-  Object.defineProperty(Constructor, 'with', DEFINE_NOT_WRITABLE);
+  Constructor.mixin = __mixin;
 
   /**
    * Method which can be used instead of the `new` statement
@@ -101,10 +97,9 @@ function defineClass(constructor_or_members, members) {
    * @return {*}
    */
   Constructor.create = __create;
-  Object.defineProperty(Constructor, 'create', DEFINE_NOT_WRITABLE);
 
   /**
-   * Call a specific method of the parent class
+   * Call a specific method of the super class
    *
    *     var SuperClass = Klass.of({
    *       onCreate: function() {
@@ -113,21 +108,21 @@ function defineClass(constructor_or_members, members) {
    *     });
    *     var SubClass = SuperClass.extends({
    *       onCreate: function() {
-   *         this.super('onCreate', arguments); // => alert('Yup!')
+   *         this.callSuper('onCreate', arguments); // => alert('Yup!')
    *       }
    *     });
    *
-   * @method super
+   * @method callSuper
    * @param {String} methodName
    * @param {Object|Arguments} args
    * @type {Function}
    */
-  Constructor.prototype.super = __super;
+  Constructor.prototype.callSuper = __callSuper;
 
   return Constructor;
 }
 
-function __with(trait, aliases) {
+function __mixin(trait, aliases) {
   /*jshint validthis:true */
   var i = 0, keys = Object.keys(trait), iz = keys.length,
       prop, processed_trait = {};
@@ -154,9 +149,9 @@ function __create() {
   return instance;
 }
 
-function __super(methodName, args) {
+function __callSuper(methodName, args) {
   /*jshint validthis:true */
-  // TODO: this.super() で連鎖的に先祖のメソッドを呼び出したい
+  // TODO: this.callSuper() で連鎖的に先祖のメソッドを呼び出したい
   return this.constructor.__super__[methodName].apply(this, args);
 }
 /**
@@ -175,6 +170,50 @@ Trait.AsyncCallbacks = {
   onFailure: function() {}
 };
 /**
+ * @class Phalanx.Trait.EntityObserver
+ */
+Trait.EntityObserver = {
+
+  /**
+     * @property {Phalanx.Model|Phalanx.Collection}
+   */
+  entity: null,
+
+  /**
+   *     entitylListeners: {
+   *       'change': 'modelChanged'
+   *     }
+   *     // model.trigger('change') => observer.modelChanged()
+   *
+   * @property {Object.<String, String>}
+   */
+  entitylListeners: {},
+
+  /**
+   * Listen to entity events
+   */
+  listenToEntity: function() {
+    var i = 0, events = Object.keys(this.entitylListeners), iz = events.length,
+        event, method;
+
+    for (; i<iz; i++) {
+      event  = events[i];
+      method = this.entitylListeners[event];
+      if (!_.isFunction(this[method])) {
+        throw new Error('Method `' + method + '` is not exists this Entity');
+      }
+      this.listenTo(this.entity, event, this[method]);
+    }
+  },
+
+  /**
+   * Unlisten to bound model events
+   */
+  unlistenToEntity: function() {
+    this.stopListening(this.entity);
+  }
+};
+/**
  * @class Phalanx.Trait.LifecycleCallbacks
  */
 Trait.LifecycleCallbacks = {
@@ -187,9 +226,27 @@ Trait.LifecycleCallbacks = {
 
   /**
    * It is called as a common initialization process. (derived from Backbone)
+   * In Layout, View, Component...After set initial element & Before event delegation.
    * @abstract
    */
   initialize: function() {},
+
+  /**
+   * It is called when new element assigned.
+   * called only Layout, View, Component.
+   * @abstract
+   */
+  onSetElement: function() {},
+
+  /**
+   * @abstract
+   */
+  onPause: function() {},
+
+  /**
+   * @abstract
+   */
+  onResume: function() {},
 
   /**
    * It is called when destroying the instance.
@@ -209,6 +266,11 @@ var UI_FIND_PLACEHOLDER = '[data-ui="{name}"]';
  */
 Trait.UiLookupable = {
   /**
+   * @property {HTMLElement|jQuery}
+   */
+  el: null,
+
+  /**
    *     ui: {
    *       hoge: null
    *     }
@@ -225,12 +287,10 @@ Trait.UiLookupable = {
 
   /**
    * From the selector defined by this.ui, caching to explore the elements.
-   *
-   * @params {HTMLElement|jQuery}
    */
-  lookupUi: function(element) {
+  lookupUi: function() {
     var name, selector,
-        $baseEl = element instanceof Backbone.$ ? element : Backbone.$(element),
+        $baseEl = this.el instanceof Backbone.$ ? this.el : Backbone.$(this.el),
         i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
     this.ui  = {};
@@ -278,7 +338,7 @@ var Router = defineClass({
   }
 });
 
-Router.with(Trait.LifecycleCallbacks);
+Router.mixin(Trait.LifecycleCallbacks);
 
 _.extend(Router.prototype, Backbone.Router.prototype, {
   /**
@@ -314,8 +374,8 @@ var View = defineClass({
   }
 });
 
-View.with(Trait.UiLookupable)
-    .with(Trait.LifecycleCallbacks);
+View.mixin(Trait.UiLookupable)
+    .mixin(Trait.LifecycleCallbacks);
 
 var ATTR_COMPONENT     = 'data-component',
     ATTR_COMPONENT_UID = 'data-component-uid';
@@ -370,14 +430,24 @@ _.extend(View.prototype, Backbone.View.prototype, {
   _processedListeners: {},
 
   /**
+   * @property {Boolean}
+   */
+  persistent: false,
+
+  /**
+   * @property {Boolean}
+   */
+  paused: false,
+
+  /**
    * @param {HTMLElement} element
    * @param {Boolean} delegate
    */
   setElement: function(element, delegate) {
     Backbone.View.prototype.setElement.apply(this, arguments);
     if (this.el && this.el.parentNode) {
-      this.lookupUi(this.$el);
-      this.onSetElement(this.el);
+      this.lookupUi();
+      this.onSetElement();
     }
   },
 
@@ -385,24 +455,38 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * @param {Object} [events]
    */
   delegateEvents: function(events) {
+    var componentEvents;
+
+    if (events == null) {
+      componentEvents = this._getComponentEvents();
+      Backbone.View.prototype.delegateEvents.apply(this, [_.extend(componentEvents, this.events)]);
+    } else {
+      Backbone.View.prototype.delegateEvents.apply(this, arguments);
+    }
+  },
+
+  /**
+   * @private
+   * @return {Object.<String, String>}
+   */
+  _getComponentEvents: function() {
     var componentEvents = {},
         componentName, protoComponent,
         eventKeys, eventClosures,
         i = 0, keys = Object.keys(this.components), iz = keys.length;
 
-    if (events == null) {
-      for (; i<iz; i++) {
-        componentName  = keys[i];
-        protoComponent = this.components[componentName].prototype;
-        eventKeys      = _.keys(protoComponent.events),
-        eventClosures  = _.map(protoComponent.events, this._getComponentEventClosure);
-        _.extend(componentEvents, _.object(eventKeys, eventClosures));
+    for (; i<iz; i++) {
+      componentName  = keys[i];
+      if (this.components[componentName] == null) {
+        throw new Error(componentName + ' Class is not exists.');
       }
-      Backbone.View.prototype.delegateEvents.apply(this, [_.extend(componentEvents, this.events)]);
-    } else {
-      Backbone.View.prototype.delegateEvents.apply(this, arguments);
+      protoComponent = this.components[componentName].prototype;
+      eventKeys      = _.keys(protoComponent.events),
+      eventClosures  = _.map(protoComponent.events, this._getComponentEventClosure);
+      _.extend(componentEvents, _.object(eventKeys, eventClosures));
     }
 
+    return componentEvents;
   },
 
   /**
@@ -421,7 +505,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * Flywieght component getter.
    *
    * @param {HTMLElement} el
-   * @return {*}
+   * @return {Phalanx.Component}
    */
   getComponent: function(el) {
     var componentName, uid;
@@ -444,6 +528,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
   },
 
   /**
+   * @private
    * @param {String} componentName
    * @param {HTMLElement} el
    * @return {Phalanx.Component}
@@ -488,16 +573,20 @@ _.extend(View.prototype, Backbone.View.prototype, {
 
   /**
    * Converted to processed the `listeners` property.
+   * Call at once when view instance created.
    * @private
    */
   _processListeners: function() {
     var i = 0, listeners = Object.keys(this.listeners), iz = listeners.length,
-        event_component, methodName;
+        event_component, methodName, eventMap;
 
     for (; i<iz; i++) {
       event_component = listeners[i].split(/\s+/);
       methodName      = this.listeners[listeners[i]];
-      (this._processedListeners[event_component[1]] = {})[event_component[0]] = methodName;
+      eventMap        = this._processedListeners[event_component[1]];
+
+      eventMap || (eventMap = this._processedListeners[event_component[1]] = {});
+      eventMap[event_component[0]] = methodName;
     }
   },
 
@@ -521,27 +610,46 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * Destory and teadown View.
    */
   destroy: function() {
-
-    this.destroyRegions && this.destroyRegions();
-
     this.destroyComponents();
-
     this.undelegateEvents();
-
     this.stopListening();
-
     this.releaseUi();
 
     this.onDestroy();
-
     this.el = this.$el = null;
+    this.model = this.collection = null;
+    this.options = this._processedListeners = null;
+  },
+
+  /**
+   * Pause events
+   */
+  pause: function() {
+    this.paused = true;
+    this.onPause();
+
+    this.destroyComponents();
+    this.undelegateEvents();
+    this.stopListening();
+    this.releaseUi();
+  },
+
+  /**
+   * Resume events
+   */
+  resume: function() {
+    this.paused = false;
+
+    this.delegateEvents();
+    this.lookupUi();
+
+    this.onResume();
   },
 
   /**
    * @abstract
-   * @param {HTMLElement} element
    */
-  onSetElement: function(element) {},
+  onSetElement: function() {},
 
   /**
    * @abstract
@@ -573,7 +681,7 @@ var Model = defineClass({
   }
 });
 
-Model.with(Trait.LifecycleCallbacks);
+Model.mixin(Trait.LifecycleCallbacks);
 
 _.extend(Model.prototype, Backbone.Model.prototype, {
   /**
@@ -630,7 +738,7 @@ var Collection = defineClass({
   }
 });
 
-Collection.with(Trait.LifecycleCallbacks);
+Collection.mixin(Trait.LifecycleCallbacks);
 
 _.extend(Collection.prototype, Backbone.Collection.prototype, {
   /**
@@ -724,6 +832,11 @@ _.extend(Layout.prototype, View.prototype, {
 
     selector = this.regions[regionName];
     oldView  = this.getRegionView(regionName);
+
+    if (!this.$el) {
+      // maybe already destroy
+      return;
+    }
     assignToEl = this.$el.find(selector)[0];
 
     if (!selector || !assignToEl) {
@@ -734,12 +847,39 @@ _.extend(Layout.prototype, View.prototype, {
     this.onChange(regionName, newView, oldView);
 
     // old
-    oldView && oldView.destroy();
-
-    // new
-    newView.setElement(assignToEl);
+    if (oldView) {
+      if (oldView.persistent) {
+        oldView.pause();
+        oldView.$pausingCache = oldView.$el.children();
+      } else {
+        oldView.destroy();
+      }
+    }
 
     this._assignedMap[regionName] = newView;
+
+    // new
+    if (newView.persistent && newView.paused) {
+      newView.$el.empty().append(newView.$pausingCache);
+      newView.$pausingCache = null;
+      newView.resume();
+    } else {
+      newView.setElement(assignToEl);
+    }
+
+  },
+
+  /**
+   * Copy to some specified attributes
+   *
+   * @private
+   * @param {HTMLElement} fromEl
+   * @param {HTMLElement} toEl
+   */
+  _copyAttrs: function(fromEl, toEl) {
+    toEl.setAttribute('id',    fromEl.getAttribute('id')    || '');
+    toEl.setAttribute('class', fromEl.getAttribute('class') || '');
+    toEl.setAttribute('style', fromEl.getAttribute('style') || '');
   },
 
   /**
@@ -758,21 +898,47 @@ _.extend(Layout.prototype, View.prototype, {
    */
   withdraw: function(regionName) {
     var view = this.getRegionView(regionName);
-    view.destroy();
     this._assignedMap[regionName] = null;
+    view && view.destroy();
   },
 
   /**
-   * Destroy all regions assigned views.
+   * @override Phalanx.View.destroy
    */
-  destroyRegions: function() {
+  destroy: function() {
     var i = 0, regions = Object.keys(this.regions),
-        iz = this.regions.length, regionName;
+        regionName;
 
-    for (; i<iz; i++) {
-      regionName = regions[i];
+    while ((regionName = regions[i++])) {
       this.withdraw(regionName);
     }
+    View.prototype.destroy.apply(this, arguments);
+  },
+
+  /**
+   * @override Phalanx.View.pause
+   */
+  pause: function() {
+    var i = 0, regions = Object.keys(this.regions),
+        regionName;
+
+    while ((regionName = regions[i++])) {
+      this.getRegionView(regionName) && this.getRegionView(regionName).pause();
+    }
+    View.prototype.pause.apply(this, arguments);
+  },
+
+  /**
+   * @override Phalanx.View.resume
+   */
+  resume: function() {
+    var i = 0, regions = Object.keys(this.regions),
+        regionName;
+
+    while ((regionName = regions[i++])) {
+      this.getRegionView(regionName) && this.getRegionView(regionName).resume();
+    }
+    View.prototype.resume.apply(this, arguments);
   },
 
   /**
@@ -816,11 +982,19 @@ var Component = defineClass({
   uid: null,
 
   /**
+   * placeholder of instance parameters
+   * @property {Object}
+   */
+  params: {},
+
+  /**
    * @constructor
    * @param {HTMLElement} el
    */
   constructor: function(el) {
     this.uid = INCREMENT_COMPONENT_UID++;
+
+    this.params = _.clone(this.params);
 
     this.onCreate.apply(this, arguments);
 
@@ -838,8 +1012,8 @@ var Component = defineClass({
     this.el = this.$el[0];
 
     if (this.el && this.el.parentNode) {
-      this.lookupUi(this.$el);
-      this.onSetElement(this.el);
+      this.lookupUi();
+      this.onSetElement();
 
       this.id = parseInt(this.el.getAttribute('data-id'), 10);
     }
@@ -858,14 +1032,13 @@ var Component = defineClass({
 
   /**
    * @abstract
-   * @param {HTMLElement} element
    */
-  onSetElement: function(element) {}
+  onSetElement: function() {}
 });
 
-Component.with(Trait.Observable)
-         .with(Trait.UiLookupable)
-         .with(Trait.LifecycleCallbacks);
+Component.mixin(Trait.Observable)
+         .mixin(Trait.UiLookupable)
+         .mixin(Trait.LifecycleCallbacks);
 
 /**
  * @class Phalanx

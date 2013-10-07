@@ -96,7 +96,7 @@ function defineClass(constructor_or_members, members) {
   Constructor.create = __create;
 
   /**
-   * Call a specific method of the parent class
+   * Call a specific method of the super class
    *
    *     var SuperClass = Klass.of({
    *       onCreate: function() {
@@ -105,16 +105,16 @@ function defineClass(constructor_or_members, members) {
    *     });
    *     var SubClass = SuperClass.extends({
    *       onCreate: function() {
-   *         this.super('onCreate', arguments); // => alert('Yup!')
+   *         this.callSuper('onCreate', arguments); // => alert('Yup!')
    *       }
    *     });
    *
-   * @method super
+   * @method callSuper
    * @param {String} methodName
    * @param {Object|Arguments} args
    * @type {Function}
    */
-  Constructor.prototype.super = __super;
+  Constructor.prototype.callSuper = __callSuper;
 
   return Constructor;
 }
@@ -146,8 +146,8 @@ function __create() {
   return instance;
 }
 
-function __super(methodName, args) {
+function __callSuper(methodName, args) {
   /*jshint validthis:true */
-  // TODO: this.super() で連鎖的に先祖のメソッドを呼び出したい
+  // TODO: this.callSuper() で連鎖的に先祖のメソッドを呼び出したい
   return this.constructor.__super__[methodName].apply(this, args);
 }

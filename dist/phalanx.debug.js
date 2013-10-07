@@ -1,4 +1,4 @@
-/*! Phalanx - v0.0.4 ( 2013-08-01 ) - MIT */
+/*! Phalanx - v0.0.4 ( 2013-10-07 ) - MIT */
 (function(window) {
 
 "use strict";
@@ -99,7 +99,7 @@ function defineClass(constructor_or_members, members) {
   Constructor.create = __create;
 
   /**
-   * Call a specific method of the parent class
+   * Call a specific method of the super class
    *
    *     var SuperClass = Klass.of({
    *       onCreate: function() {
@@ -108,16 +108,16 @@ function defineClass(constructor_or_members, members) {
    *     });
    *     var SubClass = SuperClass.extends({
    *       onCreate: function() {
-   *         this.super('onCreate', arguments); // => alert('Yup!')
+   *         this.callSuper('onCreate', arguments); // => alert('Yup!')
    *       }
    *     });
    *
-   * @method super
+   * @method callSuper
    * @param {String} methodName
    * @param {Object|Arguments} args
    * @type {Function}
    */
-  Constructor.prototype.super = __super;
+  Constructor.prototype.callSuper = __callSuper;
 
   return Constructor;
 }
@@ -149,9 +149,9 @@ function __create() {
   return instance;
 }
 
-function __super(methodName, args) {
+function __callSuper(methodName, args) {
   /*jshint validthis:true */
-  // TODO: this.super() で連鎖的に先祖のメソッドを呼び出したい
+  // TODO: this.callSuper() で連鎖的に先祖のメソッドを呼び出したい
   return this.constructor.__super__[methodName].apply(this, args);
 }
 /**
@@ -625,10 +625,12 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * Pause events
    */
   pause: function() {
+    this.paused = true;
     this.onPause();
 
-    this.paused = true;
+    this.destroyComponents();
     this.undelegateEvents();
+    this.stopListening();
     this.releaseUi();
   },
 
@@ -637,6 +639,7 @@ _.extend(View.prototype, Backbone.View.prototype, {
    */
   resume: function() {
     this.paused = false;
+
     this.delegateEvents();
     this.lookupUi();
 
@@ -825,10 +828,15 @@ _.extend(Layout.prototype, View.prototype, {
    * @param {Phalanx.View} newView
    */
   assign: function(regionName, newView) {
-    var selector, oldView, assignToEl, replaceToEl;
+    var selector, oldView, assignToEl;
 
     selector = this.regions[regionName];
     oldView  = this.getRegionView(regionName);
+
+    if (!this.$el) {
+      // maybe already destroy
+      return;
+    }
     assignToEl = this.$el.find(selector)[0];
 
     if (!selector || !assignToEl) {
@@ -842,14 +850,7 @@ _.extend(Layout.prototype, View.prototype, {
     if (oldView) {
       if (oldView.persistent) {
         oldView.pause();
-
-        // create new element
-        replaceToEl = document.createElement(assignToEl.tagName);
-        this._copyAttrs(assignToEl, replaceToEl);
-
-        // replace new element & keeping old element (oldView has refrence of old element)
-        assignToEl.parentNode.replaceChild(replaceToEl, assignToEl);
-        assignToEl = replaceToEl;
+        oldView.$pausingCache = oldView.$el.children();
       } else {
         oldView.destroy();
       }
@@ -859,9 +860,8 @@ _.extend(Layout.prototype, View.prototype, {
 
     // new
     if (newView.persistent && newView.paused) {
-      this._copyAttrs(assignToEl, newView.el);
-
-      assignToEl.parentNode.replaceChild(newView.el, assignToEl);
+      newView.$el.empty().append(newView.$pausingCache);
+      newView.$pausingCache = null;
       newView.resume();
     } else {
       newView.setElement(assignToEl);
