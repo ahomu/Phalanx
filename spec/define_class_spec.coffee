@@ -66,13 +66,13 @@ describe '`defineClass` of basic OOP feture provider', ->
     it 'can call super class method', ->
       HelloMan = Human.extend
         say: ->
-          @super('say', arguments) + ' World'
+          @callSuper('say', arguments) + ' World'
         god: (ohmy)->
           ohmy + ' God'
 
       JesusMan = HelloMan.extend
         god: ->
-          @super 'god', arguments
+          @callSuper 'god', arguments
 
       believer = new JesusMan(54, 'male')
       expect(believer.god('Oh my')).to.be('Oh my God')

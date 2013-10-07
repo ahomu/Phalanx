@@ -45,11 +45,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"></i></a></h2>
-      <p class="stat">71.77</p>
+      <p class="stat">68.75</p>
     </div>
     <div class="span6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h2>
-      <p class="stat">120</p>
+      <p class="stat">189</p>
     </div>
   </div>
   <div class="row historical">
@@ -63,11 +63,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty"></i></a></h2>
-      <p class="stat">27.40</p>
+      <p class="stat">39.29</p>
     </div>
     <div class="span6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs"></i></a></h2>
-      <p class="stat">0.44</p>
+      <p class="stat">0.95</p>
     </div>
   </div>
 </div>
@@ -90,7 +90,7 @@
 
 <div class="container">
   <div class="row">
-    <textarea id="file-source" class="span12">'use strict';
+    <textarea id="file-source" class="span12">&#039;use strict&#039;;
 
 /**
  * @abstract
@@ -115,16 +115,16 @@ var Layout = defineClass({
 _.extend(Layout.prototype, View.prototype, {
   /**
    *     events: {
-   *       'click .js_event_selector': 'someMethodName'
+   *       &#039;click .js_event_selector&#039;: &#039;someMethodName&#039;
    *     }
-   *     // $('.js_event_selector').click() => someMethod()
+   *     // $(&#039;.js_event_selector&#039;).click() =&gt; someMethod()
    *
-   * @property {Object.<String, String|Function>}
+   * @property {Object.&lt;String, String|Function&gt;}
    */
   events: {},
 
   /**
-   * @property {Object.<String, String>}
+   * @property {Object.&lt;String, String&gt;}
    */
   regions: {},
 
@@ -132,10 +132,10 @@ _.extend(Layout.prototype, View.prototype, {
    * Correspondence table of the region name and assigned View.
    *
    *     laput.assign(regionName, Phalanx.View);
-   *     // layout._assignedMap => { regionName: Phalanx.View }
+   *     // layout._assignedMap =&gt; { regionName: Phalanx.View }
    *
    * @private
-   * @property {Object.<String, Phalanx.View>}
+   * @property {Object.&lt;String, Phalanx.View&gt;}
    */
   _assignedMap: {},
 
@@ -151,22 +151,65 @@ _.extend(Layout.prototype, View.prototype, {
 
     selector = this.regions[regionName];
     oldView  = this.getRegionView(regionName);
+
+    if (!this.$el) {
+      // maybe already destroy
+      return;
+    }
     assignToEl = this.$el.find(selector)[0];
 
     if (!selector || !assignToEl) {
-      throw new Error('Could not get element of `'+ selector +'` from the region ' + regionName);
+      throw new Error(&#039;Could not get element of `&#039;+ selector +&#039;` from the region &#039; + regionName);
     }
 
     // change
     this.onChange(regionName, newView, oldView);
 
     // old
-    oldView && oldView.destroy();
-
-    // new
-    newView.setElement(assignToEl);
+    if (oldView) {
+      if (oldView.persistent) {
+        oldView.pause();
+        oldView.$pausingCache = oldView.$el.children();
+      } else {
+        oldView.destroy();
+      }
+    }
 
     this._assignedMap[regionName] = newView;
+
+    // new
+    if (newView.persistent &amp;&amp; newView.paused) {
+      newView.$el.empty().append(newView.$pausingCache);
+      newView.$pausingCache = null;
+      newView.resume();
+    } else {
+      newView.setElement(assignToEl);
+    }
+
+  },
+
+  /**
+   * Copy to some specified attributes
+   *
+   * @private
+   * @param {HTMLElement} fromEl
+   * @param {HTMLElement} toEl
+   */
+  _copyAttrs: function(fromEl, toEl) {
+    toEl.setAttribute(&#039;id&#039;,    fromEl.getAttribute(&#039;id&#039;)    || &#039;&#039;);
+    toEl.setAttribute(&#039;class&#039;, fromEl.getAttribute(&#039;class&#039;) || &#039;&#039;);
+    toEl.setAttribute(&#039;style&#039;, fromEl.getAttribute(&#039;style&#039;) || &#039;&#039;);
+  },
+
+  /**
+   * @param {String} regionName
+   * @return {Boolean}
+   */
+  isRegionExists: function(regionName) {
+    if (!(regionName in this.regions)) {
+      throw new Error(&#039;Specified region `&#039; + regionName + &#039;` is not declared&#039;);
+    }
+    return !!this.$el.find(this.regions[regionName]).length;
   },
 
   /**
@@ -175,7 +218,7 @@ _.extend(Layout.prototype, View.prototype, {
    */
   getRegionView: function(regionName) {
     if (!(regionName in this.regions)) {
-      throw new Error('Specified region `' + regionName + '` is not declared');
+      throw new Error(&#039;Specified region `&#039; + regionName + &#039;` is not declared&#039;);
     }
     return this._assignedMap[regionName];
   },
@@ -185,21 +228,47 @@ _.extend(Layout.prototype, View.prototype, {
    */
   withdraw: function(regionName) {
     var view = this.getRegionView(regionName);
-    view.destroy();
     this._assignedMap[regionName] = null;
+    view &amp;&amp; view.destroy();
   },
 
   /**
-   * Destroy all regions assigned views.
+   * @override Phalanx.View.destroy
    */
-  destroyRegions: function() {
+  destroy: function() {
     var i = 0, regions = Object.keys(this.regions),
-        iz = this.regions.length, regionName;
+        regionName;
 
-    for (; i<iz; i++) {
-      regionName = regions[i];
+    while ((regionName = regions[i++])) {
       this.withdraw(regionName);
     }
+    View.prototype.destroy.apply(this, arguments);
+  },
+
+  /**
+   * @override Phalanx.View.pause
+   */
+  pause: function() {
+    var i = 0, regions = Object.keys(this.regions),
+        regionName;
+
+    while ((regionName = regions[i++])) {
+      this.getRegionView(regionName) &amp;&amp; this.getRegionView(regionName).pause();
+    }
+    View.prototype.pause.apply(this, arguments);
+  },
+
+  /**
+   * @override Phalanx.View.resume
+   */
+  resume: function() {
+    var i = 0, regions = Object.keys(this.regions),
+        regionName;
+
+    while ((regionName = regions[i++])) {
+      this.getRegionView(regionName) &amp;&amp; this.getRegionView(regionName).resume();
+    }
+    View.prototype.resume.apply(this, arguments);
   },
 
   /**

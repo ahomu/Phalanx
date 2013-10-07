@@ -59,6 +59,11 @@ _.extend(Layout.prototype, View.prototype, {
 
     selector = this.regions[regionName];
     oldView  = this.getRegionView(regionName);
+
+    if (!this.$el) {
+      // maybe already destroy
+      return;
+    }
     assignToEl = this.$el.find(selector)[0];
 
     if (!selector || !assignToEl) {
@@ -69,12 +74,50 @@ _.extend(Layout.prototype, View.prototype, {
     this.onChange(regionName, newView, oldView);
 
     // old
-    oldView && oldView.destroy();
-
-    // new
-    newView.setElement(assignToEl);
+    if (oldView) {
+      if (oldView.persistent) {
+        oldView.pause();
+        oldView.$pausingCache = oldView.$el.children();
+      } else {
+        oldView.destroy();
+      }
+    }
 
     this._assignedMap[regionName] = newView;
+
+    // new
+    if (newView.persistent && newView.paused) {
+      newView.$el.empty().append(newView.$pausingCache);
+      newView.$pausingCache = null;
+      newView.resume();
+    } else {
+      newView.setElement(assignToEl);
+    }
+
+  },
+
+  /**
+   * Copy to some specified attributes
+   *
+   * @private
+   * @param {HTMLElement} fromEl
+   * @param {HTMLElement} toEl
+   */
+  _copyAttrs: function(fromEl, toEl) {
+    toEl.setAttribute('id',    fromEl.getAttribute('id')    || '');
+    toEl.setAttribute('class', fromEl.getAttribute('class') || '');
+    toEl.setAttribute('style', fromEl.getAttribute('style') || '');
+  },
+
+  /**
+   * @param {String} regionName
+   * @return {Boolean}
+   */
+  isRegionExists: function(regionName) {
+    if (!(regionName in this.regions)) {
+      throw new Error('Specified region `' + regionName + '` is not declared');
+    }
+    return !!this.$el.find(this.regions[regionName]).length;
   },
 
   /**
@@ -93,21 +136,47 @@ _.extend(Layout.prototype, View.prototype, {
    */
   withdraw: function(regionName) {
     var view = this.getRegionView(regionName);
-    view.destroy();
     this._assignedMap[regionName] = null;
+    view && view.destroy();
   },
 
   /**
-   * Destroy all regions assigned views.
+   * @override Phalanx.View.destroy
    */
-  destroyRegions: function() {
+  destroy: function() {
     var i = 0, regions = Object.keys(this.regions),
-        iz = this.regions.length, regionName;
+        regionName;
 
-    for (; i<iz; i++) {
-      regionName = regions[i];
+    while ((regionName = regions[i++])) {
       this.withdraw(regionName);
     }
+    View.prototype.destroy.apply(this, arguments);
+  },
+
+  /**
+   * @override Phalanx.View.pause
+   */
+  pause: function() {
+    var i = 0, regions = Object.keys(this.regions),
+        regionName;
+
+    while ((regionName = regions[i++])) {
+      this.getRegionView(regionName) && this.getRegionView(regionName).pause();
+    }
+    View.prototype.pause.apply(this, arguments);
+  },
+
+  /**
+   * @override Phalanx.View.resume
+   */
+  resume: function() {
+    var i = 0, regions = Object.keys(this.regions),
+        regionName;
+
+    while ((regionName = regions[i++])) {
+      this.getRegionView(regionName) && this.getRegionView(regionName).resume();
+    }
+    View.prototype.resume.apply(this, arguments);
   },
 
   /**

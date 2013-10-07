@@ -90,7 +90,7 @@
 
 <div class="container">
   <div class="row">
-    <textarea id="file-source" class="span12">'use strict';
+    <textarea id="file-source" class="span12">&#039;use strict&#039;;
 
 /**
  * @abstract
@@ -113,7 +113,7 @@ var Collection = defineClass({
   }
 });
 
-Collection.with(Trait.LifecycleCallbacks);
+Collection.mixin(Trait.LifecycleCallbacks);
 
 _.extend(Collection.prototype, Backbone.Collection.prototype, {
   /**
@@ -121,8 +121,8 @@ _.extend(Collection.prototype, Backbone.Collection.prototype, {
    *
    *     // if request to xml/html resource
    *     syncParams: {
-   *       contentType: 'application/xml',
-   *       dataType: 'text'
+   *       contentType: &#039;application/xml&#039;,
+   *       dataType: &#039;text&#039;
    *     }
    *
    * @property {Object}

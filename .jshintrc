@@ -41,7 +41,6 @@
   "jquery": true,
 
   "globalstrict": true,
-  "es5": true,
   "eqnull": true,
   "expr"  : true
 }

@@ -45,11 +45,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"></i></a></h2>
-      <p class="stat">66.13</p>
+      <p class="stat">67.33</p>
     </div>
     <div class="span6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h2>
-      <p class="stat">158</p>
+      <p class="stat">153</p>
     </div>
   </div>
   <div class="row historical">
@@ -63,11 +63,11 @@
   <div class="row">
     <div class="span6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty"></i></a></h2>
-      <p class="stat">24.65</p>
+      <p class="stat">23.32</p>
     </div>
     <div class="span6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs"></i></a></h2>
-      <p class="stat">0.44</p>
+      <p class="stat">0.37</p>
     </div>
   </div>
 </div>
@@ -90,11 +90,9 @@
 
 <div class="container">
   <div class="row">
-    <textarea id="file-source" class="span12">'use strict';
+    <textarea id="file-source" class="span12">&#039;use strict&#039;;
 
 var Trait = {};
-
-var DEFINE_NOT_WRITABLE   = {writable: false};
 
 /**
  * `defineClass` is Helper function, to generate Object like Class with basic oop fetures
@@ -102,19 +100,19 @@ var DEFINE_NOT_WRITABLE   = {writable: false};
  *     // e.g 1
  *     var Klass = Phalanx.defineClass{
  *       constructor: function() {
- *         console.log('Hello World');
+ *         console.log(&#039;Hello World&#039;);
  *       },
- *       foo: 'bar',
- *       baz: 'qux'
+ *       foo: &#039;bar&#039;,
+ *       baz: &#039;qux&#039;
  *     });
  *
  *     // e.g 2
  *     function NewClass() {
- *       console.log('This is constructor');
+ *       console.log(&#039;This is constructor&#039;);
  *     }
  *     Phalanx.defineClass(NewClass, {
- *       hoge: 'fuga',
- *       hige: 'piyo'
+ *       hoge: &#039;fuga&#039;,
+ *       hige: &#039;piyo&#039;
  *     };
  *
  * @param {Function|Object} constructor_or_members
@@ -131,11 +129,11 @@ function defineClass(constructor_or_members, members) {
    */
   var Constructor;
 
-  if (typeof constructor_or_members === 'function') {
+  if (typeof constructor_or_members === &#039;function&#039;) {
     Constructor = constructor_or_members;
   } else {
     members = constructor_or_members;
-    Constructor = members.hasOwnProperty('constructor') ? members.constructor
+    Constructor = members.hasOwnProperty(&#039;constructor&#039;) ? members.constructor
                                                         : function() {};
   }
 
@@ -157,29 +155,27 @@ function defineClass(constructor_or_members, members) {
    * @return {Klass}
    */
   Constructor.extend = Backbone.View.extend;
-  Object.defineProperty(Constructor, 'extend', DEFINE_NOT_WRITABLE);
 
   /**
    * Mixin the trait in the `prototype` of the class.
    * Is a feature that is for a simple mixin, not the exact trait.
-   * Not support multiple inheritance like "Squeak Smalltalk".
+   * Not support multiple inheritance like &quot;Squeak Smalltalk&quot;.
    *
    *     var classDefinition = {
    *       // ...
    *     };
    *     var ExtendedWithTrait = SomeClass.extend(classDefinition)
-   *                                      .with(AsyncCallbackTrait)
-   *                                      .with(ObservableTrait, {
-   *                                        method: 'aliasedMethod'
+   *                                      .mixin(AsyncCallbackTrait)
+   *                                      .mixin(ObservableTrait, {
+   *                                        method: &#039;aliasedMethod&#039;
    *                                      });
    *
-   * @method with
+   * @method mixin
    * @param {Object} trait
    * @param {Object} [aliases]
    * @return {Klass}
    */
-  Constructor.with = __with;
-  Object.defineProperty(Constructor, 'with', DEFINE_NOT_WRITABLE);
+  Constructor.mixin = __mixin;
 
   /**
    * Method which can be used instead of the `new` statement
@@ -190,40 +186,39 @@ function defineClass(constructor_or_members, members) {
    * @return {*}
    */
   Constructor.create = __create;
-  Object.defineProperty(Constructor, 'create', DEFINE_NOT_WRITABLE);
 
   /**
-   * Call a specific method of the parent class
+   * Call a specific method of the super class
    *
    *     var SuperClass = Klass.of({
    *       onCreate: function() {
-   *         alert('Yup!');
+   *         alert(&#039;Yup!&#039;);
    *       }
    *     });
    *     var SubClass = SuperClass.extends({
    *       onCreate: function() {
-   *         this.super('onCreate', arguments); // => alert('Yup!')
+   *         this.callSuper(&#039;onCreate&#039;, arguments); // =&gt; alert(&#039;Yup!&#039;)
    *       }
    *     });
    *
-   * @method super
+   * @method callSuper
    * @param {String} methodName
    * @param {Object|Arguments} args
    * @type {Function}
    */
-  Constructor.prototype.super = __super;
+  Constructor.prototype.callSuper = __callSuper;
 
   return Constructor;
 }
 
-function __with(trait, aliases) {
+function __mixin(trait, aliases) {
   /*jshint validthis:true */
   var i = 0, keys = Object.keys(trait), iz = keys.length,
       prop, processed_trait = {};
 
   aliases || (aliases = {});
 
-  for (; i<iz; i++) {
+  for (; i&lt;iz; i++) {
     prop = keys[i];
     if (aliases[prop]) {
       processed_trait[aliases[prop]] = trait[prop];
@@ -243,9 +238,9 @@ function __create() {
   return instance;
 }
 
-function __super(methodName, args) {
+function __callSuper(methodName, args) {
   /*jshint validthis:true */
-  // TODO: this.super() で連鎖的に先祖のメソッドを呼び出したい
+  // TODO: this.callSuper() で連鎖的に先祖のメソッドを呼び出したい
   return this.constructor.__super__[methodName].apply(this, args);
 }</textarea>
   </div>

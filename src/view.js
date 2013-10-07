@@ -81,14 +81,24 @@ _.extend(View.prototype, Backbone.View.prototype, {
   _processedListeners: {},
 
   /**
+   * @property {Boolean}
+   */
+  persistent: false,
+
+  /**
+   * @property {Boolean}
+   */
+  paused: false,
+
+  /**
    * @param {HTMLElement} element
    * @param {Boolean} delegate
    */
   setElement: function(element, delegate) {
     Backbone.View.prototype.setElement.apply(this, arguments);
     if (this.el && this.el.parentNode) {
-      this.lookupUi(this.$el);
-      this.onSetElement(this.el);
+      this.lookupUi();
+      this.onSetElement();
     }
   },
 
@@ -241,7 +251,6 @@ _.extend(View.prototype, Backbone.View.prototype, {
     for (; i<iz; i++) {
       uid = keys[i];
       component = this._createdComponents[uid];
-      this.stopListening(component);
       component.destroy();
       this._createdComponents[uid] = null;
       delete this._createdComponents[uid];
@@ -252,25 +261,46 @@ _.extend(View.prototype, Backbone.View.prototype, {
    * Destory and teadown View.
    */
   destroy: function() {
-
-    this.destroyRegions && this.destroyRegions();
-
     this.destroyComponents();
-
     this.undelegateEvents();
-
+    this.stopListening();
     this.releaseUi();
 
     this.onDestroy();
-
     this.el = this.$el = null;
+    this.model = this.collection = null;
+    this.options = this._processedListeners = null;
+  },
+
+  /**
+   * Pause events
+   */
+  pause: function() {
+    this.paused = true;
+    this.onPause();
+
+    this.destroyComponents();
+    this.undelegateEvents();
+    this.stopListening();
+    this.releaseUi();
+  },
+
+  /**
+   * Resume events
+   */
+  resume: function() {
+    this.paused = false;
+
+    this.delegateEvents();
+    this.lookupUi();
+
+    this.onResume();
   },
 
   /**
    * @abstract
-   * @param {HTMLElement} element
    */
-  onSetElement: function(element) {},
+  onSetElement: function() {},
 
   /**
    * @abstract

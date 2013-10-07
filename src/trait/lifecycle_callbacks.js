@@ -23,7 +23,17 @@ Trait.LifecycleCallbacks = {
    * called only Layout, View, Component.
    * @abstract
    */
-  ready: function() {},
+  onSetElement: function() {},
+
+  /**
+   * @abstract
+   */
+  onPause: function() {},
+
+  /**
+   * @abstract
+   */
+  onResume: function() {},
 
   /**
    * It is called when destroying the instance.

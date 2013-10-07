@@ -7,6 +7,11 @@ var UI_FIND_PLACEHOLDER = '[data-ui="{name}"]';
  */
 Trait.UiLookupable = {
   /**
+   * @property {HTMLElement|jQuery}
+   */
+  el: null,
+
+  /**
    *     ui: {
    *       hoge: null
    *     }
@@ -23,12 +28,10 @@ Trait.UiLookupable = {
 
   /**
    * From the selector defined by this.ui, caching to explore the elements.
-   *
-   * @params {HTMLElement|jQuery}
    */
-  lookupUi: function(element) {
+  lookupUi: function() {
     var name, selector,
-        $baseEl = element instanceof Backbone.$ ? element : Backbone.$(element),
+        $baseEl = this.el instanceof Backbone.$ ? this.el : Backbone.$(this.el),
         i = 0, keys = Object.keys(this.ui), iz = keys.length;
 
     this.ui  = {};
