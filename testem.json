@@ -9,15 +9,19 @@
   "dev_dependencies": [
     "lib/expect/expect.js",
     "lib/sinon/pkg/sinon.js",
-    "lib/fixtures/index.js"
+    "lib/fixtures/index.js",
+    "lib/blanket/dist/qunit/blanket.min.js",
+    "lib/blanket/src/adapters/mocha-blanket.js"
   ],
   "dependencies": [
     "lib/jquery/jquery.js",
     "lib/lodash/lodash.js",
     "lib/backbone/backbone.js"
   ],
+  "cover_files": [
+    "dist/phalanx.debug.js"
+  ],
   "serve_files": [
-    "dist/phalanx.debug.js",
     "spec/*_spec.js"
   ],
   "launch_in_dev": ["PhantomJS"],

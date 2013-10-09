@@ -7,7 +7,6 @@
     "reports",
     "spec",
     "src",
-
     ".*",
     "bower.json",
     "Gruntfile.js",
@@ -23,6 +22,7 @@
     "mocha": "~1.9.0",
     "expect": "~0.2.0",
     "sinon": "~1.7.1",
-    "fixtures": "https://raw.github.com/badunk/js-fixtures/master/fixtures.js"
+    "fixtures": "https://raw.github.com/badunk/js-fixtures/master/fixtures.js",
+    "blanket": "~1.1.5"
   }
 }

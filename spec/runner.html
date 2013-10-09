@@ -10,6 +10,7 @@
   </script>
   {{#dev_dependencies}}<script src="/{{.}}"></script>{{/dev_dependencies}}
   {{#dependencies}}<script src="/{{.}}"></script>{{/dependencies}}
+  {{#cover_files}}<script src="/{{.}}" data-cover></script>{{/cover_files}}
   {{#serve_files}}<script src="/{{src}}"></script>{{/serve_files}}
 </head>
 <body>
