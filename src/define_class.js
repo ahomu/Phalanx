@@ -49,6 +49,16 @@ function defineClass(constructor_or_members, members) {
   _.extend(Constructor.prototype, members);
 
   /**
+   * Method which can be used instead of the `new` statement
+   *
+   *     var instance = Klass.create();
+   *
+   * @method create
+   * @return {*}
+   */
+  Constructor.create = __create;
+
+  /**
    * By inheriting an existing class, you create a new class
    *
    *     var classDefinition = {
@@ -84,16 +94,6 @@ function defineClass(constructor_or_members, members) {
    * @return {Klass}
    */
   Constructor.mixin = __mixin;
-
-  /**
-   * Method which can be used instead of the `new` statement
-   *
-   *     var instance = Klass.create();
-   *
-   * @method create
-   * @return {*}
-   */
-  Constructor.create = __create;
 
   /**
    * Call a specific method of the super class

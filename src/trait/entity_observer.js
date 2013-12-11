@@ -4,43 +4,54 @@
  * @class Phalanx.Trait.EntityObserver
  */
 Trait.EntityObserver = {
-
   /**
-     * @property {Phalanx.Model|Phalanx.Collection}
+   * @property {String}
    */
-  entity: null,
+  eventSplitter: /^(\S+)\s*(.*)$/,
 
   /**
    *     entitylListeners: {
-   *       'change': 'modelChanged'
+   *       'change model': 'modelChanged'
    *     }
-   *     // model.trigger('change') => observer.modelChanged()
+   *     // this.model.trigger('change') => this.modelChanged()
    *
    * @property {Object.<String, String>}
    */
-  entitylListeners: {},
+  entityListeners: {},
 
   /**
    * Listen to entity events
    */
   listenToEntity: function() {
-    var i = 0, events = Object.keys(this.entitylListeners), iz = events.length,
-        event, method;
+    var i = 0, events = Object.keys(this.entityListeners),
+        event_entity, method;
 
-    for (; i<iz; i++) {
-      event  = events[i];
-      method = this.entitylListeners[event];
+    while ((event_entity = events[i++])) {
+      method = this.entityListeners[event_entity];
+      event_entity = event_entity.match(this.eventSplitter);
+
+      if (!this[event_entity[2]]) {
+        throw new Error('Entity `' + event_entity[2] + '` is unknown property');
+      }
       if (!_.isFunction(this[method])) {
         throw new Error('Method `' + method + '` is not exists this Entity');
       }
-      this.listenTo(this.entity, event, this[method]);
+
+      this.listenTo(this[event_entity[2]], event_entity[1], this[method]);
     }
   },
 
   /**
    * Unlisten to bound model events
    */
-  unlistenToEntity: function() {
-    this.stopListening(this.entity);
+  stopListeningEntity: function() {
+    var i = 0, entity,
+        listeningEntities = _.map(this.entityListeners, _.bind(function(_, _entity) {
+          return _entity.match(this.eventSplitter)[2];
+        }, this));
+
+    while ((entity = listeningEntities[i++])) {
+      this.stopListening(this[entity]);
+    }
   }
 };
