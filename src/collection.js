@@ -9,10 +9,10 @@
 var Collection = defineClass({
   /**
    * @constructor
-   * @param {Object} attributes
+   * @param {Array} models
    * @param {Object} options
    */
-  constructor: function(attributes, options) {
+  constructor: function(models, options) {
     options || (options = {});
 
     this.onCreate.apply(this, arguments);
