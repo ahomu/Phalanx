@@ -1,4 +1,4 @@
-Phalanx [![Build Status](https://travis-ci.org/ahomu/Phalanx.png?branch=master)](https://travis-ci.org/ahomu/Phalanx)
+Phalanx [![Build Status](https://drone.io/github.com/ahomu/Phalanx/status.png)](https://drone.io/github.com/ahomu/Phalanx/latest)
 ====
 
 Phalanx is a [Backbone](https://github.com/documentcloud/backbone) wrapper library. Focusing to decouple view and manage ui component simply.
@@ -231,10 +231,18 @@ npm install -g testem
 testem #run specs
 ```
 
+###Drone.io command (memo)
+
+```
+npm install bower
+node_modules/bower/bin/bower install
+gem install juicer
+./lib/sinon/build
+npm install
+npm test
+```
+
 ##TODO
 
-- Conceptual diagram
-- template declaration (assign Fucntion or element's selector)
-- permanent view instance handling
-- rename `onSetElement` to `ready`
+- template declaration (assign Function or element's selector)
 - support Component parameter from (DOM attributes | View's model or collection) declaration
